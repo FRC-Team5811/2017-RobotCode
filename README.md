@@ -1,11 +1,13 @@
-﻿Definitions:
+**Definitions:**
+
 	Agitator (keeps balls from being stuck)
 	Block Piston (stop balls from flying)
 	Elevator (lifts balls up from floor)
 
 -------------------------------------------------------------------------------------
 
-Turn correction:
+**Turn correction:**
+
 (assuming trying to find 0)
 
 If angle <= 180
@@ -20,22 +22,26 @@ if angle is 0
 -------------------------------------------------------------------------------------
 
 
-Default:
+**Default:**
+
 	Agitator: On
 	block piston: blocking
 	elevator: Off
 
-Intake:
+**Intake:**
+
 	Agitator: Off 
 	block piston: blocking
 	elevator: On
 
-Shooting:
+**Shooting:**
+
 	Agitator: off
 	block piston: not blocking
 	elevator: On
 	
-Climbing:
+**Climbing:**
+
 	Agitator: Off
 	block piston: not blocking
 	elevator: Off    
