@@ -8,7 +8,7 @@ import org.usfirst.frc.team5811.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.buttons.JoystickButton; 
+import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
 public class Robot extends IterativeRobot {
 
@@ -33,7 +33,8 @@ public class Robot extends IterativeRobot {
     boolean stupidIntake;
     
     //Motors
-    Victor frontLeftDriveMotor;
+    Spark frontLeftDriveMotor;
+    //Victor frontLeftDriveMotor;
     Victor frontRightDriveMotor;
     Victor backLeftDriveMotor;
     Victor backRightDriveMotor;
@@ -124,10 +125,12 @@ public class Robot extends IterativeRobot {
         System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
   
         //Motor port instantiating
-       frontLeftDriveMotor = new Victor(9);
-       frontRightDriveMotor = new Victor(1);
-       backLeftDriveMotor = new Victor(8); 
-       backRightDriveMotor = new Victor(0);
+       frontLeftDriveMotor = new Spark(1);
+       //frontLeftDriveMotor = new Victor(1);
+
+       frontRightDriveMotor = new Victor(8);
+       backLeftDriveMotor = new Victor(0); 
+       backRightDriveMotor = new Victor(9);
        
        //Accessory motors
        intake = new Victor(4);
