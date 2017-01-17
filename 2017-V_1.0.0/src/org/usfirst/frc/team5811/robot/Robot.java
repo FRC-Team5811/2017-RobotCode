@@ -33,8 +33,7 @@ public class Robot extends IterativeRobot {
     boolean stupidIntake;
     
     //Motors
-    Spark frontLeftDriveMotor;
-    //Victor frontLeftDriveMotor;
+    Victor frontLeftDriveMotor;
     Victor frontRightDriveMotor;
     Victor backLeftDriveMotor;
     Victor backRightDriveMotor;
@@ -125,9 +124,7 @@ public class Robot extends IterativeRobot {
         System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
   
         //Motor port instantiating
-       frontLeftDriveMotor = new Spark(1);
-       //frontLeftDriveMotor = new Victor(1);
-
+       frontLeftDriveMotor = new Victor(1);
        frontRightDriveMotor = new Victor(8);
        backLeftDriveMotor = new Victor(0); 
        backRightDriveMotor = new Victor(9);
