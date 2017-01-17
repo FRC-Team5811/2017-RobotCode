@@ -124,10 +124,10 @@ public class Robot extends IterativeRobot {
         System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
   
         //Motor port instantiating
-       frontLeftDriveMotor = new Victor(0);
-       frontRightDriveMotor = new Victor(8);
-       backLeftDriveMotor = new Victor(1); 
-       backRightDriveMotor = new Victor(9);
+       frontLeftDriveMotor = new Victor(9);
+       frontRightDriveMotor = new Victor(1);
+       backLeftDriveMotor = new Victor(8); 
+       backRightDriveMotor = new Victor(0);
        
        //Accessory motors
        intake = new Victor(4);
