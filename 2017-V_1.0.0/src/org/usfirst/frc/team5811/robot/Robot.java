@@ -20,7 +20,7 @@ public class Robot extends IterativeRobot {
     SendableChooser chooser = new SendableChooser();
 
     Joystick joyStickLeft;
-    Joystick joyStickRight;
+    //Joystick joyStickRight;
     Joystick logitech;
     
     JoystickButton logitechY;
@@ -113,10 +113,10 @@ public class Robot extends IterativeRobot {
     
   
     private void singleStickArcade(){
-        frontLeftDriveMotor.set(-joyStickLeft.getY()+joyStickLeft.getX());
-        frontRightDriveMotor.set(-joyStickLeft.getY()-joyStickLeft.getX());
-        backLeftDriveMotor.set(-joyStickLeft.getY()+joyStickLeft.getX());
-        backRightDriveMotor.set(-joyStickLeft.getY()-joyStickLeft.getX());
+        frontLeftDriveMotor.set(joyStickLeft.getX()-joyStickLeft.getY());
+        frontRightDriveMotor.set(joyStickLeft.getX()+joyStickLeft.getY());
+        backLeftDriveMotor.set(joyStickLeft.getX()-joyStickLeft.getY());
+        backRightDriveMotor.set(joyStickLeft.getX()+joyStickLeft.getY());
     }
     
     private void driveMotors(double speedLeftDM, double speedRightDM) {
@@ -146,11 +146,11 @@ public class Robot extends IterativeRobot {
         //Motor port instantiating
        frontLeftDriveMotor = new Victor(0);
        frontRightDriveMotor = new Victor(8);
-       backLeftDriveMotor = new Victor(0); 
+       backLeftDriveMotor = new Victor(1); 
        backRightDriveMotor = new Victor(9);
        
        //Accessory motors
-       intake = new Victor(1);
+       //intake = new Victor(1);
        shooterRight = new Spark(5);
        shooterLeft = new Spark(4);
        climber = new Victor(3);
@@ -168,20 +168,19 @@ public class Robot extends IterativeRobot {
        rotationCount = shooterEnc.get();
        rotationRate = shooterEnc.getRate();
        encIfStopped = shooterEnc.getStopped();
-       encDirection = shooterEnc.getDirection();//since it is a boolean its either 0 or 1 (obv)...not sure which value is what direction though
+       encDirection = shooterEnc.getDirection();//since it is a boolean its either 0 or 1 (obv)...not sure which value is which direction though
       
        joyStickLeft = new Joystick(0);
-       joyStickRight = new Joystick(1);
-       logitech = new Joystick(2);
-       
-       logitechY= new JoystickButton(logitech, 4);
-       logitechA= new JoystickButton(logitech, 1);
-       logitechX= new JoystickButton(logitech, 3);
-       logitechB= new JoystickButton(logitech, 2);
-       logitechLeftBumper= new JoystickButton(logitech, 5);
-       logitechRightBumper= new JoystickButton(logitech, 6);
-       logitechLeftStickPress = new JoystickButton(logitech, 9);
-       logitechStart = new JoystickButton(logitech, 7);
+       //joyStickRight = new Joystick(1);
+      
+       logitechY= new JoystickButton(joyStickLeft, 4);
+       logitechA= new JoystickButton(joyStickLeft, 1);
+       logitechX= new JoystickButton(joyStickLeft, 3);
+       logitechB= new JoystickButton(joyStickLeft, 2);
+       logitechLeftBumper= new JoystickButton(joyStickLeft, 5);
+       logitechRightBumper= new JoystickButton(joyStickLeft, 6);
+       logitechLeftStickPress = new JoystickButton(joyStickLeft, 9);
+       logitechStart = new JoystickButton(joyStickLeft, 7);
        
        //rightTrim = SmartDashboard.getNumber("DB/Slider 3", 1.0);
        //if(rightTrim == 0){ SmartDashboard.putNumber("DB/Slider 3", 1); rightTrim = 1;}
@@ -201,7 +200,7 @@ public class Robot extends IterativeRobot {
        //limit switch init
        //imitSwitch =  new DigitalInput(1);
        
-       current = power.getCurrent(15);
+      // current = power.getCurrent(15);
        System.out.println(current);
        
        //Boolean State Change instantiation
@@ -215,10 +214,7 @@ public class Robot extends IterativeRobot {
     }
    
     private void operatorControl(){
-    	//call if limit switch is used
-    	/*while(limitSwitch.get()) {
-    		System.out.println("limit switch");
-    	}*/
+   
     }
     
     public void disabledInit(){
@@ -246,7 +242,8 @@ public class Robot extends IterativeRobot {
     public void teleopPeriodic() {
 
         Scheduler.getInstance().run();
-        
+        singleStickArcade();
+        /*
         if (leftStickPressStateChange){
         	arcadeDrive(logitech.getRawAxis(0)+(logitech.getRawAxis(3)-logitech.getRawAxis(2)),logitech.getRawAxis(5));
         	logitech.setRumble(RumbleType.kLeftRumble, 1);
@@ -262,7 +259,7 @@ public class Robot extends IterativeRobot {
         		leftStickPressStateChange = true;
         	}
         }
-        
+        */
         //agitator
         agitator.set(.75);
         if(logitechStart.get()){
@@ -275,6 +272,7 @@ public class Robot extends IterativeRobot {
         		}
         }
         //shooter and block pneumatic
+        /*	
         if(logitechRightBumper.get()){
         	if(shooterStateChange){
         		shooterRight.set(.75);
@@ -289,20 +287,18 @@ public class Robot extends IterativeRobot {
         		ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
         	}
         }
-       /*
-        if(isSet && shooterStateChange == true) {
-        	shooter.set(.75);
-        	shooterStateChange = false;
-        	//if(encoderValue=100%){
-        	//ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
-        	//}
+        */
+       
+        if(logitechY.get() == true){
+        	shooterLeft.set(-.75);
+        	shooterRight.set(-.75);
         }
-        if(isSet && shooterStateChange == false){
-    		shooter.set(0);
-    		shooterStateChange = true;
-    		ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
-    	}*/
+        if(logitechA.get()==true){
+        	shooterLeft.set(0);
+        	shooterRight.set(0);
+        }
         
+        System.out.println(shooterLeft.get());
         //intake
         if(logitechLeftBumper.get()){
         	if(intakeStateChange){
@@ -426,4 +422,3 @@ public class Robot extends IterativeRobot {
         LiveWindow.run();  
     }
 }
-
