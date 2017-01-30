@@ -16,15 +16,17 @@ public class Robot extends IterativeRobot {
 
 	public static final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
 	public static OI oi;
-	
+	/*
+	 * 
+	 * Experiment 
 	enum RobotModes {
 		KeepInPositionMode,
 		NormalOperationMode,
 		ClimbingMode
 	}
-	
-	RobotModes mode = RobotModes.NormalOperationMode;
 
+	RobotModes mode = RobotModes.NormalOperationMode;
+	*/
     Command autonomousCommand;
     SendableChooser chooser = new SendableChooser();
 
@@ -54,9 +56,9 @@ public class Robot extends IterativeRobot {
     Victor backRightDriveMotor;
     Victor intake;
     Spark shooterRight;;
-    Spark shooterLeft;
-    Victor climber;
-    Victor agitator;
+   // Spark shooterLeft;
+    Spark climber;
+    //Victor agitator;
     Victor elevator;
     
     //Encoder definitions and variables
@@ -67,8 +69,8 @@ public class Robot extends IterativeRobot {
     boolean encIfStopped;
     
     //misc
-    double intakePower; 
-    
+    //double intakePower; 
+    /*
     //Auto Intake values
     double autoSelecter;
     boolean releaseToggle;
@@ -89,7 +91,7 @@ public class Robot extends IterativeRobot {
     int rightThreshold;
     int centerThreshold;
     int leftThreshold;
-    
+    */
     //Boolean state changes
     boolean shouldBeRunningSwitch;
     boolean wasPressedLeftStick;
@@ -135,7 +137,7 @@ public class Robot extends IterativeRobot {
         backLeftDriveMotor.set(joyStickLeft.getX()-joyStickLeft.getY());
         backRightDriveMotor.set(joyStickLeft.getX()+joyStickLeft.getY());
     }
-    
+    //SINGLE STICK DRIVE METHOD
     private void driveMotors(double speedLeftDM, double speedRightDM) {
     	//System.out.println("Command: " + speedLeftDM);
     	frontLeftDriveMotor.set(speedLeftDM);
@@ -143,29 +145,29 @@ public class Robot extends IterativeRobot {
     	backLeftDriveMotor.set(speedLeftDM);
     	backRightDriveMotor.set(speedRightDM);
     }
-    
-    
+    //2 STICK DRIVE METHOD
     private void arcadeDrive(double throttle, double turn){
     	driveMotors((throttle + turn), (throttle - turn));
     }
-    
+    //CORRECTION METHOD. WE USE THE VALUE QUARTERNION Z FOR ROTATIONAL POSTITIONING
     private void correct(){
-    	if(logitechBack.get()){
-			rotationPos = ahrs.getQuaternionZ();
-			 System.out.println(rotationPos);
-			 //TODO: put into "keep in place state"
+    
+		float nowRot = (float) ahrs.getAngle();
+		System.out.println(rotationPos);
+		System.out.println(nowRot);
+		if(nowRot >= rotationPos + 10){
+			frontLeftDriveMotor.set(-.5);
+			backLeftDriveMotor.set(-.5);
+			frontRightDriveMotor.set(-.5);
+			backRightDriveMotor.set(-.5);
 		}
-		float nowRot = ahrs.getQuaternionZ();
-		if(nowRot > rotationPos + 0.1){
-			//TODO: bring motor back to rotationPos
-			
-		}
-		if(nowRot < rotationPos - 0.1){
-			//TODO: bring motor back to rotationPos
-			
+		if(nowRot <= rotationPos - 10){
+			frontLeftDriveMotor.set(.5);
+			backLeftDriveMotor.set(.5);
+			frontRightDriveMotor.set(.5);  
+			backRightDriveMotor.set(.5);
 		}
     }
-    
     
     public void robotInit() {
  
@@ -184,12 +186,12 @@ public class Robot extends IterativeRobot {
        backRightDriveMotor = new Victor(9);
        
        //Accessory motors
-       //intake = new Victor(1);
+       intake = new Victor(2);
        shooterRight = new Spark(5);
-       shooterLeft = new Spark(4);
-       climber = new Victor(3);
+       //shooterLeft = new Spark(4);
+       climber = new Spark(3);
        elevator = new Victor(7);
-       agitator = new Victor(6);
+      // agitator = new Victor(6);
        
        //Encoder inits and instantiations
        shooterEnc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
@@ -207,14 +209,15 @@ public class Robot extends IterativeRobot {
        joyStickLeft = new Joystick(0);
        //joyStickRight = new Joystick(1);
        
+       //BUTTON MAPPING. REASON ITS HERE IS BECAUSE IT WAS WRONG AND THESE ARE THE CORRECT VALUES
        //back button 9
        //left stick 11
        //right stick 12
        //start 10
-       //ltrigger 7
-       //rtrigger 8
-       //lbumber 5
-       //rbumper 6
+       //lefttrigger 7
+       //righttrigger 8
+       //leftbumper 5
+       //rightbumper 6
        //y 4
        //b 3
        //a 2
@@ -237,9 +240,6 @@ public class Robot extends IterativeRobot {
        ballBlockCylinder = new DoubleSolenoid(3,4);
        gearTrayCylinder.set(DoubleSolenoid.Value.kReverse);
        ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
-       
-       //set cycle counter
-       cycleCounter = 0;
           
        //compressor port init
        compressor = new Compressor(0);
@@ -270,19 +270,19 @@ public class Robot extends IterativeRobot {
        wasPressedBackButton = false;
        shouldBeRunningCorrect = false;
        
-       
-       
        rotationPos = 0;
        
        //NavX instantiation
        try {
            ahrs = new AHRS(SerialPort.Port.kUSB);
-           //ahrs = new AHRS(I2C.Port.kMXP);
-       } catch (RuntimeException ex ) {
+           //ahrs = new AHRS(I2C.Port.kMXP);   //WE WILL NEED I2C IN THE FUTURE. RIGHT NOW WE WILL STICK WITH USB
+       }catch (RuntimeException ex ) {
+    	   System.out.println("NavX instantiation error");
            DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
        }
     }
    
+    
     private void operatorControl(){
         if(isOperatorControl() && isEnabled()) {
             
@@ -374,6 +374,7 @@ public class Robot extends IterativeRobot {
         }
     }
     
+    
     public void disabledInit(){
 
     }
@@ -387,7 +388,7 @@ public class Robot extends IterativeRobot {
        
     }
     public void autonomousPeriodic() {
-
+    	
     }
 
     public void teleopInit() {
@@ -397,11 +398,8 @@ public class Robot extends IterativeRobot {
     	
     public void teleopPeriodic() {
     	
-   
-    	
         Scheduler.getInstance().run();
         singleStickArcade();
-        float foo = ahrs.getQuaternionZ();
        
         // SWITCHING BETWEEN DRIVE MODES
         
@@ -411,9 +409,10 @@ public class Robot extends IterativeRobot {
 			}
 			wasPressedLeftStick = true;
 			System.out.println("yah boi be on");
-		} else{
+		}else{
 			wasPressedLeftStick = false;
 		}
+		
 		if(shouldBeRunningSwitch){
 			arcadeDrive(joyStickLeft.getRawAxis(0)+(joyStickLeft.getRawAxis(3)-joyStickLeft.getRawAxis(2)),joyStickLeft.getRawAxis(5));
         	joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
@@ -424,108 +423,85 @@ public class Robot extends IterativeRobot {
         	joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
 		}
         
-        //Correction Code toggle
+        //CORRECTION MODE 
+		
         if(logitechBack.get()){
         	if(!wasPressedBackButton){
+        		rotationPos = (float) ahrs.getAngle();
         		shouldBeRunningCorrect = !shouldBeRunningCorrect;
         	}
         	wasPressedBackButton = true;
         }else{
         	wasPressedBackButton = false;
         }
+        
         if(shouldBeRunningCorrect){
         	correct();
+        	System.out.println("in correct mode");
+        }else{
+        	System.out.println("not in correct mode");
         }
-		
-        //SPIN UP FUNCTION 
-        if(logitechStart.get()){
-        	if(rotationCount < 100){ //might have to be changed
-        		shooterRight.set(.75);
-        		shooterLeft.set(.75);
-        		ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
-        		if(rotationCount >= 100){
-        			SmartDashboard.putNumber("SHOOTER READY", 101);
-        		}
-        }
+	
+        //System.out.println("getting stuck here");
         //SHOOTER + BLOCK PNEUMATIC 
-    		if(logitechRightBumper.get()){
-    			if(!wasPressedRightBumper){
-    				shouldBeRunningShooter = !shouldBeRunningShooter;
-    			}
-    			wasPressedRightBumper = true;
-    			System.out.println("yah boi be on");
-    		} else{
-    			wasPressedRightBumper = false;
-    		}
-    		if(shouldBeRunningShooter){
-    			shooterRight.set(.75);
-        		shooterLeft.set(.75);
-        		ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
-    		}else{
-    			shooterRight.set(0);
-        		shooterLeft.set(0);
-        		System.out.println("memes");
-        		ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
-    		}	
+		
+		if(logitechRightBumper.get()){
+			if(!wasPressedRightBumper){
+				shouldBeRunningShooter = !shouldBeRunningShooter;
+			}
+			wasPressedRightBumper = true;
+			System.out.println("yah boi be on");
+		}else{
+			wasPressedRightBumper = false;
+		}
+		
+		if(shouldBeRunningShooter){
+			shooterRight.set(.75);
+    		//shooterLeft.set(.75);
+    		ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
+		}else{
+			shooterRight.set(0);
+    		//shooterLeft.set(0);
+    		ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
+		}
         	
         //INTAKE MY DUDES
-    		if(logitechLeftBumper.get()){
-    			if(!wasPressedLeftBumper){
-    				shouldBeRunningIntake = !shouldBeRunningIntake;
-    			}
-    			wasPressedLeftBumper = true;
-    			System.out.println("yah boi be on");
-    		} else{
-    			wasPressedLeftBumper = false;
-    		}
-    		if(shouldBeRunningIntake){
-    			intake.set(1);
-        		SmartDashboard.putNumber("INTAKE ON", 101);
-    		}else{
-    			intake.set(0);
-        		SmartDashboard.putNumber("INTAKE OFF", 101);
-    		}
+    		
+		if(logitechLeftBumper.get()){
+			if(!wasPressedLeftBumper){
+				shouldBeRunningIntake = !shouldBeRunningIntake;
+			}
+			wasPressedLeftBumper = true;
+			//System.out.println("yah boi be on");
+		}else{
+			wasPressedLeftBumper = false;
+		}
+		
+		if(shouldBeRunningIntake){
+			intake.set(1);
+    		//SmartDashboard.putNumber("INTAKE ON", 101);
+		}else{
+			intake.set(0);
+    		//SmartDashboard.putNumber("INTAKE OFF", 101);
+		}
     	
     	//CLIMBER DOWN 
-    		if(logitechA.get()){
-    			if(!wasPressedLogitechA){
-    				shouldBeRunningClimberDown = !shouldBeRunningClimberDown;
-    			}
-    			wasPressedLogitechA = true;
-    			System.out.println("yah boi be on");
-    		} else{
-    			wasPressedLogitechA = false;
-    		}
-    		if(shouldBeRunningClimberDown){
-    			climber.set(-1);
-    		}else{
-    			climber.set(0);
-    		}
-        
-    	//CLIMBER UP 
-    		if(logitechY.get()){
-    			if(!wasPressedLogitechY){
-    				shouldBeRunningClimberUp = !shouldBeRunningClimberUp;
-    			}
-    			wasPressedLogitechY = true;
-    			System.out.println("yah boi be on");
-    		} else{
-    			wasPressedLogitechY = false;
-    		}
-    		if(shouldBeRunningClimberUp){
-    			climber.set(1);
-        		agitator.set(0);
-    		}else{
-    			climber.set(0);
-    		}
-        }	
-    	/*
-    	if(current > n){
+    	
+    	if(logitechA.get()){
+    		climber.set(-1);
+    	}else{
     		climber.set(0);
     	}
-    	*/
+    	//CLIMBER UP 
+    	if(logitechY.get()){
+    		climber.set(1);
+    	}else{
+    		climber.set(0);
+    	}
+    
     	
     	//ELEVATOR
+    		
 		if(logitechX.get()){
 			if(!wasPressedLogitechX){
 				shouldBeRunningElevator = !shouldBeRunningElevator;
@@ -535,6 +511,7 @@ public class Robot extends IterativeRobot {
 		} else{
 			wasPressedLogitechX = false;
 		}
+		
 		if(shouldBeRunningElevator){
 			elevator.set(1);
     		SmartDashboard.putNumber("ELEVATOR ON", 101);
@@ -543,16 +520,18 @@ public class Robot extends IterativeRobot {
     		SmartDashboard.putNumber("ELEVATOR OFF", 101);
 		}
     	
-    	//gear tray
+    	//GEAR TRAY
+		
 		if(logitechB.get()){
 			if(!wasPressedLogitechB){
 				shouldBeRunningGearTray = !shouldBeRunningGearTray;
 			}
 			wasPressedLogitechB = true;
 			System.out.println("yah boi be on");
-		} else{
+		}else{
 			wasPressedLogitechB = false;
 		}
+		
 		if(shouldBeRunningGearTray){
 			gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
       		 SmartDashboard.putNumber("GEAR TRAY OUT", 101);
@@ -560,18 +539,7 @@ public class Robot extends IterativeRobot {
 			gearTrayCylinder.set(DoubleSolenoid.Value.kReverse);
       		 SmartDashboard.putNumber("GEAR TRAY IN", 101);
 		}
-
-	
-		/*
-		if (foo > 0){
-			frontRightDriveMotor.set(0.2);
-			backRightDriveMotor.set(0.2);
-		}else{
-			frontRightDriveMotor.set(0);
-			backRightDriveMotor.set(0);
-		}
-		*/
-		
+        
 		operatorControl();
 		
       }
