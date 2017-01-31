@@ -87,6 +87,9 @@ public class Robot extends IterativeRobot {
 
 	boolean shouldBeRunningCorrect;
 	boolean wasPressedBackButton;
+	
+    boolean shouldBeRunningAutoTurn;
+    boolean wasPressedStart;
 
 	// Global Speed Values
 	double leftSpeed;
@@ -107,6 +110,7 @@ public class Robot extends IterativeRobot {
 	PowerDistributionPanel power = new PowerDistributionPanel();
 
 	float rotationPos;
+	float macroPos;
 	
 	private void switchDriveModes(){
 		// SWITCHING BETWEEN DRIVE MODES
@@ -219,147 +223,6 @@ public class Robot extends IterativeRobot {
 	private void toggleElevator() {
 		
 		// ELEVATOR
-
-<<<<<<< HEAD
-    //Controllers
-    Joystick joyStickLeft;
-    //Joystick joyStickRight;
-    Joystick logitech;
-    
-    //NavX
-    AHRS ahrs;
-    
-    //Buttons
-    JoystickButton logitechY;
-    JoystickButton logitechA;
-    JoystickButton logitechX;
-    JoystickButton logitechB;
-    JoystickButton logitechLeftBumper;
-    JoystickButton logitechRightBumper;
-    JoystickButton logitechLeftStickPress;
-    JoystickButton logitechStart;
-    JoystickButton logitechBack;
-    
-    //Motors
-    Victor frontLeftDriveMotor;
-    Victor frontRightDriveMotor;
-    Victor backLeftDriveMotor;
-    Victor backRightDriveMotor;
-    Victor intake;
-    Spark shooterRight;;
-   // Spark shooterLeft;
-    Spark climber;
-    //Victor agitator;
-    Victor elevator;
-    
-    //Encoder definitions and variables
-    Encoder shooterEnc;
-    int rotationCount;
-    double rotationRate;
-    boolean encDirection;
-    boolean encIfStopped;
-    
-    //Boolean state changes
-    boolean shouldBeRunningSwitch;
-    boolean wasPressedLeftStick;
-   	boolean shouldBeRunningShooter;
-   	boolean wasPressedRightBumper;
-    boolean shouldBeRunningIntake;
-    boolean wasPressedLeftBumper;
-    boolean shouldBeRunningClimberUp;
-    boolean wasPressedLogitechA;
-    boolean shouldBeRunningClimberDown;
-    boolean wasPressedLogitechY;
-    boolean shouldBeRunningElevator;
-    boolean wasPressedLogitechX;
-    boolean shouldBeRunningGearTray;
-    boolean wasPressedLogitechB;
-    
-    boolean shouldBeRunningAutoTurn;
-    boolean wasPressedStart;
-    
-    boolean shouldBeRunningCorrect;
-    boolean wasPressedBackButton;
-    
-    //Global Speed Values
-    double leftSpeed;
-    double rightSpeed;
-    
-    //Current logic 
-    double current;
-    double n;
-    
-    //A cylinder
-    DoubleSolenoid gearTrayCylinder;
-    DoubleSolenoid ballBlockCylinder;
-    
-    //COMPRESSOR!!!
-    Compressor compressor;
-    
-    //power distribution panel
-    PowerDistributionPanel power = new PowerDistributionPanel();
-    
-    float rotationPos;
-    float macroPos;
-     
-    private void singleStickArcade(){
-        frontLeftDriveMotor.set(joyStickLeft.getX()-joyStickLeft.getY());
-        frontRightDriveMotor.set(joyStickLeft.getX()+joyStickLeft.getY());
-        backLeftDriveMotor.set(joyStickLeft.getX()-joyStickLeft.getY());
-        backRightDriveMotor.set(joyStickLeft.getX()+joyStickLeft.getY());
-    }
-    //SINGLE STICK DRIVE METHOD
-    private void driveMotors(double speedLeftDM, double speedRightDM) {
-    	//System.out.println("Command: " + speedLeftDM);
-    	frontLeftDriveMotor.set(speedLeftDM);
-    	frontRightDriveMotor.set(speedRightDM);
-    	backLeftDriveMotor.set(speedLeftDM);
-    	backRightDriveMotor.set(speedRightDM);
-    }
-    //2 STICK DRIVE METHOD
-    private void arcadeDrive(double throttle, double turn){
-    	leftSpeed = throttle + turn;
-    	rightSpeed = throttle - turn;
-    	
-    	driveMotors(leftSpeed, rightSpeed);
-    }
-    public void turnMacro(float degrees){
-    	float nowRot = (float) ahrs.getAngle();
-    	if((macroPos + degrees) > nowRot){
-    		frontLeftDriveMotor.set(-.5);
-			backLeftDriveMotor.set(-.5);
-			frontRightDriveMotor.set(-.5);
-			backRightDriveMotor.set(-.5);
-    	}else{
-    		frontLeftDriveMotor.set(0);
-			backLeftDriveMotor.set(0);
-			frontRightDriveMotor.set(0);
-			backRightDriveMotor.set(0);
-			wasPressedStart = false;
-			shouldBeRunningAutoTurn = false;
-    	}
-    }
-    private void rotationMacro(){
-    	if(logitechStart.get()){
-			if(!wasPressedStart){
-				macroPos = (float) ahrs.getAngle();
-				shouldBeRunningAutoTurn = !shouldBeRunningAutoTurn;
-			}
-			wasPressedStart = true;
-			System.out.println("yah boi be on");
-		}else{
-			wasPressedStart = false;
-		}
-    	if(shouldBeRunningSwitch){
-    		turnMacro(30);
-    	}else{
-    		
-    	}
-    }
-
-  //CORRECTION METHOD. WE USE THE VALUE getAngle(degrees)
-    private void correct(){
-=======
 		if (logitechX.get()) {
 			if (!wasPressedLogitechX) {
 				shouldBeRunningElevator = !shouldBeRunningElevator;
@@ -425,11 +288,43 @@ public class Robot extends IterativeRobot {
 		driveMotors((throttle + turn), (throttle - turn));
 	}
 	
+    private void turnMacro(float degrees){
+    	float nowRot = (float) ahrs.getAngle();
+    	if((macroPos + degrees) > nowRot){
+    		frontLeftDriveMotor.set(-.5);
+			backLeftDriveMotor.set(-.5);
+			frontRightDriveMotor.set(-.5);
+			backRightDriveMotor.set(-.5);
+    	}else{
+    		frontLeftDriveMotor.set(0);
+			backLeftDriveMotor.set(0);
+			frontRightDriveMotor.set(0);
+			backRightDriveMotor.set(0);
+			wasPressedStart = false;
+			shouldBeRunningAutoTurn = false;
+    	}
+    }
+    private void rotationMacro(){
+    	if(logitechStart.get()){
+			if(!wasPressedStart){
+				macroPos = (float) ahrs.getAngle();
+				shouldBeRunningAutoTurn = !shouldBeRunningAutoTurn;
+			}
+			wasPressedStart = true;
+			System.out.println("yah boi be on");
+		}else{
+			wasPressedStart = false;
+		}
+    	if(shouldBeRunningSwitch){
+    		turnMacro(30);
+    	}else{
+    		
+    	}
+    }
+	
 	// CORRECTION METHOD. WE USE THE VALUE QUARTERNION Z FOR ROTATIONAL
 	// POSTITIONING
 	private void correct() {
-
->>>>>>> branch 'master' of https://github.com/FRC-Team5811/2017-RobotCode.git
 		float nowRot = (float) ahrs.getAngle();
 		System.out.println(rotationPos);
 		System.out.println(nowRot);
@@ -445,8 +340,8 @@ public class Robot extends IterativeRobot {
 			frontRightDriveMotor.set(.5);
 			backRightDriveMotor.set(.5);
 		}
-<<<<<<< HEAD
     }
+	
     public void correctSwitch(){
         if(logitechBack.get()){
         	if(!wasPressedBackButton){
@@ -487,15 +382,8 @@ public class Robot extends IterativeRobot {
 		}
     }
 
-    
-    public void robotInit() {
- 
-=======
-	}
-
 	public void robotInit() {
 
->>>>>>> branch 'master' of https://github.com/FRC-Team5811/2017-RobotCode.git
 		oi = new OI();
 		chooser = new SendableChooser();
 		chooser.addDefault("Default Auto", new ExampleCommand());
@@ -757,25 +645,7 @@ public class Robot extends IterativeRobot {
 
 	}
 
-<<<<<<< HEAD
-   
-    }
-    	
-    public void teleopPeriodic() {
-    	
-        Scheduler.getInstance().run();
-        singleStickArcade();
 
-        // SWITCHING BETWEEN DRIVE MODES
-        driveSwitch();  
-        
-        
-        //CORRECTION MODE 
-        correctSwitch();
-        //turn macro
-        rotationMacro();
-        //SHOOTER + BLOCK PNEUMATIC 
-=======
 	public void autonomousPeriodic() {
 
 	}
@@ -799,7 +669,7 @@ public class Robot extends IterativeRobot {
 		checkClimberState();
 		
 		toggleElevator();
->>>>>>> branch 'master' of https://github.com/FRC-Team5811/2017-RobotCode.git
+
 		
 		toggleGearTray();
 		
