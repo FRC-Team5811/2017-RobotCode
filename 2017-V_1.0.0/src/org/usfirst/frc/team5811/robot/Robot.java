@@ -3,6 +3,8 @@ package org.usfirst.frc.team5811.robot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
+import edu.wpi.first.wpilibj.networktables.*;
+
 import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -20,7 +22,7 @@ public class Robot extends IterativeRobot {
 
 	// Controllers
 	Joystick joyStickLeft;
-	
+
 	// Joystick joyStickRight;
 	Joystick logitech;
 
@@ -44,9 +46,9 @@ public class Robot extends IterativeRobot {
 	Victor backLeftDriveMotor;
 	Victor backRightDriveMotor;
 	Victor intake;
-	Spark shooterRight;;
-	// Spark shooterLeft;
-	Spark climber;
+	Spark shooterRight;
+	Spark shooterLeft;
+	Victor climber;
 	// Victor agitator;
 	Victor elevator;
 
@@ -57,18 +59,6 @@ public class Robot extends IterativeRobot {
 	boolean encDirection;
 	boolean encIfStopped;
 
-	// misc
-	// double intakePower;
-	/*
-	 * //Auto Intake values double autoSelecter; boolean releaseToggle; boolean
-	 * raiseAfterRelease; boolean returnAfter; double turnTime; double
-	 * turnPower; boolean shootBall;
-	 * 
-	 * //Intake current values int cycleCounter; int intakeCounter; boolean
-	 * firstSpikeStarted; boolean firstSpikeFinished; boolean
-	 * secondSpikeStarted; int secondIntakeCounter; double ultrasonicVoltage;
-	 * int rightThreshold; int centerThreshold; int leftThreshold;
-	 */
 	// Boolean state changes
 	boolean shouldBeRunningSwitch;
 	boolean wasPressedLeftStick;
@@ -84,12 +74,10 @@ public class Robot extends IterativeRobot {
 	boolean wasPressedLogitechX;
 	boolean shouldBeRunningGearTray;
 	boolean wasPressedLogitechB;
-
 	boolean shouldBeRunningCorrect;
 	boolean wasPressedBackButton;
-	
-    boolean shouldBeRunningAutoTurn;
-    boolean wasPressedStart;
+	boolean shouldBeRunningAutoTurn;
+	boolean wasPressedStart;
 
 	// Global Speed Values
 	double leftSpeed;
@@ -109,10 +97,32 @@ public class Robot extends IterativeRobot {
 	// power distribution panel
 	PowerDistributionPanel power = new PowerDistributionPanel();
 
+	//Global Rotational Values
 	float rotationPos;
 	float macroPos;
+	float turnPos;
+	float nowRot;
 	
-	private void switchDriveModes(){
+	//CycleCounter
+	int cycleCounter;
+	
+	//Network Table
+    NetworkTable table;
+    	
+	private void autoTurn(float degrees){
+		turnPos = (float)ahrs.getAngle();
+		while(nowRot < macroPos + degrees){
+			frontLeftDriveMotor.set(-.5);
+			backLeftDriveMotor.set(-.5);
+			frontRightDriveMotor.set(-.5);
+			backRightDriveMotor.set(-.5);
+		}
+			frontLeftDriveMotor.set(0);
+			backLeftDriveMotor.set(0);
+			frontRightDriveMotor.set(0);
+			backRightDriveMotor.set(0);	
+	}
+	private void switchDriveModes() {
 		// SWITCHING BETWEEN DRIVE MODES
 		if (logitechLeftStickPress.get()) {
 			if (!wasPressedLeftStick) {
@@ -125,17 +135,17 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningSwitch) {
-			arcadeDrive(joyStickLeft.getRawAxis(0) + (joyStickLeft.getRawAxis(3) - joyStickLeft.getRawAxis(2)),
-					joyStickLeft.getRawAxis(5));
-			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-			joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
-		} else {
 			singleStickArcade();
-			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-			joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
+			//joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
+			//joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
+			
+		} else {
+			arcadeDrive(joyStickLeft.getRawAxis(0),-joyStickLeft.getRawAxis(3));
+			//joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
+			//joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
 		}
 	}
-	
+
 	private void testForCorrectionMode() {
 		// CORRECTION MODE
 		if (logitechBack.get()) {
@@ -155,9 +165,9 @@ public class Robot extends IterativeRobot {
 			System.out.println("not in correct mode");
 		}
 	}
-	
+
 	private void toggleShooterMotor() {
-		
+
 		// SHOOTER + BLOCK PNEUMATIC
 
 		if (logitechRightBumper.get()) {
@@ -178,11 +188,11 @@ public class Robot extends IterativeRobot {
 			// shooterLeft.set(0);
 			ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
 		}
-		
+
 	}
-	
+
 	private void toggleIntake() {
-		
+
 		// INTAKE MY DUDES
 
 		if (logitechLeftBumper.get()) {
@@ -203,25 +213,24 @@ public class Robot extends IterativeRobot {
 			// SmartDashboard.putNumber("INTAKE OFF", 101);
 		}
 
-
 	}
 
-	private void checkClimberState(){
-		//CLIMBER LOGIC
+	private void checkClimberState() {
+		// CLIMBER LOGIC
 		if (logitechA.get()) {
 			// CLIMBER DOWN
 			climber.set(-1);
-		} else if(logitechY.get()) {
+		} else if (logitechY.get()) {
 			// CLIMBER UP
 			climber.set(1);
-		}else{
+		} else {
 			climber.set(0);
 		}
-				
-	} 
-	
+
+	}
+
 	private void toggleElevator() {
-		
+
 		// ELEVATOR
 		if (logitechX.get()) {
 			if (!wasPressedLogitechX) {
@@ -240,11 +249,10 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putNumber("ELEVATOR OFF", 101);
 		}
 
-		
 	}
-	
+
 	private void toggleGearTray() {
-		
+
 		// GEAR TRAY
 
 		if (logitechB.get()) {
@@ -264,9 +272,8 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putNumber("GEAR TRAY IN", 101);
 		}
 
-		
-	} 
-	
+	}
+
 	private void singleStickArcade() {
 		frontLeftDriveMotor.set(joyStickLeft.getX() - joyStickLeft.getY());
 		frontRightDriveMotor.set(joyStickLeft.getX() + joyStickLeft.getY());
@@ -285,47 +292,38 @@ public class Robot extends IterativeRobot {
 
 	// 2 STICK DRIVE METHOD
 	private void arcadeDrive(double throttle, double turn) {
-		driveMotors((throttle + turn), (throttle - turn));
-	}
-	
-    private void turnMacro(float degrees){
-    	float nowRot = (float) ahrs.getAngle();
-    	if((macroPos + degrees) > nowRot){
-    		frontLeftDriveMotor.set(-.5);
+		leftSpeed = throttle + turn;
+    	rightSpeed = throttle - turn;
+    	
+    	driveMotors(leftSpeed, rightSpeed);
+    }
+    
+	/*
+	private void turnMacro(float degrees) {
+		//float nowRot = (float) ahrs.getAngle();
+		while(nowRot < macroPos + degrees){
+			frontLeftDriveMotor.set(-.5);
 			backLeftDriveMotor.set(-.5);
 			frontRightDriveMotor.set(-.5);
 			backRightDriveMotor.set(-.5);
-    	}else{
-    		frontLeftDriveMotor.set(0);
-			backLeftDriveMotor.set(0);
-			frontRightDriveMotor.set(0);
-			backRightDriveMotor.set(0);
-			wasPressedStart = false;
-			shouldBeRunningAutoTurn = false;
-    	}
-    }
-    private void rotationMacro(){
-    	if(logitechStart.get()){
-			if(!wasPressedStart){
-				macroPos = (float) ahrs.getAngle();
-				shouldBeRunningAutoTurn = !shouldBeRunningAutoTurn;
-			}
-			wasPressedStart = true;
-			System.out.println("yah boi be on");
-		}else{
-			wasPressedStart = false;
 		}
-    	if(shouldBeRunningSwitch){
-    		turnMacro(30);
-    	}else{
-    		
-    	}
-    }
-	
+		frontLeftDriveMotor.set(0);
+		backLeftDriveMotor.set(0);
+		frontRightDriveMotor.set(0);
+		backRightDriveMotor.set(0);
+	}
+	*/
+/*
+	private void rotationMacro() {
+		if (logitechStart.get()) {
+			turnMacro(30);
+		}
+	}
+*/
 	// CORRECTION METHOD. WE USE THE VALUE QUARTERNION Z FOR ROTATIONAL
 	// POSTITIONING
 	private void correct() {
-		float nowRot = (float) ahrs.getAngle();
+		//float nowRot = (float) ahrs.getAngle();
 		System.out.println(rotationPos);
 		System.out.println(nowRot);
 		if (nowRot >= rotationPos + 10) {
@@ -340,58 +338,21 @@ public class Robot extends IterativeRobot {
 			frontRightDriveMotor.set(.5);
 			backRightDriveMotor.set(.5);
 		}
-    }
-	
-    public void correctSwitch(){
-        if(logitechBack.get()){
-        	if(!wasPressedBackButton){
-        		rotationPos = (float) ahrs.getAngle();
-        		shouldBeRunningCorrect = !shouldBeRunningCorrect;
-        	}
-        	wasPressedBackButton = true;
-        }else{
-        	wasPressedBackButton = false;
-        }
-        
-        if(shouldBeRunningCorrect){
-        	correct();
-        	System.out.println("in correct mode");
-        }else{
-        	System.out.println("not in correct mode");
-        }
-    }
-
-    public void driveSwitch(){
-    	if(logitechLeftStickPress.get()){
-			if(!wasPressedLeftStick){
-				shouldBeRunningSwitch = !shouldBeRunningSwitch;
-			}
-			wasPressedLeftStick = true;
-			System.out.println("yah boi be on");
-		}else{
-			wasPressedLeftStick = false;
-		}
-    	if(shouldBeRunningSwitch){
-			arcadeDrive(joyStickLeft.getRawAxis(0)+(joyStickLeft.getRawAxis(3)-joyStickLeft.getRawAxis(2)),joyStickLeft.getRawAxis(5));
-        	joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-        	joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
-		}else{
-			singleStickArcade();
-        	joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-        	joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
-		}
-    }
+	}
 
 	public void robotInit() {
 
 		oi = new OI();
-		chooser = new SendableChooser();
-		chooser.addDefault("Default Auto", new ExampleCommand());
+		//chooser = new SendableChooser();
+		//chooser.addDefault("Default Auto", new ExampleCommand());
 		// chooser.addObject("My Auto", new MyAutoCommand());
-		chooser.addObject("My Auto", "My Auto");
-		SmartDashboard.putData("Auto mode", chooser);
-		System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
-
+		//chooser.addObject("My Auto", "My Auto");
+		//SmartDashboard.putData("Auto mode", chooser);
+		//System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
+		
+		//Network table instantiation
+		table = NetworkTable.getTable("PI/vision");
+	
 		// Motor port instantiating
 		frontLeftDriveMotor = new Victor(0);
 		frontRightDriveMotor = new Victor(8);
@@ -401,8 +362,8 @@ public class Robot extends IterativeRobot {
 		// Accessory motors
 		intake = new Victor(2);
 		shooterRight = new Spark(5);
-		// shooterLeft = new Spark(4);
-		climber = new Spark(3);
+	    shooterLeft = new Spark(4);
+		climber = new Victor(3);
 		elevator = new Victor(7);
 		// agitator = new Victor(6);
 
@@ -450,10 +411,6 @@ public class Robot extends IterativeRobot {
 		logitechStart = new JoystickButton(joyStickLeft, 10);
 		logitechBack = new JoystickButton(joyStickLeft, 9);
 
-		// rightTrim = SmartDashboard.getNumber("DB/Slider 3", 1.0);
-		// if(rightTrim == 0){ SmartDashboard.putNumber("DB/Slider 3", 1);
-		// rightTrim = 1;}
-
 		gearTrayCylinder = new DoubleSolenoid(2, 1);// port 0 failed, changed to
 													// 2
 		ballBlockCylinder = new DoubleSolenoid(3, 4);
@@ -485,12 +442,16 @@ public class Robot extends IterativeRobot {
 		wasPressedLogitechX = false;
 		shouldBeRunningGearTray = false;
 		wasPressedLogitechB = false;
-
 		wasPressedBackButton = false;
 		shouldBeRunningCorrect = false;
 
+		//Global Position Instantiation
 		rotationPos = 0;
-
+		//nowRot = (float)ahrs.getAngle();
+		
+		//Cycle Counter Instantiation
+		cycleCounter = 0;
+		
 		// NavX instantiation
 		try {
 			ahrs = new AHRS(SerialPort.Port.kUSB);
@@ -645,34 +606,39 @@ public class Robot extends IterativeRobot {
 
 	}
 
-
 	public void autonomousPeriodic() {
-
+		nowRot = (float)ahrs.getAngle();
+		/*
+		if(cycleCounter >= 0 && cycleCounter < 1){
+			autoTurn(30);
+		}
+		*/
 	}
 
 	public void teleopInit() {
-
+		arcadeDrive(joyStickLeft.getRawAxis(0),-joyStickLeft.getRawAxis(3));
 	}
 
 	public void teleopPeriodic() {
-
+		nowRot = (float)ahrs.getAngle();
 		Scheduler.getInstance().run();
 
 		switchDriveModes();
 
 		testForCorrectionMode();
+		
+		//rotationMacro();
 
 		toggleShooterMotor();
-
+		
 		toggleIntake();
-		
+
 		checkClimberState();
-		
+
 		toggleElevator();
 
-		
 		toggleGearTray();
-		
+
 		operatorControl();
 
 	}
