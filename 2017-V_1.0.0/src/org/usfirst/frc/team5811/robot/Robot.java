@@ -319,6 +319,7 @@ public class Robot extends IterativeRobot {
 			shouldBeRunningAutoTurn = false;
     	}
     }
+    
     private void rotationMacro(){
     	if(logitechStart.get()){
 			if(!wasPressedStart){
@@ -376,12 +377,102 @@ public class Robot extends IterativeRobot {
         }
     }
     
-    public void baseline(float encValue){
-    	if(cycleCounter < encValue){
+    public void encoderMacro(float encValue){
+    	if(rotationCount < encValue){
 			driveMotors(0.3, 0.3);
 		}
     }
 
+    public void gotoBoilerLeftWhileMiddlePosition(){
+    	encoderMacro(000);
+    	turnMacro(-90);
+    }
+
+    public void gotoBoilerRightWhileMiddlePosition(){
+    	encoderMacro(000);
+    	turnMacro(90);
+    }
+    
+    public void gotoBoilerWhileLeftPosition(){
+    	
+    }
+
+    public void gotoBoilerWhileRightPosition(){
+    	
+    }
+    
+    public void gotoLoadingRightWhileMiddlePosition(){
+    	
+    }
+    
+    public void gotoLoadingLeftWhileMiddlePosition(){
+    	
+    }
+    
+    public void gotoLoadingWhileLeftPosition(){
+    	
+    }
+    
+    public void gotoLoadingWhileRightPosition(){
+    	
+    }
+
+    public void gearMiddle(){
+    	
+    }
+
+    public void gearLeftWhileLoading(){
+    	
+    }
+
+    public void gearRightWhileBoiler(){
+    	
+    }
+
+    public void gearLeftWhileBoiler(){
+    	
+    }
+
+    public void gearRightWhileLoading(){
+    	
+    }
+
+    public void hopperWhileBoilerLeft(){
+    	
+    }
+
+    public void hopperWhileLoadingRight(){
+    	
+    }
+
+    public void hopperWhileBoilingRight(){
+    	
+    }
+
+    public void hopperWhileLoadingLeft(){
+    	
+    }
+
+    public void returnHopperWhileBoilerLeft(){
+    	
+    }
+
+    public void returnHopperWhileLoadingRight(){
+    	
+    }
+
+    public void returnHopperWhileBoilingRight(){
+    	
+    }
+
+    public void returnHopperWhileLoadingLeft(){
+    	
+    }
+
+    public void shootAutonomous(){
+    	
+    }
+    
     public void driveSwitch(){
     	if(logitechLeftStickPress.get()){
 			if(!wasPressedLeftStick){
@@ -517,8 +608,8 @@ public class Robot extends IterativeRobot {
 
 		// NavX instantiation
 		try {
-			ahrs = new AHRS(SerialPort.Port.kUSB);
-			// ahrs = new AHRS(I2C.Port.kMXP); //WE WILL NEED I2C IN THE FUTURE.
+			//ahrs = new AHRS(SerialPort.Port.kUSB);
+			 ahrs = new AHRS(I2C.Port.kMXP); //WE WILL NEED I2C IN THE FUTURE.
 			// RIGHT NOW WE WILL STICK WITH USB
 		} catch (RuntimeException ex) {
 			System.out.println("NavX instantiation error");
@@ -670,11 +761,34 @@ public class Robot extends IterativeRobot {
 
 	public void disabledPeriodic() {
 		Scheduler.getInstance().run();
-		if((botPosition == "loading" || botPosition == "boiler") &&
-				   baselineCross == "yes" &&
-				   gearPlacement == "nil" &&
-				   shoot == "no" &&
-				   hopperPickup == "no" ){	
+		if((botPosition == "loading" || botPosition == "boiler") &&			//Pass baseline
+				(allianceColor == "blue" || allianceColor == "red") &&
+				baselineCross == "yes" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				hopperPickup == "no" ){	
+			autoMode = 1;
+		}
+		if((botPosition == "center") &&										//Gear Middle
+				(allianceColor == "blue" || allianceColor == "red") &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "no" &&
+				hopperPickup == "no" ){	
+			autoMode = 2;
+		}
+		if(((botPosition == "loading" && allianceColor == "red") || (botPosition == "boiler" && allianceColor == "blue")) &&			//Gear Left
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				hopperPickup == "no" ){	
+			autoMode = 1;
+		}
+		if(((botPosition == "boiler" && allianceColor == "red") || (botPosition == "loading" && allianceColor == "blue")) &&			//Gear Right
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				hopperPickup == "no" ){	
 			autoMode = 1;
 		}
 		
@@ -695,55 +809,51 @@ public class Robot extends IterativeRobot {
  * Make sure to pair!!!!!!!
  */
 		if(autoMode == 1){		//Pass baseline
-			baseline(250);
+			encoderMacro(250);
+			if(cycleCounter < 250){
+				driveMotors(1, 1);
+			}
 		}
 		
-		if(baselineCross == "no"){			//Gear Middle
+		if(autoMode == 2){			//Gear Middle
 			if(cycleCounter < 100){
 				driveMotors(1, 1);
-			}else if(cycleCounter < 200){
+			}else if(cycleCounter < 350){
+				driveMotors(0.3, 0.3);
+			}else if(cycleCounter < 450){
 				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
-				driveMotors(0, 0);
-			}else if(cycleCounter < 250){
-				driveMotors(-1, -1);
-			}else if(cycleCounter > 250){
 				driveMotors(0, 0);
 			}
 		}
-		if(autoMode == 2){			//Gear Left
+		if(autoMode == 3){			//Gear Left
 			if(cycleCounter < 100){
 				driveMotors(1, 1);
 			}else if(cycleCounter < 200){
 				turnMacro(45);
 			}else if(cycleCounter < 250){
-				driveMotors(-1, -1);
+				driveMotors(1, 1);
 			}else if(cycleCounter < 350){
-				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
-				driveMotors(0, 0);
+				driveMotors(0.3, 0.3);
 			}else if(cycleCounter < 450){
-				driveMotors(-1, -1);
-			}else if(cycleCounter > 450){
+				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
 				driveMotors(0, 0);
 			}
 		}
-		if(autoMode == 2){			//Gear Right
+		if(autoMode == 4){			//Gear Right
 			if(cycleCounter < 100){
 				driveMotors(1, 1);
 			}else if(cycleCounter < 200){
 				turnMacro(-45);
 			}else if(cycleCounter < 250){
-				driveMotors(-1, -1);
+				driveMotors(1, 1);
 			}else if(cycleCounter < 350){
-				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
-				System.out.println("Sam Sidhu Loves Memes");
-				driveMotors(0, 0);
+				driveMotors(0.3, 0.3);
 			}else if(cycleCounter < 450){
-				driveMotors(-1, -1);
-			}else if(cycleCounter > 450){
+				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
 				driveMotors(0, 0);
 			}
 		}
-		if(autoMode == 3){			//Gear Right && Shoot 
+		if(autoMode == 5){			//Gear Right && Shoot 
 			if(cycleCounter < 100){
 				driveMotors(1, 1);
 			}else if(cycleCounter < 200){
