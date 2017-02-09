@@ -44,23 +44,25 @@ public class Robot extends IterativeRobot {
 	Victor backLeftDriveMotor;
 	Victor backRightDriveMotor;
 	Victor intake;
-	Spark shooterRight;;
+	Spark shooterRight;
 	Spark shooterLeft;
 	Spark climber;
 	// Victor agitator;
 	Victor elevator;
 
 	// Encoder definitions and variables
-	Encoder shooterEnc;
+	Encoder shooterRightEnc;
+	//Counter shooterEncoder;
 	int rotationCount;
 	double rotationRate;
 	boolean encDirection;
 	boolean encIfStopped;
+	double rotationPeriod;
 
 	// misc
 	// double intakePower;
 	/*
-	 * //Auto Intake values double autoMode; boolean releaseToggle; boolean
+	 * //Auto Intake values double autoSelecter; boolean releaseToggle; boolean
 	 * raiseAfterRelease; boolean returnAfter; double turnTime; double
 	 * turnPower; boolean shootBall;
 	 * 
@@ -183,8 +185,8 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningShooter) {
-			shooterRight.set(-.65);
-			shooterLeft.set(.65);
+			shooterRight.set(-.15);
+			shooterLeft.set(.15);
 			ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
 		} else {
 			shooterRight.set(0);
@@ -209,7 +211,7 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningIntake) {
-			intake.set(1);
+			intake.set(-.4);
 			// SmartDashboard.putNumber("INTAKE ON", 101);
 		} else {
 			intake.set(0);
@@ -373,14 +375,13 @@ public class Robot extends IterativeRobot {
         	System.out.println("not in correct mode");
         }
     }
-
+    
     public void baseline(float encValue){
     	if(cycleCounter < encValue){
 			driveMotors(0.3, 0.3);
 		}
     }
 
-    
     public void driveSwitch(){
     	if(logitechLeftStickPress.get()){
 			if(!wasPressedLeftStick){
@@ -402,7 +403,8 @@ public class Robot extends IterativeRobot {
 		}
     }
 
-	public void robotInit() {
+
+    public void robotInit() {
 
 		oi = new OI();
 		chooser = new SendableChooser();
@@ -419,25 +421,27 @@ public class Robot extends IterativeRobot {
 		backRightDriveMotor = new Victor(9);
 
 		// Accessory motors
-		intake = new Victor(2);
+		intake = new Victor(7);
 		shooterRight = new Spark(5);
 		shooterLeft = new Spark(4);
 		climber = new Spark(3);
-		elevator = new Victor(7);
+		elevator = new Victor(2);
 		// agitator = new Victor(6);
 
 		// Encoder inits and instantiations
-		shooterEnc = new Encoder(0, 1, false, Encoder.EncodingType.k4X);
-		shooterEnc.setMaxPeriod(.1);
-		shooterEnc.setMinRate(10);
-		shooterEnc.setDistancePerPulse(5);
-		shooterEnc.setReverseDirection(true);
-		shooterEnc.setSamplesToAverage(7);
+		shooterRightEnc = new Encoder(0, 1, true, Encoder.EncodingType.k1X);
+		shooterRightEnc.setMaxPeriod(1);
+		shooterRightEnc.setDistancePerPulse(36);
 
-		rotationCount = shooterEnc.get();
-		rotationRate = shooterEnc.getRate();
-		encIfStopped = shooterEnc.getStopped();
-		encDirection = shooterEnc.getDirection();// since it is a boolean its
+		shooterRightEnc.setMinRate(10);
+		shooterRightEnc.setSamplesToAverage(32);
+		
+		//shooterEncoder = new Counter(0);
+		//shooterEncoder.setSemiPeriodMode(true);
+		//rotationCount = shooterRightEnc.get();
+		//rotationRate = shooterRightEnc.getRate();
+		//encIfStopped = shooterRightEnc.getStopped();
+		//encDirection = shooterRightEnc.getDirection();// since it is a boolean its
 													// either 0 or 1 (obv)...not
 													// sure which value is which
 													// direction though
@@ -505,17 +509,12 @@ public class Robot extends IterativeRobot {
 		wasPressedLogitechX = false;
 		shouldBeRunningGearTray = false;
 		wasPressedLogitechB = false;
-		
+
 		wasPressedBackButton = false;
 		shouldBeRunningCorrect = false;
-		
-		autoMode = 0;
 
 		rotationPos = 0;
 
-		//Autonomous
-		cycleCounter = 0;
-		
 		// NavX instantiation
 		try {
 			ahrs = new AHRS(SerialPort.Port.kUSB);
@@ -780,12 +779,31 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void teleopInit() {
-
+		
 	}
 
 	public void teleopPeriodic() {
 
 		Scheduler.getInstance().run();
+		
+		rotationCount = shooterRightEnc.get();
+		rotationRate = shooterRightEnc.getRate();
+		double distance = shooterRightEnc.getDistance();
+		boolean direction = shooterRightEnc.getDirection();
+		boolean stopped = shooterRightEnc.getStopped();
+		rotationPeriod = shooterRightEnc.getRaw();
+		System.out.println("************");
+		System.out.println(distance);
+		System.out.println(direction);
+		System.out.println(stopped);
+		System.out.println(rotationCount);
+		System.out.println(rotationRate);
+		System.out.println(rotationPeriod);
+		System.out.println("************");
+		
+		//System.out.println(shooterEncoder.getDistance());
+		//System.out.println(shooterEncoder.get());
+
 
 		switchDriveModes();
 
