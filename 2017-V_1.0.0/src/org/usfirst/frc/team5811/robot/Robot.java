@@ -82,13 +82,24 @@ public class Robot extends IterativeRobot {
 		 * + (location on field where interaction occurs [i.e. Boiler is at the Boiler])
 		 * + (side of field, depends on alliance due to field being rotationally asymmetrical [i.e. Boiler Right is Red Alliance])
 		*/ 
+		
+		//**************BASE FUNCTIONS**************
+		
 		//Baseline Only
 		baseline,
 		
-		//Gear Only
+		//Gear Base
 		gearMiddle,
-		gearLeft,
-		gearRight,
+		
+		//**************BOILER-BASED FUNCTIONS**************
+		
+		//Gear Only
+		gearMiddleBoilerLeft,
+		gearMiddleBoilerRight,
+		gearBoilerLeft,
+		gearBoilerLeftWhileMiddle,
+		gearBoilerRight,
+		gearBoilerRightWhileMiddle,
 		
 		//Shoot Only
 		shootOnlyBoilerLeft,
@@ -116,7 +127,15 @@ public class Robot extends IterativeRobot {
 		hopperShootBoilerRight,
 		hopperShootBoilerRightWhileMiddle,
 		
-		//Hopper, Shoot, place Gear or place Gear, Hopper, then Shoot (Hopper Shoot Gear)
+		//Gear and Hopper
+		gearMiddleHopperBoilerLeft,
+		gearMiddleHopperBoilerRight,
+		gearHopperBoilerLeft,
+		gearHopperBoilerLeftWhileMiddle,
+		gearHopperBoilerRight,
+		gearHopperBoilerRightWhileMiddle,
+		
+		//Hopper, Shoot, Place Gear || Place Gear, Hopper, then Shoot (Hopper Shoot Gear Sequences)
 		gearMiddleHopperShootBoilerLeft,
 		gearMiddleHopperShootBoilerRight,
 		gearHopperShootBoilerLeft,
@@ -128,25 +147,57 @@ public class Robot extends IterativeRobot {
 		shootHopperShootBoilerLeft,
 		shootHopperShootBoilerLeftWhileMiddle,
 		shootHopperShootBoilerRight,
-		shootHopperShootboilerRightWhileMiddle,
+		shootHopperShootBoilerRightWhileMiddle,
 		
 		//Ultimate Autonomous
+		ultimateAutoGearMiddleBoilerLeft,
+		ultimateAutoGearMiddleBoilerRight,
 		ultimateAutoBoilerLeft, //gear shoot hopper shoot boiler left
 		ultimateAutoBoilerLeftWhileMiddle,
 		ultimateAutoBoilerRight,  //gear shoot hopper shoot boiler right
 		ultimateAutoBoilerRightWhileMiddle,
+		
+		
+		//**************LOADING-BASED FUNCTIONS**************
+		
+		//Loading Only
+		loadingOnlyLeft,
+		loadingOnlyLeftWhileMiddle,
+		loadingOnlyRight,
+		loadingOnlyRightWhileMiddle,
+		
+		//Gear and Loading
+		gearMiddleLoadingLeft,
+		gearMiddleLoadingRight,
+		gearLoadingLeft,
+		gearLoadingLeftWhileMiddle,
+		gearLoadingRight,
+		gearLoadingRightWhileMiddle,
+		
+		//Hopper and Loading
+		hopperLoadingLeft,
+		hopperLoadingLeftWhileMiddle,
+		hopperLoadingRight,
+		hopperLoadingRightWhileMiddle,
+		
+		//Hopper and Gear
+		gearMiddleHopperLoadingLeft,
+		gearMiddleHopperLoadingRight,
+		gearHopperLoadingLeft,
+		gearHopperLoadingLeftWhileMiddle,
+		gearHopperLoadingRight,
+		gearHopperLoadingRightWhileMiddle,
 	}
 	
     RobotStates autoMode; 
 	String botPosition;
 	String allianceColor;
+	String chooseBoilerOrLoading;
 	String baselineCross;
 	String gearPlacement;
 	String shoot;
-	String shootTwice;
+	String shootAfterHopper;
 	String hopperPickup;
-	String logicError;
-	String endgameAutonomous;
 	
 	// Boolean state changes
 	boolean shouldBeRunningSwitch;
@@ -370,9 +421,9 @@ public class Robot extends IterativeRobot {
 	private void driveMotors(double speedLeftDM, double speedRightDM) {
 		// System.out.println("Command: " + speedLeftDM);
 		frontLeftDriveMotor.set(speedLeftDM);
-		frontRightDriveMotor.set(speedRightDM);
 		backLeftDriveMotor.set(speedLeftDM);
-		backRightDriveMotor.set(speedRightDM);
+		frontRightDriveMotor.set(-speedRightDM);
+		backRightDriveMotor.set(-speedRightDM);
 	}
 
 	// 2 STICK DRIVE METHOD
@@ -484,7 +535,7 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
     
-    public void gotoBoilerWhileLeftPosition(){
+    public void gotoBoilerLeftWhileLeftPosition(){
     	encoderMacro(000);
     	turnMacro(-90);
     	encoderMacro(000);
@@ -492,7 +543,7 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
 
-    public void gotoBoilerWhileRightPosition(){
+    public void gotoBoilerRightWhileRightPosition(){
     	encoderMacro(000);
     	turnMacro(90);
     	encoderMacro(000);
@@ -550,6 +601,24 @@ public class Robot extends IterativeRobot {
     	}
     }
     
+    public void gotoLoadingRightFromMiddleGear(){
+    	encoderMacro(-000);
+    	turnMacro(120);
+    	encoderMacro(000);
+    	if(current < 000){
+    		encoderMacro(0);
+    	}
+    }
+    
+    public void gotoLoadingLeftFromMiddleGear(){
+    	encoderMacro(-000);
+    	turnMacro(-120);
+    	encoderMacro(000);
+    	if(current < 000){
+    		encoderMacro(0);
+    	}
+    }
+    
     public void gearMiddle(){
     	encoderMacro(000);
     	encoderCreep(000);
@@ -562,21 +631,21 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
 
-    public void gearRightWhileBoiler(){
+    public void gearRightWhileLoading(){
     	encoderMacro(-000);
     	turnMacro(180);
     	encoderMacro(000);
     	encoderCreep(000);
     }
-
+    
     public void gearLeftWhileBoiler(){
     	encoderMacro(-000);
     	turnMacro(180);
     	encoderMacro(000);
     	encoderCreep(000);
     }
-
-    public void gearRightWhileLoading(){
+    
+    public void gearRightWhileBoiler(){
     	encoderMacro(-000);
     	turnMacro(180);
     	encoderMacro(000);
@@ -590,19 +659,6 @@ public class Robot extends IterativeRobot {
     	turnMacro(-45);
     	encoderMacro(000);
     	turnMacro(45);
-    	encoderMacro(-000);
-    	Timer.delay(1);
-    }
-
-    public void hopperWhileLoadingRight(){
-    	encoderMacro(-000);
-    	turnMacro(-135);
-    	encoderMacro(000);
-    	turnMacro(45);
-    	encoderMacro(000);
-    	turnMacro(-45);
-    	encoderMacro(-000);
-    	Timer.delay(1);
     }
 
     public void hopperWhileBoilerRight(){
@@ -612,8 +668,6 @@ public class Robot extends IterativeRobot {
     	turnMacro(45);
     	encoderMacro(000);
     	turnMacro(-45);
-    	encoderMacro(-000);
-    	Timer.delay(1);
     }
 
     public void hopperWhileLoadingLeft(){
@@ -623,25 +677,29 @@ public class Robot extends IterativeRobot {
     	turnMacro(-45);
     	encoderMacro(000);
     	turnMacro(45);
+    }
+    
+    public void hopperWhileLoadingRight(){
     	encoderMacro(-000);
-    	Timer.delay(1);
+    	turnMacro(-135);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderMacro(000);
+    	turnMacro(-45);
     }
 
     public void returnHopperWhileBoilerLeft(){
+    	encoderMacro(-000);
+    	Timer.delay(1);
     	turnMacro(180);
     	encoderMacro(000);
     	turnMacro(45);
     	encoderCreep(000);
     }
 
-    public void returnHopperWhileLoadingRight(){
-    	turnMacro(180);
-    	encoderMacro(000);
-    	turnMacro(-45);
-    	encoderCreep(000);
-    }
-
     public void returnHopperWhileBoilerRight(){
+    	encoderMacro(-000);
+    	Timer.delay(1);
     	turnMacro(180);
     	encoderMacro(000);
     	turnMacro(-45);
@@ -649,9 +707,20 @@ public class Robot extends IterativeRobot {
     }
 
     public void returnHopperWhileLoadingLeft(){
+    	encoderMacro(-000);
+    	Timer.delay(1);
     	turnMacro(180);
     	encoderMacro(000);
     	turnMacro(45);
+    	encoderCreep(000);
+    }
+    
+    public void returnHopperWhileLoadingRight(){
+    	encoderMacro(-000);
+    	Timer.delay(1);
+    	turnMacro(180);
+    	encoderMacro(000);
+    	turnMacro(-45);
     	encoderCreep(000);
     }
 
@@ -818,11 +887,12 @@ public class Robot extends IterativeRobot {
 		
 		botPosition = SmartDashboard.getString("DB/String 0", "Is Bot at loading, center, or boiler?");
 		allianceColor = SmartDashboard.getString("DB/String 1", "Alliance Color red or blue?");
-		baselineCross = SmartDashboard.getString("DB/String 2", "Only Cross Baseline? yes or no");
-		gearPlacement = SmartDashboard.getString("DB/String 3", "Place gear right, left, middle, or nil?");
-		shoot = SmartDashboard.getString("DB/String 4", "Shoot Before Hopper Pickup? yes or no");
-		shootTwice = SmartDashboard.getString("DB/String 5", "Shoot After Hopper Pickup? yes or no");
-		hopperPickup = SmartDashboard.getString("DB/String 6", "Pickup balls from hopper? yes or no");
+		chooseBoilerOrLoading = SmartDashboard.getString("DB/String 2", "Going boiler or loading side or nil?");
+		baselineCross = SmartDashboard.getString("DB/String 3", "Only Cross Baseline? yes or no");
+		gearPlacement = SmartDashboard.getString("DB/String 4", "Place gear right, left, middle, or nil?");
+		shoot = SmartDashboard.getString("DB/String 5", "Shoot Before Hopper Pickup? yes or no");
+		shootAfterHopper = SmartDashboard.getString("DB/String 6", "Shoot After Hopper Pickup? yes or no");
+		hopperPickup = SmartDashboard.getString("DB/String 7", "Pickup balls from hopper? yes or no");
 		
 		//logicError = SmartDashboard.getString("DB/String 6", "No error");
 		//endgameAutonomous = SmartDashboard.getString("DB/String 8", "Hah....BASIC");
@@ -985,258 +1055,691 @@ public class Robot extends IterativeRobot {
 		
 		driveMotors(0, 0);
 		
-		if((botPosition == "loading" || botPosition == "boiler") &&			
+		if((botPosition == "right" || botPosition == "left") &&			
 				(allianceColor == "blue" || allianceColor == "red") &&
+				(chooseBoilerOrLoading == "boiler" && chooseBoilerOrLoading == "loading") &&
 				baselineCross == "yes" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){	
 			autoMode = RobotStates.baseline;
 		}
-		if((botPosition == "center") &&										
+		if((botPosition == "middle") &&										
 				(allianceColor == "blue" || allianceColor == "red") &&
+				chooseBoilerOrLoading == "nil" &&
 				baselineCross == "no" &&
 				gearPlacement == "middle" &&
 				shoot == "no" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){	
 			autoMode = RobotStates.gearMiddle;
 		}
-		if(((botPosition == "loading" && allianceColor == "red") || (botPosition == "boiler" && allianceColor == "blue")) &&			
+		
+		//**************BOILER-BASED FUNCTIONS**************
+		
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
-				gearPlacement == "left" &&
+				gearPlacement == "middle" &&
 				shoot == "no" &&
-				shootTwice == "no" &&
-				hopperPickup == "no"){	
-			autoMode = RobotStates.gearLeft;
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearMiddleBoilerLeft;
 		}
-		if(((botPosition == "boiler" && allianceColor == "red") || (botPosition == "loading" && allianceColor == "blue")) &&			
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
-				gearPlacement == "right" &&
+				gearPlacement == "middle" &&
 				shoot == "no" &&
-				shootTwice == "no" &&
-				hopperPickup == "no"){	
-			autoMode = RobotStates.gearRight;
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearMiddleBoilerRight;
 		}
 		if(botPosition == "left" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearBoilerLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearBoilerRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearBoilerRightWhileMiddle;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.shootOnlyBoilerLeft;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.shootOnlyBoilerLeftWhileMiddle;
 		}
 		if(botPosition == "right" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.shootOnlyBoilerRight;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.shootOnlyBoilerRightWhileMiddle;
 		}
 		if(botPosition == "left" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.hopperOnlyBoilerLeft;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.hopperOnlyBoilerLeftWhileMiddle;
 		}
 		if(botPosition == "right" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.hopperOnlyBoilerRight;
 		}
 		if(botPosition == "right" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.hopperOnlyBoilerRightWhileMiddle;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "middle" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.gearMiddleShootBoilerLeft;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "middle" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.gearMiddleShootBoilerRight;
 		}
 		if(botPosition == "left" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "left" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.gearShootBoilerLeft;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "left" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.gearShootBoilerLeftWhileMiddle;
 		}
 		if(botPosition == "right" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "right" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.gearShootBoilerRight;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "right" &&
 				shoot == "yes" &&
-				shootTwice == "no" &&
+				shootAfterHopper == "no" &&
 				hopperPickup == "no"){
 			autoMode = RobotStates.gearShootBoilerRightWhileMiddle;
 		}
 		if(botPosition == "left" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "yes" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.hopperShootBoilerLeft;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "yes" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.hopperShootBoilerLeftWhileMiddle;
 		}
 		if(botPosition == "right" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "yes" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.hopperShootBoilerRight;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "nil" &&
 				shoot == "no" &&
-				shootTwice == "yes" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.hopperShootBoilerRightWhileMiddle;
 		}
-		// ADD SHOOT TWICE FROM HERE DOWN
 		if(botPosition == "middle" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "middle" &&
-				shoot == "yes" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearMiddleHopperBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearMiddleHopperBoilerRight;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperBoilerLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperBoilerRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperBoilerRightWhileMiddle;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "no" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.gearMiddleHopperShootBoilerLeft;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "middle" &&
-				shoot == "yes" &&
+				shoot == "no" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.gearMiddleHopperShootBoilerRight;
 		}
 		if(botPosition == "left" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "left" &&
-				shoot == "yes" &&
+				shoot == "no" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.gearHopperShootBoilerLeft;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "left" &&
-				shoot == "yes" &&
+				shoot == "no" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.gearHopperShootBoilerLeftWhileMiddle;
 		}
 		if(botPosition == "right" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "right" &&
-				shoot == "yes" &&
+				shoot == "no" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.gearHopperShootBoilerRight;
 		}
 		if(botPosition == "middle" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "right" &&
-				shoot == "yes" &&
+				shoot == "no" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
 			autoMode = RobotStates.gearHopperShootBoilerRightWhileMiddle;
 		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.shootHopperShootBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.shootHopperShootBoilerLeftWhileMiddle;
+		}
 		if(botPosition == "right" &&
 				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.shootHopperShootBoilerRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.shootHopperShootBoilerRightWhileMiddle;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.ultimateAutoGearMiddleBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.ultimateAutoGearMiddleBoilerRight;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.ultimateAutoBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.ultimateAutoBoilerLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
 				baselineCross == "no" &&
 				gearPlacement == "right" &&
 				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
 				hopperPickup == "yes"){
-			autoMode = RobotStates.gearHopperShootBoilerRight;
+			autoMode = RobotStates.ultimateAutoBoilerRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "boiler" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "yes" &&
+				shootAfterHopper == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.ultimateAutoBoilerRightWhileMiddle;
+		}
+		
+		//**************LOADING-BASED FUNCTIONS**************
+		
+		if(botPosition == "left" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.loadingOnlyLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.loadingOnlyLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.loadingOnlyRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.loadingOnlyRightWhileMiddle;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearMiddleLoadingLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearMiddleLoadingRight;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearLoadingLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearLoadingLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearLoadingRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearLoadingRightWhileMiddle;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperLoadingLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperLoadingLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperLoadingRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperLoadingRightWhileMiddle;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearMiddleHopperLoadingLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearMiddleHopperLoadingRight;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperLoadingLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperLoadingLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperLoadingRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				chooseBoilerOrLoading == "loading" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootAfterHopper == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperLoadingRightWhileMiddle;
 		}
 	}
 
@@ -1245,14 +1748,14 @@ public class Robot extends IterativeRobot {
 /*NOTE: the notions of the method driveMotors are to be paired with encoder data.
  * Make sure to pair!!!!!!!
  */
-		if(autoMode == RobotStates.baseline){		//Pass baseline
+		if(autoMode == RobotStates.baseline){		//Cross baseline
 			encoderMacro(250);
 			if(cycleCounter < 250){
 				driveMotors(1, 1);
 			}
 		}
 		
-		if(autoMode == RobotStates.gearMiddle){			//Gear Middle
+		if(autoMode == RobotStates.gearMiddle){			
 			if(cycleCounter < 100){
 				driveMotors(1, 1);
 			}else if(cycleCounter < 350){
@@ -1262,46 +1765,215 @@ public class Robot extends IterativeRobot {
 				driveMotors(0, 0);
 			}
 		}
-		if(autoMode == RobotStates.gearLeft){			//Gear Left
-			if(cycleCounter < 100){
-				driveMotors(1, 1);
-			}else if(cycleCounter < 200){
-				turnMacro(45);
-			}else if(cycleCounter < 250){
-				driveMotors(1, 1);
-			}else if(cycleCounter < 350){
-				driveMotors(0.3, 0.3);
-			}else if(cycleCounter < 450){
-				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
-				driveMotors(0, 0);
-			}
+		if(autoMode == RobotStates.gearMiddleBoilerLeft){			
+			gearMiddle();
+			gotoBoilerLeftFromMiddleGear();
 		}
-		if(autoMode == RobotStates.gearRight){			//Gear Right
-			if(cycleCounter < 100){
-				driveMotors(1, 1);
-			}else if(cycleCounter < 200){
-				turnMacro(-45);
-			}else if(cycleCounter < 250){
-				driveMotors(1, 1);
-			}else if(cycleCounter < 350){
-				driveMotors(0.3, 0.3);
-			}else if(cycleCounter < 450){
-				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
-				driveMotors(0, 0);
-			}
+		if(autoMode == RobotStates.gearMiddleBoilerRight){			
+			gearMiddle();
+			gotoBoilerRightFromMiddleGear();
 		}
-		if(autoMode == RobotStates.gearShootBoilerRight){			//Gear Right && Shoot 
+		if(autoMode == RobotStates.gearBoilerLeft){			
+			gotoBoilerLeftWhileLeftPosition();
+			gearLeftWhileBoiler();
+		}
+		if(autoMode == RobotStates.gearBoilerLeftWhileMiddle){			
+			gotoBoilerLeftWhileMiddlePosition();
+			gearLeftWhileBoiler();
+		}
+		if(autoMode == RobotStates.gearBoilerRight){			
+			gotoBoilerRightWhileRightPosition();
+			gearRightWhileBoiler();
+		}
+		if(autoMode == RobotStates.gearBoilerRightWhileMiddle){			
+			gotoBoilerRightWhileMiddlePosition();
+			gearRightWhileBoiler();
+		}
+		if(autoMode == RobotStates.shootOnlyBoilerLeft){
+			gotoBoilerLeftWhileLeftPosition();
+			shootAutonomous(0);
+		}
+		if(autoMode == RobotStates.shootOnlyBoilerLeftWhileMiddle){
+			gotoBoilerLeftWhileMiddlePosition();
+			shootAutonomous(0);
+		}
+		if(autoMode == RobotStates.shootOnlyBoilerRight){
+			gotoBoilerRightWhileRightPosition();
+			shootAutonomous(0);
+		}
+		if(autoMode == RobotStates.shootOnlyBoilerRightWhileMiddle){
+			gotoBoilerRightWhileMiddlePosition();
+			shootAutonomous(0);
+		}
+		if(autoMode == RobotStates.hopperOnlyBoilerLeft){
+			gotoBoilerLeftWhileLeftPosition();
+			hopperWhileBoilerLeft();
+		}
+		if(autoMode == RobotStates.hopperOnlyBoilerLeftWhileMiddle){
 			
 		}
-		/*
-		if(autoMode == 4){		//Gear Middle && Shoot
+		if(autoMode == RobotStates.hopperOnlyBoilerRight){
 			
 		}
-		if(false){
-			logicError = "CONTRADICTION DETECTED";
+		if(autoMode == RobotStates.hopperOnlyBoilerRightWhileMiddle){
+			
 		}
-		*/
-		
+		if(autoMode == RobotStates.gearMiddleShootBoilerLeft){  //Priority
+			
+		}
+		if(autoMode == RobotStates.gearMiddleShootBoilerRight){  //Priority
+			
+		}
+		if(autoMode == RobotStates.gearShootBoilerLeft){
+			
+		}
+		if(autoMode == RobotStates.gearShootBoilerLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.gearShootBoilerRight){
+			
+		}
+		if(autoMode == RobotStates.gearShootBoilerRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.hopperShootBoilerLeft){
+			
+		}
+		if(autoMode == RobotStates.hopperShootBoilerLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.hopperShootBoilerRight){
+			
+		}
+		if(autoMode == RobotStates.hopperShootBoilerRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.gearMiddleHopperBoilerLeft){			
+			
+		}
+		if(autoMode == RobotStates.gearMiddleHopperBoilerRight){			
+			
+		}
+		if(autoMode == RobotStates.gearHopperBoilerLeft){			
+			
+		}
+		if(autoMode == RobotStates.gearHopperBoilerLeftWhileMiddle){			
+			
+		}
+		if(autoMode == RobotStates.gearHopperBoilerRight){
+			
+		}
+		if(autoMode == RobotStates.gearHopperBoilerRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.gearMiddleHopperShootBoilerLeft){
+			
+		}
+		if(autoMode == RobotStates.gearMiddleHopperShootBoilerRight){
+			
+		}
+		if(autoMode == RobotStates.gearHopperShootBoilerLeft){
+			
+		}
+		if(autoMode == RobotStates.gearHopperShootBoilerLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.gearHopperShootBoilerRight){
+			
+		}
+		if(autoMode == RobotStates.gearHopperShootBoilerRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.shootHopperShootBoilerLeft){
+			
+		}
+		if(autoMode == RobotStates.shootHopperShootBoilerLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.shootHopperShootBoilerRight){
+			
+		}
+		if(autoMode == RobotStates.shootHopperShootBoilerRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.ultimateAutoGearMiddleBoilerLeft){
+			
+		}
+		if(autoMode == RobotStates.ultimateAutoGearMiddleBoilerRight){
+			
+		}
+		if(autoMode == RobotStates.ultimateAutoBoilerLeft){
+			
+		}
+		if(autoMode == RobotStates.ultimateAutoBoilerLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.ultimateAutoBoilerRight){
+			
+		}
+		if(autoMode == RobotStates.ultimateAutoBoilerRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.loadingOnlyLeft){
+			
+		}
+		if(autoMode == RobotStates.loadingOnlyLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.loadingOnlyRight){
+			
+		}
+		if(autoMode == RobotStates.loadingOnlyRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.gearMiddleLoadingLeft){
+			
+		}
+		if(autoMode == RobotStates.gearMiddleLoadingRight){
+			
+		}
+		if(autoMode == RobotStates.gearLoadingLeft){
+			
+		}
+		if(autoMode == RobotStates.gearLoadingLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.gearLoadingRight){
+			
+		}
+		if(autoMode == RobotStates.gearLoadingRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.hopperLoadingLeft){
+			
+		}
+		if(autoMode == RobotStates.hopperLoadingLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.hopperLoadingRight){
+			
+		}
+		if(autoMode == RobotStates.hopperLoadingRightWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.gearMiddleHopperLoadingLeft){
+			
+		}
+		if(autoMode == RobotStates.gearMiddleHopperLoadingRight){
+			
+		}
+		if(autoMode == RobotStates.gearHopperLoadingLeft){
+			
+		}
+		if(autoMode == RobotStates.gearHopperLoadingLeftWhileMiddle){
+			
+		}
+		if(autoMode == RobotStates.gearHopperLoadingRight){
+			
+		}
+		if(autoMode == RobotStates.gearHopperLoadingRightWhileMiddle){
+			
+		}
 		
 		cycleCounter++;
 		
