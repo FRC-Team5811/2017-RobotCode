@@ -46,8 +46,8 @@ public class Robot extends IterativeRobot {
 	Victor intake;
 	Spark shooterRight;
 	Spark shooterLeft;
-	Spark climber;
-	// Victor agitator;
+	Victor climberLeft;
+	Victor climberRight;
 	Victor elevator;
 
 	// Encoder definitions and variables
@@ -55,9 +55,11 @@ public class Robot extends IterativeRobot {
 	//Counter shooterEncoder;
 	int rotationCount;
 	double rotationRate;
+	double shooterSpeedCorrection;
 	boolean encDirection;
 	boolean encIfStopped;
 	double rotationPeriod;
+	boolean spinUpComplete;
 
 	// misc
 	// double intakePower;
@@ -74,12 +76,74 @@ public class Robot extends IterativeRobot {
 	
 	//Autonomous
 	int cycleCounter;
-	int autoMode; 
+	enum RobotStates{ //#blessed because our dude Chris taught us the ways of the enumerations
+		/*
+		 * How to read: (sequence of methods [i.e. shootgear = shoot then place gear])
+		 * + (location on field where interaction occurs [i.e. Boiler is at the Boiler])
+		 * + (side of field, depends on alliance due to field being rotationally asymmetrical [i.e. Boiler Right is Red Alliance])
+		*/ 
+		//Baseline Only
+		baseline,
+		
+		//Gear Only
+		gearMiddle,
+		gearLeft,
+		gearRight,
+		
+		//Shoot Only
+		shootOnlyBoilerLeft,
+		shootOnlyBoilerLeftWhileMiddle,
+		shootOnlyBoilerRight,
+		shootOnlyBoilerRightWhileMiddle,
+		
+		//Hopper Only
+		hopperOnlyBoilerLeft,
+		hopperOnlyBoilerLeftWhileMiddle,
+		hopperOnlyBoilerRight,
+		hopperOnlyBoilerRightWhileMiddle,
+		
+		//Gear and Shoot
+		gearMiddleShootBoilerLeft, //Priority
+		gearMiddleShootBoilerRight,  //Priority
+		gearShootBoilerLeft,
+		gearShootBoilerLeftWhileMiddle,
+		gearShootBoilerRight,
+		gearShootBoilerRightWhileMiddle,
+		
+		//Hopper then Shoot
+		hopperShootBoilerLeft,
+		hopperShootBoilerLeftWhileMiddle,
+		hopperShootBoilerRight,
+		hopperShootBoilerRightWhileMiddle,
+		
+		//Hopper, Shoot, place Gear or place Gear, Hopper, then Shoot (Hopper Shoot Gear)
+		gearMiddleHopperShootBoilerLeft,
+		gearMiddleHopperShootBoilerRight,
+		gearHopperShootBoilerLeft,
+		gearHopperShootBoilerLeftWhileMiddle,
+		gearHopperShootBoilerRight,
+		gearHopperShootBoilerRightWhileMiddle,
+
+		//Shoot, Hopper, Shoot
+		shootHopperShootBoilerLeft,
+		shootHopperShootBoilerLeftWhileMiddle,
+		shootHopperShootBoilerRight,
+		shootHopperShootboilerRightWhileMiddle,
+		
+		//Ultimate Autonomous
+		ultimateAutoBoilerLeft, //gear shoot hopper shoot boiler left
+		ultimateAutoBoilerLeftWhileMiddle,
+		ultimateAutoBoilerRight,  //gear shoot hopper shoot boiler right
+		ultimateAutoBoilerRightWhileMiddle,
+	}
+	
+    RobotStates autoMode; 
 	String botPosition;
 	String allianceColor;
 	String baselineCross;
 	String gearPlacement;
 	String shoot;
+	String shootTwice;
 	String hopperPickup;
 	String logicError;
 	String endgameAutonomous;
@@ -184,9 +248,22 @@ public class Robot extends IterativeRobot {
 			wasPressedRightBumper = false;
 		}
 
-		if (shouldBeRunningShooter) {
-			shooterRight.set(-.15);
-			shooterLeft.set(.15);
+		if(rotationRate >= 19000){
+			spinUpComplete = true;
+		} else {
+			spinUpComplete = false;
+		}
+		
+		if(shouldBeRunningShooter && !spinUpComplete){
+			shooterRight.set(.62);
+			shooterLeft.set(-.62);
+		} else if (shouldBeRunningShooter && spinUpComplete) {
+			rotationRate = shooterRightEnc.getRate();
+			shooterSpeedCorrection = (19200-rotationRate)/5000;   //.62 is 19200, .65 is 20000, .61 is 19000
+			shooterRight.set(.65+shooterSpeedCorrection);
+			shooterLeft.set(-.65+shooterSpeedCorrection);
+			System.out.println("Rotation Rate: " + rotationRate);
+			System.out.println("Power Correction: " + shooterSpeedCorrection);
 			ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
 		} else {
 			shooterRight.set(0);
@@ -220,7 +297,7 @@ public class Robot extends IterativeRobot {
 
 
 	}
-
+/*
 	private void checkClimberState(){
 		//CLIMBER LOGIC
 		if (logitechA.get()) {
@@ -234,7 +311,7 @@ public class Robot extends IterativeRobot {
 		}
 				
 	} 
-	
+	*/
 	private void toggleElevator() {
 		
 		// ELEVATOR
@@ -340,6 +417,7 @@ public class Robot extends IterativeRobot {
 	
 	// CORRECTION METHOD. WE USE THE VALUE QUARTERNION Z FOR ROTATIONAL
 	// POSTITIONING
+    //Spectre says HI 
 	private void correct() {
 		float nowRot = (float) ahrs.getAngle();
 		System.out.println(rotationPos);
@@ -378,7 +456,14 @@ public class Robot extends IterativeRobot {
     }
     
     public void encoderMacro(float encValue){
+    	rotationCount = 0;
     	if(rotationCount < encValue){
+			driveMotors(1, 1);
+		}
+    }
+    
+    public void encoderCreep(float encValue){
+    	while(rotationCount >= 0.9 * encValue && rotationCount < encValue){
 			driveMotors(0.3, 0.3);
 		}
     }
@@ -386,91 +471,211 @@ public class Robot extends IterativeRobot {
     public void gotoBoilerLeftWhileMiddlePosition(){
     	encoderMacro(000);
     	turnMacro(-90);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderCreep(000);
     }
 
     public void gotoBoilerRightWhileMiddlePosition(){
     	encoderMacro(000);
     	turnMacro(90);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderCreep(000);
     }
     
     public void gotoBoilerWhileLeftPosition(){
-    	
+    	encoderMacro(000);
+    	turnMacro(-90);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderCreep(000);
     }
 
     public void gotoBoilerWhileRightPosition(){
-    	
+    	encoderMacro(000);
+    	turnMacro(90);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderCreep(000);
     }
     
     public void gotoLoadingRightWhileMiddlePosition(){
-    	
+    	encoderMacro(000);
+    	turnMacro(90);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderCreep(000);
     }
     
     public void gotoLoadingLeftWhileMiddlePosition(){
-    	
+    	encoderMacro(000);
+    	turnMacro(-90);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderCreep(000);
     }
     
     public void gotoLoadingWhileLeftPosition(){
-    	
+    	encoderMacro(000);
+    	turnMacro(-90);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderCreep(000);
     }
     
     public void gotoLoadingWhileRightPosition(){
-    	
+    	encoderMacro(000);
+    	turnMacro(90);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderCreep(000);
     }
 
+    public void gotoBoilerLeftFromMiddleGear(){  //Priority
+    	encoderMacro(-000);
+    	turnMacro(-120);
+    	encoderMacro(000);
+    	if(current < 000){
+    		encoderMacro(0);
+    	}
+    }
+    
+    public void gotoBoilerRightFromMiddleGear(){  //Priority
+    	encoderMacro(-000);
+    	turnMacro(120);
+    	encoderMacro(000);
+    	if(current < 000){
+    		encoderMacro(0);
+    	}
+    }
+    
     public void gearMiddle(){
-    	
+    	encoderMacro(000);
+    	encoderCreep(000);
     }
 
     public void gearLeftWhileLoading(){
-    	
+    	encoderMacro(-000);
+    	turnMacro(180);
+    	encoderMacro(000);
+    	encoderCreep(000);
     }
 
     public void gearRightWhileBoiler(){
-    	
+    	encoderMacro(-000);
+    	turnMacro(180);
+    	encoderMacro(000);
+    	encoderCreep(000);
     }
 
     public void gearLeftWhileBoiler(){
-    	
+    	encoderMacro(-000);
+    	turnMacro(180);
+    	encoderMacro(000);
+    	encoderCreep(000);
     }
 
     public void gearRightWhileLoading(){
-    	
+    	encoderMacro(-000);
+    	turnMacro(180);
+    	encoderMacro(000);
+    	encoderCreep(000);
     }
 
     public void hopperWhileBoilerLeft(){
-    	
+    	encoderMacro(-000);
+    	turnMacro(135);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderMacro(-000);
+    	Timer.delay(1);
     }
 
     public void hopperWhileLoadingRight(){
-    	
+    	encoderMacro(-000);
+    	turnMacro(-135);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderMacro(-000);
+    	Timer.delay(1);
     }
 
-    public void hopperWhileBoilingRight(){
-    	
+    public void hopperWhileBoilerRight(){
+    	encoderMacro(-000);
+    	turnMacro(-135);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderMacro(-000);
+    	Timer.delay(1);
     }
 
     public void hopperWhileLoadingLeft(){
-    	
+    	encoderMacro(-000);
+    	turnMacro(135);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderMacro(-000);
+    	Timer.delay(1);
     }
 
     public void returnHopperWhileBoilerLeft(){
-    	
+    	turnMacro(180);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderCreep(000);
     }
 
     public void returnHopperWhileLoadingRight(){
-    	
+    	turnMacro(180);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderCreep(000);
     }
 
-    public void returnHopperWhileBoilingRight(){
-    	
+    public void returnHopperWhileBoilerRight(){
+    	turnMacro(180);
+    	encoderMacro(000);
+    	turnMacro(-45);
+    	encoderCreep(000);
     }
 
     public void returnHopperWhileLoadingLeft(){
-    	
+    	turnMacro(180);
+    	encoderMacro(000);
+    	turnMacro(45);
+    	encoderCreep(000);
     }
 
-    public void shootAutonomous(){
-    	
+    public void shootAutonomous(double shootTime){
+    	if(rotationRate >= 19000){
+			spinUpComplete = true;
+		} else {
+			spinUpComplete = false;
+		}
+		
+		if(!spinUpComplete){
+			shooterRight.set(.61);
+			shooterLeft.set(-.61);
+		} else if (spinUpComplete) {
+			rotationRate = shooterRightEnc.getRate();
+			shooterSpeedCorrection = (19000-rotationRate)/5000;
+			shooterRight.set(.61 + shooterSpeedCorrection);
+			shooterLeft.set(-.61 + shooterSpeedCorrection);
+			ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
+			Timer.delay(shootTime);
+			shooterRight.set(0);
+			shooterLeft.set(0);
+			ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
+		} 
     }
     
     public void driveSwitch(){
@@ -484,6 +689,8 @@ public class Robot extends IterativeRobot {
 			wasPressedLeftStick = false;
 		}
     	if(shouldBeRunningSwitch){
+    		
+    	//** MUST BE FIXED!!!!!
 			arcadeDrive(joyStickLeft.getRawAxis(0)+(joyStickLeft.getRawAxis(3)-joyStickLeft.getRawAxis(2)),joyStickLeft.getRawAxis(5));
         	joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
         	joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
@@ -506,17 +713,18 @@ public class Robot extends IterativeRobot {
 		System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
 
 		// Motor port instantiating
-		frontLeftDriveMotor = new Victor(0);
-		frontRightDriveMotor = new Victor(8);
-		backLeftDriveMotor = new Victor(1);
-		backRightDriveMotor = new Victor(9);
+		frontLeftDriveMotor = new Victor(9);
+		frontRightDriveMotor = new Victor(4);
+		backLeftDriveMotor = new Victor(8);
+		backRightDriveMotor = new Victor(3);
 
 		// Accessory motors
-		intake = new Victor(7);
-		shooterRight = new Spark(5);
-		shooterLeft = new Spark(4);
-		climber = new Spark(3);
-		elevator = new Victor(2);
+		intake = new Victor(6);
+		shooterRight = new Spark(0);
+		shooterLeft = new Spark(5);
+		climberLeft = new Victor(2);
+		climberRight = new Victor(7);
+		elevator = new Victor(1);
 		// agitator = new Victor(6);
 
 		// Encoder inits and instantiations
@@ -582,7 +790,7 @@ public class Robot extends IterativeRobot {
 		// limit switch init
 		// imitSwitch = new DigitalInput(1);
 
-		// current = power.getCurrent(15);
+		current = power.getCurrent(15);
 		System.out.println(current);
 
 		// Boolean Toggle Switch
@@ -600,12 +808,25 @@ public class Robot extends IterativeRobot {
 		wasPressedLogitechX = false;
 		shouldBeRunningGearTray = false;
 		wasPressedLogitechB = false;
+		
+		spinUpComplete = false;
 
 		wasPressedBackButton = false;
 		shouldBeRunningCorrect = false;
 
 		rotationPos = 0;
-
+		
+		botPosition = SmartDashboard.getString("DB/String 0", "Is Bot at loading, center, or boiler?");
+		allianceColor = SmartDashboard.getString("DB/String 1", "Alliance Color red or blue?");
+		baselineCross = SmartDashboard.getString("DB/String 2", "Only Cross Baseline? yes or no");
+		gearPlacement = SmartDashboard.getString("DB/String 3", "Place gear right, left, middle, or nil?");
+		shoot = SmartDashboard.getString("DB/String 4", "Shoot Before Hopper Pickup? yes or no");
+		shootTwice = SmartDashboard.getString("DB/String 5", "Shoot After Hopper Pickup? yes or no");
+		hopperPickup = SmartDashboard.getString("DB/String 6", "Pickup balls from hopper? yes or no");
+		
+		//logicError = SmartDashboard.getString("DB/String 6", "No error");
+		//endgameAutonomous = SmartDashboard.getString("DB/String 8", "Hah....BASIC");
+		
 		// NavX instantiation
 		try {
 			//ahrs = new AHRS(SerialPort.Port.kUSB);
@@ -749,58 +970,274 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void disabledInit() {
-		botPosition = SmartDashboard.getString("DB/String 0", "Is Bot loading, center, or boiler?");
-		allianceColor = SmartDashboard.getString("DB/String 1", "Alliance Color ?");
-		baselineCross = SmartDashboard.getString("DB/String 2", "Only Cross Baseline?");
-		gearPlacement = SmartDashboard.getString("DB/String 3", "Is gear right, left, middle, or nil?");
-		shoot = SmartDashboard.getString("DB/String 4", "Shoot?");
-		hopperPickup = SmartDashboard.getString("DB/String 5", "Pickup balls from hopper?");
-		logicError = SmartDashboard.getString("DB/String 6", "No error");
-		endgameAutonomous = SmartDashboard.getString("DB/String 8", "Hah....BASIC");
+		
 	}
 
 	public void disabledPeriodic() {
 		Scheduler.getInstance().run();
-		if((botPosition == "loading" || botPosition == "boiler") &&			//Pass baseline
-				(allianceColor == "blue" || allianceColor == "red") &&
-				baselineCross == "yes" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				hopperPickup == "no" ){	
-			autoMode = 1;
-		}
-		if((botPosition == "center") &&										//Gear Middle
-				(allianceColor == "blue" || allianceColor == "red") &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				hopperPickup == "no" ){	
-			autoMode = 2;
-		}
-		if(((botPosition == "loading" && allianceColor == "red") || (botPosition == "boiler" && allianceColor == "blue")) &&			//Gear Left
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				hopperPickup == "no" ){	
-			autoMode = 1;
-		}
-		if(((botPosition == "boiler" && allianceColor == "red") || (botPosition == "loading" && allianceColor == "blue")) &&			//Gear Right
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				hopperPickup == "no" ){	
-			autoMode = 1;
-		}
 		
 	}
 
 	public void autonomousInit() {
-	
-
+	    
 		ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
 		gearTrayCylinder.set(DoubleSolenoid.Value.kReverse);
 		
 		driveMotors(0, 0);
+		
+		if((botPosition == "loading" || botPosition == "boiler") &&			
+				(allianceColor == "blue" || allianceColor == "red") &&
+				baselineCross == "yes" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){	
+			autoMode = RobotStates.baseline;
+		}
+		if((botPosition == "center") &&										
+				(allianceColor == "blue" || allianceColor == "red") &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "no" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){	
+			autoMode = RobotStates.gearMiddle;
+		}
+		if(((botPosition == "loading" && allianceColor == "red") || (botPosition == "boiler" && allianceColor == "blue")) &&			
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "no" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){	
+			autoMode = RobotStates.gearLeft;
+		}
+		if(((botPosition == "boiler" && allianceColor == "red") || (botPosition == "loading" && allianceColor == "blue")) &&			
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "no" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){	
+			autoMode = RobotStates.gearRight;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.shootOnlyBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.shootOnlyBoilerLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.shootOnlyBoilerRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.shootOnlyBoilerRightWhileMiddle;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperOnlyBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperOnlyBoilerLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperOnlyBoilerRight;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "no" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperOnlyBoilerRightWhileMiddle;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearMiddleShootBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearMiddleShootBoilerRight;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearShootBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearShootBoilerLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearShootBoilerRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "yes" &&
+				shootTwice == "no" &&
+				hopperPickup == "no"){
+			autoMode = RobotStates.gearShootBoilerRightWhileMiddle;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperShootBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperShootBoilerLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperShootBoilerRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "nil" &&
+				shoot == "no" &&
+				shootTwice == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.hopperShootBoilerRightWhileMiddle;
+		}
+		// ADD SHOOT TWICE FROM HERE DOWN
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearMiddleHopperShootBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "middle" &&
+				shoot == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearMiddleHopperShootBoilerRight;
+		}
+		if(botPosition == "left" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperShootBoilerLeft;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "blue" &&
+				baselineCross == "no" &&
+				gearPlacement == "left" &&
+				shoot == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperShootBoilerLeftWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperShootBoilerRight;
+		}
+		if(botPosition == "middle" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperShootBoilerRightWhileMiddle;
+		}
+		if(botPosition == "right" &&
+				allianceColor == "red" &&
+				baselineCross == "no" &&
+				gearPlacement == "right" &&
+				shoot == "yes" &&
+				hopperPickup == "yes"){
+			autoMode = RobotStates.gearHopperShootBoilerRight;
+		}
 	}
 
 
@@ -808,14 +1245,14 @@ public class Robot extends IterativeRobot {
 /*NOTE: the notions of the method driveMotors are to be paired with encoder data.
  * Make sure to pair!!!!!!!
  */
-		if(autoMode == 1){		//Pass baseline
+		if(autoMode == RobotStates.baseline){		//Pass baseline
 			encoderMacro(250);
 			if(cycleCounter < 250){
 				driveMotors(1, 1);
 			}
 		}
 		
-		if(autoMode == 2){			//Gear Middle
+		if(autoMode == RobotStates.gearMiddle){			//Gear Middle
 			if(cycleCounter < 100){
 				driveMotors(1, 1);
 			}else if(cycleCounter < 350){
@@ -825,7 +1262,7 @@ public class Robot extends IterativeRobot {
 				driveMotors(0, 0);
 			}
 		}
-		if(autoMode == 3){			//Gear Left
+		if(autoMode == RobotStates.gearLeft){			//Gear Left
 			if(cycleCounter < 100){
 				driveMotors(1, 1);
 			}else if(cycleCounter < 200){
@@ -839,7 +1276,7 @@ public class Robot extends IterativeRobot {
 				driveMotors(0, 0);
 			}
 		}
-		if(autoMode == 4){			//Gear Right
+		if(autoMode == RobotStates.gearRight){			//Gear Right
 			if(cycleCounter < 100){
 				driveMotors(1, 1);
 			}else if(cycleCounter < 200){
@@ -853,26 +1290,8 @@ public class Robot extends IterativeRobot {
 				driveMotors(0, 0);
 			}
 		}
-		if(autoMode == 5){			//Gear Right && Shoot 
-			if(cycleCounter < 100){
-				driveMotors(1, 1);
-			}else if(cycleCounter < 200){
-				turnMacro(-45);
-			}else if(cycleCounter < 250){
-				driveMotors(-1, -1);
-			}else if(cycleCounter < 350){
-				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
-				driveMotors(0, 0);
-			}else if(cycleCounter < 450){
-				driveMotors(-1, -1);
-			}else if(cycleCounter < 500){
-				driveMotors(0, 0);
-				turnMacro(180);
-			}else if(cycleCounter < 550){
-				driveMotors(0, 0); //MAKE SURE TO DRIVE UNTIL YOU HIT A WALL
-			}else if(cycleCounter < 600){
-				//visionNavXDualCorrection();
-			}
+		if(autoMode == RobotStates.gearShootBoilerRight){			//Gear Right && Shoot 
+			
 		}
 		/*
 		if(autoMode == 4){		//Gear Middle && Shoot
@@ -902,14 +1321,14 @@ public class Robot extends IterativeRobot {
 		boolean direction = shooterRightEnc.getDirection();
 		boolean stopped = shooterRightEnc.getStopped();
 		rotationPeriod = shooterRightEnc.getRaw();
-		System.out.println("************");
+		/*System.out.println("************");
 		System.out.println(distance);
 		System.out.println(direction);
 		System.out.println(stopped);
 		System.out.println(rotationCount);
 		System.out.println(rotationRate);
 		System.out.println(rotationPeriod);
-		System.out.println("************");
+		System.out.println("************");*/
 		
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
@@ -923,7 +1342,7 @@ public class Robot extends IterativeRobot {
 
 		toggleIntake();
 		
-		checkClimberState();
+		//checkClimberState();
 		
 		toggleElevator();
 
