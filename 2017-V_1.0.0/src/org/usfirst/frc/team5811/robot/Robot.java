@@ -1748,233 +1748,125 @@ public class Robot extends IterativeRobot {
 /*NOTE: the notions of the method driveMotors are to be paired with encoder data.
  * Make sure to pair!!!!!!!
  */
-		if(autoMode == RobotStates.baseline){		//Cross baseline
-			encoderMacro(250);
-			if(cycleCounter < 250){
-				driveMotors(1, 1);
-			}
-		}
 		
-		if(autoMode == RobotStates.gearMiddle){			
-			if(cycleCounter < 100){
-				driveMotors(1, 1);
-			}else if(cycleCounter < 350){
-				driveMotors(0.3, 0.3);
-			}else if(cycleCounter < 450){
-				gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
-				driveMotors(0, 0);
-			}
-		}
-		if(autoMode == RobotStates.gearMiddleBoilerLeft){			
-			gearMiddle();
-			gotoBoilerLeftFromMiddleGear();
-		}
-		if(autoMode == RobotStates.gearMiddleBoilerRight){			
-			gearMiddle();
-			gotoBoilerRightFromMiddleGear();
-		}
-		if(autoMode == RobotStates.gearBoilerLeft){			
-			gotoBoilerLeftWhileLeftPosition();
-			gearLeftWhileBoiler();
-		}
-		if(autoMode == RobotStates.gearBoilerLeftWhileMiddle){			
-			gotoBoilerLeftWhileMiddlePosition();
-			gearLeftWhileBoiler();
-		}
-		if(autoMode == RobotStates.gearBoilerRight){			
-			gotoBoilerRightWhileRightPosition();
-			gearRightWhileBoiler();
-		}
-		if(autoMode == RobotStates.gearBoilerRightWhileMiddle){			
-			gotoBoilerRightWhileMiddlePosition();
-			gearRightWhileBoiler();
-		}
-		if(autoMode == RobotStates.shootOnlyBoilerLeft){
-			gotoBoilerLeftWhileLeftPosition();
-			shootAutonomous(0);
-		}
-		if(autoMode == RobotStates.shootOnlyBoilerLeftWhileMiddle){
-			gotoBoilerLeftWhileMiddlePosition();
-			shootAutonomous(0);
-		}
-		if(autoMode == RobotStates.shootOnlyBoilerRight){
-			gotoBoilerRightWhileRightPosition();
-			shootAutonomous(0);
-		}
-		if(autoMode == RobotStates.shootOnlyBoilerRightWhileMiddle){
-			gotoBoilerRightWhileMiddlePosition();
-			shootAutonomous(0);
-		}
-		if(autoMode == RobotStates.hopperOnlyBoilerLeft){
-			gotoBoilerLeftWhileLeftPosition();
-			hopperWhileBoilerLeft();
-		}
-		if(autoMode == RobotStates.hopperOnlyBoilerLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.hopperOnlyBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.hopperOnlyBoilerRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearMiddleShootBoilerLeft){  //Priority
-			
-		}
-		if(autoMode == RobotStates.gearMiddleShootBoilerRight){  //Priority
-			
-		}
-		if(autoMode == RobotStates.gearShootBoilerLeft){
-			
-		}
-		if(autoMode == RobotStates.gearShootBoilerLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearShootBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.gearShootBoilerRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.hopperShootBoilerLeft){
-			
-		}
-		if(autoMode == RobotStates.hopperShootBoilerLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.hopperShootBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.hopperShootBoilerRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearMiddleHopperBoilerLeft){			
-			
-		}
-		if(autoMode == RobotStates.gearMiddleHopperBoilerRight){			
-			
-		}
-		if(autoMode == RobotStates.gearHopperBoilerLeft){			
-			
-		}
-		if(autoMode == RobotStates.gearHopperBoilerLeftWhileMiddle){			
-			
-		}
-		if(autoMode == RobotStates.gearHopperBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.gearHopperBoilerRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearMiddleHopperShootBoilerLeft){
-			
-		}
-		if(autoMode == RobotStates.gearMiddleHopperShootBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.gearHopperShootBoilerLeft){
-			
-		}
-		if(autoMode == RobotStates.gearHopperShootBoilerLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearHopperShootBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.gearHopperShootBoilerRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.shootHopperShootBoilerLeft){
-			
-		}
-		if(autoMode == RobotStates.shootHopperShootBoilerLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.shootHopperShootBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.shootHopperShootBoilerRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.ultimateAutoGearMiddleBoilerLeft){
-			
-		}
-		if(autoMode == RobotStates.ultimateAutoGearMiddleBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.ultimateAutoBoilerLeft){
-			
-		}
-		if(autoMode == RobotStates.ultimateAutoBoilerLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.ultimateAutoBoilerRight){
-			
-		}
-		if(autoMode == RobotStates.ultimateAutoBoilerRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.loadingOnlyLeft){
-			
-		}
-		if(autoMode == RobotStates.loadingOnlyLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.loadingOnlyRight){
-			
-		}
-		if(autoMode == RobotStates.loadingOnlyRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearMiddleLoadingLeft){
-			
-		}
-		if(autoMode == RobotStates.gearMiddleLoadingRight){
-			
-		}
-		if(autoMode == RobotStates.gearLoadingLeft){
-			
-		}
-		if(autoMode == RobotStates.gearLoadingLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearLoadingRight){
-			
-		}
-		if(autoMode == RobotStates.gearLoadingRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.hopperLoadingLeft){
-			
-		}
-		if(autoMode == RobotStates.hopperLoadingLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.hopperLoadingRight){
-			
-		}
-		if(autoMode == RobotStates.hopperLoadingRightWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearMiddleHopperLoadingLeft){
-			
-		}
-		if(autoMode == RobotStates.gearMiddleHopperLoadingRight){
-			
-		}
-		if(autoMode == RobotStates.gearHopperLoadingLeft){
-			
-		}
-		if(autoMode == RobotStates.gearHopperLoadingLeftWhileMiddle){
-			
-		}
-		if(autoMode == RobotStates.gearHopperLoadingRight){
-			
-		}
-		if(autoMode == RobotStates.gearHopperLoadingRightWhileMiddle){
-			
-		}
-		
+		switch(autoMode){
+			case baseline: //Cross baseline
+				encoderMacro(250);
+				if(cycleCounter < 250){
+					driveMotors(1, 1);
+				}
+				break;
+			case gearMiddle:
+				if(cycleCounter < 100){
+					driveMotors(1, 1);
+				}else if(cycleCounter < 350){
+					driveMotors(0.3, 0.3);
+				}else if(cycleCounter < 450){
+					gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
+					driveMotors(0, 0);
+				}
+				break;
+			case gearMiddleBoilerLeft:
+				gearMiddle();
+				gotoBoilerLeftFromMiddleGear();
+				break;
+			case gearMiddleBoilerRight:
+				gearMiddle();
+				gotoBoilerRightFromMiddleGear();
+				break;
+			case gearBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				gearLeftWhileBoiler();
+				break;
+			case gearBoilerLeftWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				gearLeftWhileBoiler();
+				break;
+			case gearBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				gearRightWhileBoiler();
+				break;
+			case gearBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				gearRightWhileBoiler();
+				break;
+			case shootOnlyBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				shootAutonomous(0);
+				break;
+			case shootOnlyBoilerLeftWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				shootAutonomous(0);
+				break;
+			case shootOnlyBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				shootAutonomous(0);
+				break;
+			case shootOnlyBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				shootAutonomous(0);
+				break;
+			case hopperOnlyBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				hopperWhileBoilerLeft();
+				break;
+			case hopperOnlyBoilerLeftWhileMiddle:
+			case hopperOnlyBoilerRight:
+			case hopperOnlyBoilerRightWhileMiddle:
+			case gearMiddleShootBoilerLeft: //Priority
+			case gearMiddleShootBoilerRight: //Priority
+			case gearShootBoilerLeft:
+			case gearShootBoilerLeftWhileMiddle:
+			case gearShootBoilerRight:
+			case gearShootBoilerRightWhileMiddle:
+			case hopperShootBoilerLeft:
+			case hopperShootBoilerLeftWhileMiddle:
+			case hopperShootBoilerRight:
+			case hopperShootBoilerRightWhileMiddle:
+			case gearMiddleHopperBoilerLeft:
+			case gearMiddleHopperBoilerRight:
+			case gearHopperBoilerLeft:
+			case gearHopperBoilerLeftWhileMiddle:
+			case gearHopperBoilerRight:
+			case gearHopperBoilerRightWhileMiddle:
+			case gearMiddleHopperShootBoilerLeft:
+			case gearMiddleHopperShootBoilerRight:
+			case gearHopperShootBoilerLeft:
+			case gearHopperShootBoilerLeftWhileMiddle:
+			case gearHopperShootBoilerRight:
+			case gearHopperShootBoilerRightWhileMiddle:
+			case shootHopperShootBoilerLeft:
+			case shootHopperShootBoilerLeftWhileMiddle:
+			case shootHopperShootBoilerRight:
+			case shootHopperShootBoilerRightWhileMiddle:
+			case ultimateAutoGearMiddleBoilerLeft:
+			case ultimateAutoGearMiddleBoilerRight:
+			case ultimateAutoBoilerLeft:
+			case ultimateAutoBoilerLeftWhileMiddle:
+			case ultimateAutoBoilerRight:
+			case ultimateAutoBoilerRightWhileMiddle:
+			case loadingOnlyLeft:
+			case loadingOnlyLeftWhileMiddle:
+			case loadingOnlyRight:
+			case loadingOnlyRightWhileMiddle:
+			case gearMiddleLoadingLeft:
+			case gearMiddleLoadingRight:
+			case gearLoadingLeft:
+			case gearLoadingLeftWhileMiddle:
+			case gearLoadingRight:
+			case gearLoadingRightWhileMiddle:
+			case hopperLoadingLeft:
+			case hopperLoadingLeftWhileMiddle:
+			case hopperLoadingRight:
+			case hopperLoadingRightWhileMiddle:
+			case gearMiddleHopperLoadingLeft:
+			case gearMiddleHopperLoadingRight:
+			case gearHopperLoadingLeft:
+			case gearHopperLoadingLeftWhileMiddle:
+			case gearHopperLoadingRight:
+			case gearHopperLoadingRightWhileMiddle:
+				break;
+		}		
 		cycleCounter++;
 		
 	}
