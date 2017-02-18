@@ -1876,6 +1876,10 @@ public class Robot extends IterativeRobot {
 	rotationCountForDrive = drive.get();
 	rotationRateForDrive = drive.getRate();
 
+	
+	
+	
+
 		switch(autoMode){
 			case baseline: //Cross baseline
 				//encoderMacro(250);
