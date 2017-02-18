@@ -35,8 +35,11 @@ public class Robot extends IterativeRobot {
 	JoystickButton logitechLeftBumper;
 	JoystickButton logitechRightBumper;
 	JoystickButton logitechLeftStickPress;
+	JoystickButton logitechRightStickPress;
 	JoystickButton logitechStart;
 	JoystickButton logitechBack;
+	JoystickButton logitechRightTrigger;
+	JoystickButton logitechLeftTrigger;
 
 	// Motors
 	Victor frontLeftDriveMotor;
@@ -52,6 +55,8 @@ public class Robot extends IterativeRobot {
 
 	// Encoder definitions and variables
 	Encoder shooterRightEnc;
+	Encoder drive;
+	
 	//Counter shooterEncoder;
 	int rotationCount;
 	double rotationRate;
@@ -60,7 +65,16 @@ public class Robot extends IterativeRobot {
 	boolean encIfStopped;
 	double rotationPeriod;
 	boolean spinUpComplete;
-
+	
+	DigitalInput limitSwitch;
+	
+	
+	
+	int rotationCountForDrive;
+	double rotationRateForDrive;
+	double distance;
+	
+	
 	// misc
 	// double intakePower;
 	/*
@@ -187,9 +201,17 @@ public class Robot extends IterativeRobot {
 		gearHopperLoadingLeftWhileMiddle,
 		gearHopperLoadingRight,
 		gearHopperLoadingRightWhileMiddle,
+		
+		//**************************************************************
+		turnMacroTest,
+		noStringNoMove,
 	}
 	
-    RobotStates autoMode; 
+	RobotStates autoMode; 
+	public void autoMode(RobotStates autoMode){
+		this.autoMode = autoMode;
+	}
+    
 	String botPosition;
 	String allianceColor;
 	String chooseBoilerOrLoading;
@@ -214,6 +236,9 @@ public class Robot extends IterativeRobot {
 	boolean wasPressedLogitechX;
 	boolean shouldBeRunningGearTray;
 	boolean wasPressedLogitechB;
+	
+	boolean shouldBeRunningShifter;
+	boolean wasPressedRightStick;
 
 	boolean shouldBeRunningCorrect;
 	boolean wasPressedBackButton;
@@ -230,8 +255,8 @@ public class Robot extends IterativeRobot {
 	double n;
 
 	// A cylinder
-	DoubleSolenoid gearTrayCylinder;
-	DoubleSolenoid ballBlockCylinder;
+	DoubleSolenoid shifterCylinder;
+	DoubleSolenoid reservoirCylinder;
 
 	// COMPRESSOR!!!
 	Compressor compressor;
@@ -255,8 +280,7 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningSwitch) {
-			arcadeDrive(joyStickLeft.getRawAxis(0) + (joyStickLeft.getRawAxis(3) - joyStickLeft.getRawAxis(2)),
-					joyStickLeft.getRawAxis(5));
+			arcadeDrive(-joyStickLeft.getRawAxis(1),joyStickLeft.getRawAxis(2));
 			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
 			joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
 		} else {
@@ -315,11 +339,11 @@ public class Robot extends IterativeRobot {
 			shooterLeft.set(-.65+shooterSpeedCorrection);
 			System.out.println("Rotation Rate: " + rotationRate);
 			System.out.println("Power Correction: " + shooterSpeedCorrection);
-			ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
+			
 		} else {
 			shooterRight.set(0);
-			 shooterLeft.set(0);
-			ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
+		    shooterLeft.set(0);
+			
 		}
 		
 	}
@@ -348,21 +372,25 @@ public class Robot extends IterativeRobot {
 
 
 	}
-/*
+	/*
 	private void checkClimberState(){
 		//CLIMBER LOGIC
-		if (logitechA.get()) {
+		
+		if (logitechRightTrigger.get()) {
 			// CLIMBER DOWN
-			climber.set(-1);
-		} else if(logitechY.get()) {
+			climberRight.set(-joyStickLeft.getRawAxis(6));
+			climberLeft.set(joyStickLeft.getRawAxis(6));
+		} else if(logitechLeftTrigger.get()) {
 			// CLIMBER UP
-			climber.set(1);
+			climberRight.set(joyStickLeft.getRawAxis(6));
+			climberLeft.set(-joyStickLeft.getRawAxis(6));
 		}else{
-			climber.set(0);
+			climberRight.set(0);
+			climberLeft.set(0);
 		}
 				
 	} 
-	*/
+*/
 	private void toggleElevator() {
 		
 		// ELEVATOR
@@ -376,7 +404,7 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningElevator) {
-			elevator.set(1);
+			elevator.set(-1);
 			SmartDashboard.putNumber("ELEVATOR ON", 101);
 		} else {
 			elevator.set(0);
@@ -386,10 +414,7 @@ public class Robot extends IterativeRobot {
 		
 	}
 	
-	private void toggleGearTray() {
-		
-		// GEAR TRAY
-
+	private void toggleResExpansion(){
 		if (logitechB.get()) {
 			if (!wasPressedLogitechB) {
 				shouldBeRunningGearTray = !shouldBeRunningGearTray;
@@ -400,11 +425,39 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningGearTray) {
-			gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
-			SmartDashboard.putNumber("GEAR TRAY OUT", 101);
+			reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 		} else {
-			gearTrayCylinder.set(DoubleSolenoid.Value.kReverse);
-			SmartDashboard.putNumber("GEAR TRAY IN", 101);
+			reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
+		}
+
+		
+	} 
+	private void shifterDelay(){
+		int cycleCounterTele = 0;
+		while(cycleCounterTele < 20){
+			driveMotors(.3,-.3);
+			cycleCounterTele++;
+		}
+	}
+	private void toggleShifter() {
+
+		if (logitechRightStickPress.get()) {
+			if (!wasPressedRightStick) {
+				
+				shouldBeRunningShifter = !shouldBeRunningShifter;
+				shifterDelay();
+			}
+			wasPressedRightStick = true;
+		} else {
+			wasPressedRightStick = false;
+		}
+
+		if (shouldBeRunningShifter) {
+			shifterCylinder.set(DoubleSolenoid.Value.kForward);
+			
+		} else {
+			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
+			
 		}
 
 		
@@ -420,10 +473,10 @@ public class Robot extends IterativeRobot {
 	// SINGLE STICK DRIVE METHOD
 	private void driveMotors(double speedLeftDM, double speedRightDM) {
 		// System.out.println("Command: " + speedLeftDM);
-		frontLeftDriveMotor.set(speedLeftDM);
-		backLeftDriveMotor.set(speedLeftDM);
-		frontRightDriveMotor.set(-speedRightDM);
-		backRightDriveMotor.set(-speedRightDM);
+		frontLeftDriveMotor.set(-speedLeftDM);
+		backLeftDriveMotor.set(-speedLeftDM);
+		frontRightDriveMotor.set(speedRightDM);
+		backRightDriveMotor.set(speedRightDM);
 	}
 
 	// 2 STICK DRIVE METHOD
@@ -431,23 +484,50 @@ public class Robot extends IterativeRobot {
 		driveMotors((throttle + turn), (throttle - turn));
 	}
 	
+	
+	
     private void turnMacro(float degrees){
+    	ahrs.reset();
     	float nowRot = (float) ahrs.getAngle();
-    	if((macroPos + degrees) > nowRot){
-    		frontLeftDriveMotor.set(-.5);
-			backLeftDriveMotor.set(-.5);
-			frontRightDriveMotor.set(-.5);
-			backRightDriveMotor.set(-.5);
-    	}else{
-    		frontLeftDriveMotor.set(0);
-			backLeftDriveMotor.set(0);
-			frontRightDriveMotor.set(0);
-			backRightDriveMotor.set(0);
-			wasPressedStart = false;
-			shouldBeRunningAutoTurn = false;
+    	double outputDirection;
+    	double outputPower;
+    	while(degrees+5 > nowRot && nowRot > degrees-5){
+    		if(nowRot > degrees){
+    			outputDirection = 1;
+    		}else{
+    			outputDirection = -1;
+    		}
+    		outputPower = outputDirection*(((nowRot-degrees)/200)+.1);
+    		driveMotors(outputPower,-outputPower);
+    		nowRot = (float) ahrs.getAngle();
     	}
     }
     
+    private void driveStraightFeet(float feet){
+    	ahrs.reset();
+    	float nowRot = (float) ahrs.getAngle();
+    	double outputDirection;
+    	double outputPower;
+    	//double currentLocation;
+    	if(distance < feet){
+    		//driveMotors(.5, -.5);
+    		while(5.0 > nowRot && nowRot > -5.0){
+        		if(nowRot > 0){
+        			outputDirection = 1;
+        		}else{
+        			outputDirection = -1;
+        		}
+        		
+        		outputPower = outputDirection*(((0-nowRot)/200)+.1);
+        		driveMotors(outputPower + 0.8 ,outputPower + -0.8);
+        		nowRot = (float) ahrs.getAngle();
+        	}
+    	}
+    	else{
+    		driveMotors(0,0);
+    	}
+    }
+    /*
     private void rotationMacro(){
     	if(logitechStart.get()){
 			if(!wasPressedStart){
@@ -465,7 +545,7 @@ public class Robot extends IterativeRobot {
     		
     	}
     }
-	
+	*/
 	// CORRECTION METHOD. WE USE THE VALUE QUARTERNION Z FOR ROTATIONAL
 	// POSTITIONING
     //Spectre says HI 
@@ -474,16 +554,10 @@ public class Robot extends IterativeRobot {
 		System.out.println(rotationPos);
 		System.out.println(nowRot);
 		if (nowRot >= rotationPos + 10) {
-			frontLeftDriveMotor.set(-.5);
-			backLeftDriveMotor.set(-.5);
-			frontRightDriveMotor.set(-.5);
-			backRightDriveMotor.set(-.5);
+			driveMotors(-.5,-.5);
 		}
 		if (nowRot <= rotationPos - 10) {
-			frontLeftDriveMotor.set(.5);
-			backLeftDriveMotor.set(.5);
-			frontRightDriveMotor.set(.5);
-			backRightDriveMotor.set(.5);
+			driveMotors(.5,.5);
 		}
     }
 	
@@ -567,7 +641,7 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
     
-    public void gotoLoadingWhileLeftPosition(){
+    public void gotoLoadingLeftWhileLeftPosition(){
     	encoderMacro(000);
     	turnMacro(-90);
     	encoderMacro(000);
@@ -575,7 +649,7 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
     
-    public void gotoLoadingWhileRightPosition(){
+    public void gotoLoadingRightWhileRightPosition(){
     	encoderMacro(000);
     	turnMacro(90);
     	encoderMacro(000);
@@ -631,6 +705,12 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
 
+    public void returnGearLeftWhileLoading(){
+    	encoderMacro(-000);
+    	turnMacro(180);
+    	encoderMacro(000);
+    }
+    
     public void gearRightWhileLoading(){
     	encoderMacro(-000);
     	turnMacro(180);
@@ -638,6 +718,12 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
     
+    public void returnGearRightWhileLoading(){
+    	encoderMacro(-000);
+    	turnMacro(180);
+    	encoderMacro(000);
+    }
+
     public void gearLeftWhileBoiler(){
     	encoderMacro(-000);
     	turnMacro(180);
@@ -645,11 +731,23 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
     
+    public void returnGearLeftWhileBoiler(){
+    	encoderMacro(-000);
+    	turnMacro(180);
+    	encoderMacro(000);
+    }
+
     public void gearRightWhileBoiler(){
     	encoderMacro(-000);
     	turnMacro(180);
     	encoderMacro(000);
     	encoderCreep(000);
+    }
+
+    public void returnGearRightWhileBoiler(){
+    	encoderMacro(-000);
+    	turnMacro(180);
+    	encoderMacro(000);
     }
 
     public void hopperWhileBoilerLeft(){
@@ -739,35 +837,12 @@ public class Robot extends IterativeRobot {
 			shooterSpeedCorrection = (19000-rotationRate)/5000;
 			shooterRight.set(.61 + shooterSpeedCorrection);
 			shooterLeft.set(-.61 + shooterSpeedCorrection);
-			ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
+			
 			Timer.delay(shootTime);
 			shooterRight.set(0);
 			shooterLeft.set(0);
-			ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
+		
 		} 
-    }
-    
-    public void driveSwitch(){
-    	if(logitechLeftStickPress.get()){
-			if(!wasPressedLeftStick){
-				shouldBeRunningSwitch = !shouldBeRunningSwitch;
-			}
-			wasPressedLeftStick = true;
-			System.out.println("yah boi be on");
-		}else{
-			wasPressedLeftStick = false;
-		}
-    	if(shouldBeRunningSwitch){
-    		
-    	//** MUST BE FIXED!!!!!
-			arcadeDrive(joyStickLeft.getRawAxis(0)+(joyStickLeft.getRawAxis(3)-joyStickLeft.getRawAxis(2)),joyStickLeft.getRawAxis(5));
-        	joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-        	joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
-		}else{
-			singleStickArcade();
-        	joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-        	joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
-		}
     }
 
 
@@ -788,21 +863,28 @@ public class Robot extends IterativeRobot {
 		backRightDriveMotor = new Victor(3);
 
 		// Accessory motors
-		intake = new Victor(6);
+		intake = new Victor(2);
 		shooterRight = new Spark(0);
 		shooterLeft = new Spark(5);
-		climberLeft = new Victor(2);
+		climberLeft = new Victor(1);
 		climberRight = new Victor(7);
-		elevator = new Victor(1);
+		elevator = new Victor(6);
 		// agitator = new Victor(6);
 
 		// Encoder inits and instantiations
 		shooterRightEnc = new Encoder(0, 1, true, Encoder.EncodingType.k1X);
 		shooterRightEnc.setMaxPeriod(1);
 		shooterRightEnc.setDistancePerPulse(36);
-
 		shooterRightEnc.setMinRate(10);
 		shooterRightEnc.setSamplesToAverage(32);
+		
+		drive = new Encoder(2,3, true, Encoder.EncodingType.k1X);
+		drive.setMaxPeriod(1);
+		drive.setDistancePerPulse(36);
+		drive.setMinRate(10);
+		drive.setSamplesToAverage(32);
+		
+		
 		
 		//shooterEncoder = new Counter(0);
 		//shooterEncoder.setSemiPeriodMode(true);
@@ -839,18 +921,20 @@ public class Robot extends IterativeRobot {
 		logitechLeftBumper = new JoystickButton(joyStickLeft, 5);
 		logitechRightBumper = new JoystickButton(joyStickLeft, 6);
 		logitechLeftStickPress = new JoystickButton(joyStickLeft, 11);
+		logitechRightStickPress = new JoystickButton(joyStickLeft,12);
 		logitechStart = new JoystickButton(joyStickLeft, 10);
 		logitechBack = new JoystickButton(joyStickLeft, 9);
+		logitechRightTrigger = new JoystickButton(joyStickLeft, 8);
+		logitechLeftTrigger = new JoystickButton(joyStickLeft,7);
 
 		// rightTrim = SmartDashboard.getNumber("DB/Slider 3", 1.0);
 		// if(rightTrim == 0){ SmartDashboard.putNumber("DB/Slider 3", 1);
 		// rightTrim = 1;}
 
-		gearTrayCylinder = new DoubleSolenoid(2, 1);// port 0 failed, changed to
-													// 2
-		ballBlockCylinder = new DoubleSolenoid(3, 4);
-		gearTrayCylinder.set(DoubleSolenoid.Value.kReverse);
-		ballBlockCylinder.set(DoubleSolenoid.Value.kForward);
+		shifterCylinder = new DoubleSolenoid(2, 3);
+		reservoirCylinder = new DoubleSolenoid(6, 7);
+		shifterCylinder.set(DoubleSolenoid.Value.kForward);
+		reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
 
 		// compressor port init
 		compressor = new Compressor(0);
@@ -882,17 +966,13 @@ public class Robot extends IterativeRobot {
 
 		wasPressedBackButton = false;
 		shouldBeRunningCorrect = false;
+		
+		shouldBeRunningShifter = false;
+		wasPressedRightStick = false;
 
 		rotationPos = 0;
 		
-		botPosition = SmartDashboard.getString("DB/String 0", "Is Bot at loading, center, or boiler?");
-		allianceColor = SmartDashboard.getString("DB/String 1", "Alliance Color red or blue?");
-		chooseBoilerOrLoading = SmartDashboard.getString("DB/String 2", "Going boiler or loading side or nil?");
-		baselineCross = SmartDashboard.getString("DB/String 3", "Only Cross Baseline? yes or no");
-		gearPlacement = SmartDashboard.getString("DB/String 4", "Place gear right, left, middle, or nil?");
-		shoot = SmartDashboard.getString("DB/String 5", "Shoot Before Hopper Pickup? yes or no");
-		shootAfterHopper = SmartDashboard.getString("DB/String 6", "Shoot After Hopper Pickup? yes or no");
-		hopperPickup = SmartDashboard.getString("DB/String 7", "Pickup balls from hopper? yes or no");
+		//limitSwitch = new DigitalInput(1);
 		
 		//logicError = SmartDashboard.getString("DB/String 6", "No error");
 		//endgameAutonomous = SmartDashboard.getString("DB/String 8", "Hah....BASIC");
@@ -911,8 +991,7 @@ public class Robot extends IterativeRobot {
 	private void operatorControl() {
 		if (isOperatorControl() && isEnabled()) {
 
-			Timer.delay(
-					0.020); /* wait for one motor update time period (50Hz) */
+			Timer.delay(0.020); /* wait for one motor update time period (50Hz) */
 
 			/*
 			 * boolean zero_yaw_pressed = stick.getTrigger(); if (
@@ -920,6 +999,7 @@ public class Robot extends IterativeRobot {
 			 */
 
 			/* Display 6-axis Processed Angle Data */
+			/*
 			SmartDashboard.putBoolean("IMU_Connected", ahrs.isConnected());
 			SmartDashboard.putBoolean("IMU_IsCalibrating", ahrs.isCalibrating());
 			SmartDashboard.putNumber("IMU_Yaw", ahrs.getYaw());
@@ -929,13 +1009,13 @@ public class Robot extends IterativeRobot {
 			/* Display tilt-corrected, Magnetometer-based heading (requires */
 			/* magnetometer calibration to be useful) */
 
-			SmartDashboard.putNumber("IMU_CompassHeading", ahrs.getCompassHeading());
+			//SmartDashboard.putNumber("IMU_CompassHeading", ahrs.getCompassHeading());
 
 			/*
 			 * Display 9-axis Heading (requires magnetometer calibration to be
 			 * useful)
 			 */
-			SmartDashboard.putNumber("IMU_FusedHeading", ahrs.getFusedHeading());
+		//	SmartDashboard.putNumber("IMU_FusedHeading", ahrs.getFusedHeading());
 
 			/*
 			 * These functions are compatible w/the WPI Gyro Class, providing a
@@ -944,18 +1024,18 @@ public class Robot extends IterativeRobot {
 			/* path for upgrading from the Kit-of-Parts gyro to the navx MXP */
 
 			SmartDashboard.putNumber("IMU_TotalYaw", ahrs.getAngle());
-			SmartDashboard.putNumber("IMU_YawRateDPS", ahrs.getRate());
+			//SmartDashboard.putNumber("IMU_YawRateDPS", ahrs.getRate());
 
 			/*
 			 * Display Processed Acceleration Data (Linear Acceleration, Motion
 			 * Detect)
 			 */
-
+/*
 			SmartDashboard.putNumber("IMU_Accel_X", ahrs.getWorldLinearAccelX());
 			SmartDashboard.putNumber("IMU_Accel_Y", ahrs.getWorldLinearAccelY());
 			SmartDashboard.putBoolean("IMU_IsMoving", ahrs.isMoving());
 			SmartDashboard.putBoolean("IMU_IsRotating", ahrs.isRotating());
-
+*/
 			/*
 			 * Display estimates of velocity/displacement. Note that these
 			 * values are
@@ -973,12 +1053,12 @@ public class Robot extends IterativeRobot {
 			 * especially
 			 */
 			/* double (displacement) integration. */
-
+/*
 			SmartDashboard.putNumber("Velocity_X", ahrs.getVelocityX());
 			SmartDashboard.putNumber("Velocity_Y", ahrs.getVelocityY());
 			SmartDashboard.putNumber("Displacement_X", ahrs.getDisplacementX());
 			SmartDashboard.putNumber("Displacement_Y", ahrs.getDisplacementY());
-
+*/
 			/* Display Raw Gyro/Accelerometer/Magnetometer Values */
 			/*
 			 * NOTE: These values are not normally necessary, but are made
@@ -989,7 +1069,7 @@ public class Robot extends IterativeRobot {
 			 * whether
 			 */
 			/* the processed data (see above) will suit your needs. */
-
+/*
 			SmartDashboard.putNumber("RawGyro_X", ahrs.getRawGyroX());
 			SmartDashboard.putNumber("RawGyro_Y", ahrs.getRawGyroY());
 			SmartDashboard.putNumber("RawGyro_Z", ahrs.getRawGyroZ());
@@ -1001,19 +1081,19 @@ public class Robot extends IterativeRobot {
 			SmartDashboard.putNumber("RawMag_Z", ahrs.getRawMagZ());
 			SmartDashboard.putNumber("IMU_Temp_C", ahrs.getTempC());
 			SmartDashboard.putNumber("IMU_Timestamp", ahrs.getLastSensorTimestamp());
-
+*/
 			/* Omnimount Yaw Axis Information */
 			/*
 			 * For more info, see
 			 * http://navx-mxp.kauailabs.com/installation/omnimount
 			 */
 			AHRS.BoardYawAxis yaw_axis = ahrs.getBoardYawAxis();
+			/*
 			SmartDashboard.putString("YawAxisDirection", yaw_axis.up ? "Up" : "Down");
 			SmartDashboard.putNumber("YawAxis", yaw_axis.board_axis.getValue());
 
 			/* Sensor Board Information */
-			SmartDashboard.putString("FirmwareVersion", ahrs.getFirmwareVersion());
-
+			//SmartDashboard.putString("FirmwareVersion", ahrs.getFirmwareVersion());
 			/* Quaternion Data */
 			/*
 			 * Quaternions are fascinating, and are the most compact
@@ -1027,7 +1107,9 @@ public class Robot extends IterativeRobot {
 			 * from the Quaternions. If interested in motion processing,
 			 * knowledge of
 			 */
+			
 			/* Quaternions is highly recommended. */
+			/*
 			SmartDashboard.putNumber("QuaternionW", ahrs.getQuaternionW());
 			SmartDashboard.putNumber("QuaternionX", ahrs.getQuaternionX());
 			SmartDashboard.putNumber("QuaternionY", ahrs.getQuaternionY());
@@ -1049,11 +1131,36 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void autonomousInit() {
+	    autonomousCommand = (Command) chooser.getSelected();
 	    
-		ballBlockCylinder.set(DoubleSolenoid.Value.kReverse);
-		gearTrayCylinder.set(DoubleSolenoid.Value.kReverse);
+		botPosition = SmartDashboard.getString("DB/String 0", "Is Bot at loading, middle, or boiler?");
+		allianceColor = SmartDashboard.getString("DB/String 1", "Alliance Color red or blue?");
+		chooseBoilerOrLoading = SmartDashboard.getString("DB/String 2", "Going boiler or loading side or nil?");
+		baselineCross = SmartDashboard.getString("DB/String 3", "Only Cross Baseline? yes or no");
+		gearPlacement = SmartDashboard.getString("DB/String 4", "Place gear right, left, middle, or nil?");
+		shoot = SmartDashboard.getString("DB/String 5", "Shoot Before Hopper Pickup? yes or no");
+		shootAfterHopper = SmartDashboard.getString("DB/String 6", "Shoot After Hopper Pickup? yes or no");
+		hopperPickup = SmartDashboard.getString("DB/String 7", "Pickup balls from hopper? yes or no");
 		
+		
+		//shifterCylinder.set(DoubleSolenoid.Value.kReverse);
+		reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
+		
+		cycleCounter = 0;
 		driveMotors(0, 0);
+		
+		//**************DEFAULT CODE IN CASE OF AN L**************
+		
+		if ((botPosition == null || botPosition == null) &&			
+				(allianceColor == null || allianceColor == null) &&
+				(chooseBoilerOrLoading == null && chooseBoilerOrLoading == null) &&
+				baselineCross == null &&
+				gearPlacement == null &&
+				shoot == null &&
+				shootAfterHopper == null &&
+				hopperPickup == null){	
+			autoMode = RobotStates.noStringNoMove;
+		}
 		
 		if((botPosition == "right" || botPosition == "left") &&			
 				(allianceColor == "blue" || allianceColor == "red") &&
@@ -1741,30 +1848,62 @@ public class Robot extends IterativeRobot {
 				hopperPickup == "yes"){
 			autoMode = RobotStates.gearHopperLoadingRightWhileMiddle;
 		}
+		if(botPosition == "turn" &&
+				allianceColor == "turn" &&
+				chooseBoilerOrLoading == "turn" &&
+				baselineCross == "turn" &&
+				gearPlacement == "turn" &&
+				shoot == "turn" &&
+				shootAfterHopper == "turn" &&
+				hopperPickup == "turn"){
+			autoMode = RobotStates.turnMacroTest;
+		}
 	}
 
 
 	public void autonomousPeriodic() {
 /*NOTE: the notions of the method driveMotors are to be paired with encoder data.
  * Make sure to pair!!!!!!!
- */
-		
+ * 
+ *NOTE: The hopper only methods for boiler side and loading side return from the hopper. If a "hopperStay" auton sequence is needed,
+ *contact Sam Sidhu ASAP 
+ *
+ */ 	Scheduler.getInstance().run();
+ 
+ 
+	distance = drive.getDistance();
+
+	rotationCountForDrive = drive.get();
+	rotationRateForDrive = drive.getRate();
+
 		switch(autoMode){
 			case baseline: //Cross baseline
-				encoderMacro(250);
+				//encoderMacro(250);
+				/*
 				if(cycleCounter < 250){
 					driveMotors(1, 1);
 				}
+				*/
 				break;
+			case noStringNoMove:
+				//driveMotors(0,0);
+			default:
+			//	driveMotors(0,0);
+				break;
+		}
+				/*
 			case gearMiddle:
-				if(cycleCounter < 100){
+				gearMiddle();
+				*/
+				/*if(cycleCounter < 100){
 					driveMotors(1, 1);
 				}else if(cycleCounter < 350){
 					driveMotors(0.3, 0.3);
 				}else if(cycleCounter < 450){
 					gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
 					driveMotors(0, 0);
-				}
+				}*/
+	/*
 				break;
 			case gearMiddleBoilerLeft:
 				gearMiddle();
@@ -1809,65 +1948,354 @@ public class Robot extends IterativeRobot {
 			case hopperOnlyBoilerLeft:
 				gotoBoilerLeftWhileLeftPosition();
 				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
 				break;
 			case hopperOnlyBoilerLeftWhileMiddle:
-			case hopperOnlyBoilerRight:
-			case hopperOnlyBoilerRightWhileMiddle:
-			case gearMiddleShootBoilerLeft: //Priority
-			case gearMiddleShootBoilerRight: //Priority
-			case gearShootBoilerLeft:
-			case gearShootBoilerLeftWhileMiddle:
-			case gearShootBoilerRight:
-			case gearShootBoilerRightWhileMiddle:
-			case hopperShootBoilerLeft:
-			case hopperShootBoilerLeftWhileMiddle:
-			case hopperShootBoilerRight:
-			case hopperShootBoilerRightWhileMiddle:
-			case gearMiddleHopperBoilerLeft:
-			case gearMiddleHopperBoilerRight:
-			case gearHopperBoilerLeft:
-			case gearHopperBoilerLeftWhileMiddle:
-			case gearHopperBoilerRight:
-			case gearHopperBoilerRightWhileMiddle:
-			case gearMiddleHopperShootBoilerLeft:
-			case gearMiddleHopperShootBoilerRight:
-			case gearHopperShootBoilerLeft:
-			case gearHopperShootBoilerLeftWhileMiddle:
-			case gearHopperShootBoilerRight:
-			case gearHopperShootBoilerRightWhileMiddle:
-			case shootHopperShootBoilerLeft:
-			case shootHopperShootBoilerLeftWhileMiddle:
-			case shootHopperShootBoilerRight:
-			case shootHopperShootBoilerRightWhileMiddle:
-			case ultimateAutoGearMiddleBoilerLeft:
-			case ultimateAutoGearMiddleBoilerRight:
-			case ultimateAutoBoilerLeft:
-			case ultimateAutoBoilerLeftWhileMiddle:
-			case ultimateAutoBoilerRight:
-			case ultimateAutoBoilerRightWhileMiddle:
-			case loadingOnlyLeft:
-			case loadingOnlyLeftWhileMiddle:
-			case loadingOnlyRight:
-			case loadingOnlyRightWhileMiddle:
-			case gearMiddleLoadingLeft:
-			case gearMiddleLoadingRight:
-			case gearLoadingLeft:
-			case gearLoadingLeftWhileMiddle:
-			case gearLoadingRight:
-			case gearLoadingRightWhileMiddle:
-			case hopperLoadingLeft:
-			case hopperLoadingLeftWhileMiddle:
-			case hopperLoadingRight:
-			case hopperLoadingRightWhileMiddle:
-			case gearMiddleHopperLoadingLeft:
-			case gearMiddleHopperLoadingRight:
-			case gearHopperLoadingLeft:
-			case gearHopperLoadingLeftWhileMiddle:
-			case gearHopperLoadingRight:
-			case gearHopperLoadingRightWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
 				break;
-		}		
+			case hopperOnlyBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				break;
+			case hopperOnlyBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				break;
+			case gearMiddleShootBoilerLeft: //Priority
+				gearMiddle();
+				gotoBoilerLeftFromMiddleGear();
+				shootAutonomous(0);
+				break;
+			case gearMiddleShootBoilerRight: //Priority
+				gearMiddle();
+				gotoBoilerRightFromMiddleGear();
+				shootAutonomous(0);
+				break;
+			case gearShootBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				gearLeftWhileBoiler();
+				returnGearLeftWhileBoiler();
+				shootAutonomous(0);
+				break;
+			case gearShootBoilerLeftWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				gearLeftWhileBoiler();
+				returnGearLeftWhileBoiler();
+				shootAutonomous(0);
+				break;
+			case gearShootBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				gearRightWhileBoiler();
+				returnGearRightWhileBoiler();
+				shootAutonomous(0);
+				break;
+			case gearShootBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				gearRightWhileBoiler();
+				returnGearRightWhileBoiler();
+				shootAutonomous(0);
+				break;
+			case hopperShootBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case hopperShootBoilerLeftWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case hopperShootBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case hopperShootBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case gearMiddleHopperBoilerLeft:
+				gearMiddle();
+				gotoBoilerLeftFromMiddleGear();
+				hopperWhileBoilerLeft();
+				break;
+			case gearMiddleHopperBoilerRight:
+				gearMiddle();
+				gotoBoilerRightFromMiddleGear();
+				hopperWhileBoilerRight();
+				break;
+			case gearHopperBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				gearLeftWhileBoiler();
+				returnGearLeftWhileBoiler();
+				hopperWhileBoilerLeft();
+				break;
+			case gearHopperBoilerLeftWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				gearLeftWhileBoiler();
+				returnGearLeftWhileBoiler();
+				hopperWhileBoilerLeft();
+				break;
+			case gearHopperBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				gearRightWhileBoiler();
+				returnGearRightWhileBoiler();
+				hopperWhileBoilerRight();
+				break;
+			case gearHopperBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				gearRightWhileBoiler();
+				returnGearRightWhileBoiler();
+				hopperWhileBoilerRight();
+				break;
+			case gearMiddleHopperShootBoilerLeft:
+				gearMiddle();
+				gotoBoilerLeftFromMiddleGear();
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case gearMiddleHopperShootBoilerRight:
+				gearMiddle();
+				gotoBoilerRightFromMiddleGear();
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case gearHopperShootBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				gearLeftWhileBoiler();
+				returnGearLeftWhileBoiler();
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case gearHopperShootBoilerLeftWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				gearLeftWhileBoiler();
+				returnGearLeftWhileBoiler();
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case gearHopperShootBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				gearRightWhileBoiler();
+				returnGearRightWhileBoiler();
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case gearHopperShootBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				gearRightWhileBoiler();
+				returnGearRightWhileBoiler();
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case shootHopperShootBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				shootAutonomous(0);
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case shootHopperShootBoilerLeftWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				shootAutonomous(0);
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case shootHopperShootBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				shootAutonomous(0);
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case shootHopperShootBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				shootAutonomous(0);
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case ultimateAutoGearMiddleBoilerLeft:
+				gearMiddle();
+				gotoBoilerLeftFromMiddleGear();
+				shootAutonomous(0);
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case ultimateAutoGearMiddleBoilerRight:
+				gearMiddle();
+				gotoBoilerRightFromMiddleGear();
+				shootAutonomous(0);
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case ultimateAutoBoilerLeft:
+				gotoBoilerLeftWhileLeftPosition();
+				gearLeftWhileBoiler();
+				returnGearLeftWhileBoiler();
+				shootAutonomous(0);
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case ultimateAutoBoilerLeftWhileMiddle:
+				gotoBoilerLeftWhileMiddlePosition();
+				gearLeftWhileBoiler();
+				returnGearLeftWhileBoiler();
+				shootAutonomous(0);
+				hopperWhileBoilerLeft();
+				returnHopperWhileBoilerLeft();
+				shootAutonomous(0);
+				break;
+			case ultimateAutoBoilerRight:
+				gotoBoilerRightWhileRightPosition();
+				gearRightWhileBoiler();
+				returnGearRightWhileBoiler();
+				shootAutonomous(0);
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case ultimateAutoBoilerRightWhileMiddle:
+				gotoBoilerRightWhileMiddlePosition();
+				gearRightWhileBoiler();
+				returnGearRightWhileBoiler();
+				shootAutonomous(0);
+				hopperWhileBoilerRight();
+				returnHopperWhileBoilerRight();
+				shootAutonomous(0);
+				break;
+			case loadingOnlyLeft:
+				gotoLoadingLeftWhileLeftPosition();
+				break;
+			case loadingOnlyLeftWhileMiddle:
+				gotoLoadingLeftWhileMiddlePosition();
+				break;
+			case loadingOnlyRight:
+				gotoLoadingRightWhileRightPosition();
+				break;
+			case loadingOnlyRightWhileMiddle:
+				gotoLoadingRightWhileMiddlePosition();
+				break;
+			case gearMiddleLoadingLeft:
+				gearMiddle();
+				gotoLoadingLeftFromMiddleGear();
+				break;
+			case gearMiddleLoadingRight:
+				gearMiddle();
+				gotoLoadingRightFromMiddleGear();
+				break;
+			case gearLoadingLeft:
+				gotoLoadingLeftWhileLeftPosition();
+				gearLeftWhileLoading();
+				returnGearLeftWhileLoading();
+				break;
+			case gearLoadingLeftWhileMiddle:
+				gotoLoadingLeftWhileMiddlePosition();
+				gearLeftWhileLoading();
+				returnGearLeftWhileLoading();
+				break;
+			case gearLoadingRight:
+				gotoLoadingRightWhileRightPosition();
+				gearRightWhileLoading();
+				returnGearRightWhileLoading();
+				break;
+			case gearLoadingRightWhileMiddle:
+				gotoLoadingRightWhileMiddlePosition();
+				gearRightWhileLoading();
+				returnGearRightWhileLoading();
+				break;
+			case hopperLoadingLeft:
+				gotoLoadingLeftWhileLeftPosition();
+				hopperWhileLoadingLeft();
+				returnHopperWhileLoadingLeft();
+				break;
+			case hopperLoadingLeftWhileMiddle:
+				gotoLoadingLeftWhileMiddlePosition();
+				hopperWhileLoadingLeft();
+				returnHopperWhileLoadingLeft();
+				break;
+			case hopperLoadingRight:
+				gotoLoadingRightWhileRightPosition();
+				hopperWhileLoadingRight();
+				returnHopperWhileLoadingRight();
+				break;
+			case hopperLoadingRightWhileMiddle:
+				gotoLoadingRightWhileMiddlePosition();
+				hopperWhileLoadingRight();
+				returnHopperWhileLoadingRight();
+				break;
+			case gearMiddleHopperLoadingLeft:
+				gearMiddle();
+				gotoLoadingLeftFromMiddleGear();
+				hopperWhileLoadingLeft();
+				returnHopperWhileLoadingLeft();
+				break;
+			case gearMiddleHopperLoadingRight:
+				gearMiddle();
+				gotoLoadingRightFromMiddleGear();
+				hopperWhileLoadingRight();
+				returnHopperWhileLoadingRight();
+				break;
+			case gearHopperLoadingLeft:
+				gotoLoadingLeftWhileLeftPosition();
+				gearLeftWhileLoading();
+				returnGearLeftWhileLoading();
+				hopperWhileLoadingLeft();
+				returnHopperWhileLoadingLeft();
+				break;
+			case gearHopperLoadingLeftWhileMiddle:
+				gotoLoadingLeftWhileMiddlePosition();
+				gearLeftWhileLoading();
+				returnGearLeftWhileLoading();
+				hopperWhileLoadingLeft();
+				returnHopperWhileLoadingLeft();
+				break;
+			case gearHopperLoadingRight:
+				gotoLoadingRightWhileRightPosition();
+				gearRightWhileLoading();
+				returnGearRightWhileLoading();
+				hopperWhileLoadingRight();
+				returnHopperWhileLoadingRight();
+				break;
+			case gearHopperLoadingRightWhileMiddle:
+				gotoLoadingRightWhileMiddlePosition();
+				gearRightWhileLoading();
+				returnGearRightWhileLoading();
+				hopperWhileLoadingRight();
+				returnHopperWhileLoadingRight();
+				break;
+			case turnMacroTest:
+				turnMacro(30);
+				break;
+			case noStringNoMove:
+				driveMotors(0,0);
+				break;
+			default:
+				driveMotors(0,0);
+				break;
+		}	
+	*/
 		cycleCounter++;
+		
 		
 	}
 
@@ -1878,21 +2306,25 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 
 		Scheduler.getInstance().run();
+		compressor.setClosedLoopControl(true);
 		
 		rotationCount = shooterRightEnc.get();
 		rotationRate = shooterRightEnc.getRate();
-		double distance = shooterRightEnc.getDistance();
+		//double distance = shooterRightEnc.getDistance();
 		boolean direction = shooterRightEnc.getDirection();
 		boolean stopped = shooterRightEnc.getStopped();
 		rotationPeriod = shooterRightEnc.getRaw();
-		/*System.out.println("************");
+		
+		distance = drive.getDistance();
+		
+		rotationCountForDrive = drive.get();
+		rotationRateForDrive = drive.getRate();
+		
+		System.out.println("************");
 		System.out.println(distance);
-		System.out.println(direction);
-		System.out.println(stopped);
-		System.out.println(rotationCount);
-		System.out.println(rotationRate);
-		System.out.println(rotationPeriod);
-		System.out.println("************");*/
+		System.out.println(rotationCountForDrive);
+		System.out.println(rotationRateForDrive);
+		System.out.println("************");
 		
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
@@ -1910,8 +2342,9 @@ public class Robot extends IterativeRobot {
 		
 		toggleElevator();
 
+		toggleResExpansion();
 		
-		toggleGearTray();
+		toggleShifter();
 		
 		operatorControl();
 
