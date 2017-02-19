@@ -14,15 +14,13 @@ import com.kauailabs.navx.frc.AHRS;
 public class Robot extends IterativeRobot {
 
 	public static OI oi;
-
+	
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
 
 	// Controllers
 	Joystick joyStickLeft;
-	
-	// Joystick joyStickRight;
-	Joystick logitech;
+	Joystick joyStickRight;
 
 	// NavX
 	AHRS ahrs;
@@ -40,6 +38,19 @@ public class Robot extends IterativeRobot {
 	JoystickButton logitechBack;
 	JoystickButton logitechRightTrigger;
 	JoystickButton logitechLeftTrigger;
+	
+	JoystickButton logitechY2;
+	JoystickButton logitechA2;
+	JoystickButton logitechX2;
+	JoystickButton logitechB2;
+	JoystickButton logitechLeftBumper2;
+	JoystickButton logitechRightBumper2;
+	JoystickButton logitechLeftStickPress2;
+	JoystickButton logitechRightStickPress2;
+	JoystickButton logitechStart2;
+	JoystickButton logitechBack2;
+	JoystickButton logitechRightTrigger2;
+	JoystickButton logitechLeftTrigger2;
 
 	// Motors
 	Victor frontLeftDriveMotor;
@@ -73,6 +84,8 @@ public class Robot extends IterativeRobot {
 	int rotationCountForDrive;
 	double rotationRateForDrive;
 	double distance;
+	
+	double autoSelecter;
 	
 	
 	// misc
@@ -208,10 +221,12 @@ public class Robot extends IterativeRobot {
 	}
 	
 	RobotStates autoMode; 
-	public void autoMode(RobotStates autoMode){
+	
+	/*
+	public Robot(RobotStates autoMode){
 		this.autoMode = autoMode;
 	}
-    
+    */
 	String botPosition;
 	String allianceColor;
 	String chooseBoilerOrLoading;
@@ -280,11 +295,11 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningSwitch) {
-			arcadeDrive(-joyStickLeft.getRawAxis(1),joyStickLeft.getRawAxis(2));
+			singleStickArcade();
 			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
 			joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
 		} else {
-			singleStickArcade();
+			arcadeDrive(joyStickLeft.getRawAxis(1),-joyStickLeft.getRawAxis(2));
 			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
 			joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
 		}
@@ -314,7 +329,7 @@ public class Robot extends IterativeRobot {
 		
 		// SHOOTER + BLOCK PNEUMATIC
 
-		if (logitechRightBumper.get()) {
+		if (logitechRightBumper2.get()) {
 			if (!wasPressedRightBumper) {
 				shouldBeRunningShooter = !shouldBeRunningShooter;
 			}
@@ -394,7 +409,7 @@ public class Robot extends IterativeRobot {
 	private void toggleElevator() {
 		
 		// ELEVATOR
-		if (logitechX.get()) {
+		if (logitechX2.get()) {
 			if (!wasPressedLogitechX) {
 				shouldBeRunningElevator = !shouldBeRunningElevator;
 			}
@@ -415,7 +430,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	private void toggleResExpansion(){
-		if (logitechB.get()) {
+		if (logitechB2.get()) {
 			if (!wasPressedLogitechB) {
 				shouldBeRunningGearTray = !shouldBeRunningGearTray;
 			}
@@ -560,7 +575,7 @@ public class Robot extends IterativeRobot {
 			driveMotors(.5,.5);
 		}
     }
-	
+	/*
     public void correctSwitch(){
         if(logitechBack.get()){
         	if(!wasPressedBackButton){
@@ -579,7 +594,7 @@ public class Robot extends IterativeRobot {
         	System.out.println("not in correct mode");
         }
     }
-    
+    */
     public void encoderMacro(float encValue){
     	rotationCount = 0;
     	if(rotationCount < encValue){
@@ -855,6 +870,8 @@ public class Robot extends IterativeRobot {
 		chooser.addObject("My Auto", "My Auto");
 		SmartDashboard.putData("Auto mode", chooser);
 		System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
+		
+		autoMode = RobotStates.noStringNoMove;
 
 		// Motor port instantiating
 		frontLeftDriveMotor = new Victor(9);
@@ -897,7 +914,7 @@ public class Robot extends IterativeRobot {
 													// direction though
 
 		joyStickLeft = new Joystick(0);
-		// joyStickRight = new Joystick(1);
+		joyStickRight = new Joystick(1);
 
 		// BUTTON MAPPING. REASON ITS HERE IS BECAUSE IT WAS WRONG AND THESE ARE
 		// THE CORRECT VALUES
@@ -926,7 +943,19 @@ public class Robot extends IterativeRobot {
 		logitechBack = new JoystickButton(joyStickLeft, 9);
 		logitechRightTrigger = new JoystickButton(joyStickLeft, 8);
 		logitechLeftTrigger = new JoystickButton(joyStickLeft,7);
-
+		
+		logitechY2 = new JoystickButton(joyStickRight, 4);
+		logitechA2= new JoystickButton(joyStickRight, 2);
+		logitechX2 = new JoystickButton(joyStickRight, 1);
+		logitechB2 = new JoystickButton(joyStickRight, 3);
+		logitechLeftBumper2 = new JoystickButton(joyStickRight, 5);
+		logitechRightBumper2 = new JoystickButton(joyStickRight, 6);
+		logitechLeftStickPress2 = new JoystickButton(joyStickRight, 11);
+		logitechRightStickPress2 = new JoystickButton(joyStickRight,12);
+		logitechStart2 = new JoystickButton(joyStickRight, 10);
+		logitechBack2 = new JoystickButton(joyStickRight, 9);
+		logitechRightTrigger2 = new JoystickButton(joyStickRight, 8);
+		logitechLeftTrigger2 = new JoystickButton(joyStickRight,7);
 		// rightTrim = SmartDashboard.getNumber("DB/Slider 3", 1.0);
 		// if(rightTrim == 0){ SmartDashboard.putNumber("DB/Slider 3", 1);
 		// rightTrim = 1;}
@@ -986,6 +1015,16 @@ public class Robot extends IterativeRobot {
 			System.out.println("NavX instantiation error");
 			DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
 		}
+		
+		SmartDashboard.putString("DB/String 0", "left, right, middle");
+		SmartDashboard.putString("DB/String 1", "red, blue");
+		SmartDashboard.putString("DB/String 2", "boiler, loading");
+		SmartDashboard.putString("DB/String 3", "Cross baseline?");
+		SmartDashboard.putString("DB/String 4", "Where to place gear?");
+		SmartDashboard.putString("DB/String 5", "Shoot before hopper?");
+		SmartDashboard.putString("DB/String 6", "Shoot after hopper?");
+		SmartDashboard.putString("DB/String 7", "Pickup at Hopper?");
+		
 	}
 
 	private void operatorControl() {
@@ -1143,771 +1182,780 @@ public class Robot extends IterativeRobot {
 		hopperPickup = SmartDashboard.getString("DB/String 7", "Pickup balls from hopper? yes or no");
 		
 		
-		//shifterCylinder.set(DoubleSolenoid.Value.kReverse);
+		shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
 		
 		cycleCounter = 0;
 		driveMotors(0, 0);
-		
+	   //autoSelecter = SmartDashboard.getNumber("DB/Slider 0", 0.0);
+	   
+	  
+	    
+	 
 		//**************DEFAULT CODE IN CASE OF AN L**************
 		
-		if ((botPosition == null || botPosition == null) &&			
-				(allianceColor == null || allianceColor == null) &&
-				(chooseBoilerOrLoading == null && chooseBoilerOrLoading == null) &&
-				baselineCross == null &&
-				gearPlacement == null &&
-				shoot == null &&
-				shootAfterHopper == null &&
-				hopperPickup == null){	
+		if((botPosition.equalsIgnoreCase(null) &&										
+				(allianceColor.equalsIgnoreCase(null) || allianceColor.equalsIgnoreCase(null)) &&
+				chooseBoilerOrLoading.equalsIgnoreCase(null) &&
+				baselineCross.equalsIgnoreCase(null) &&
+				gearPlacement.equalsIgnoreCase(null) &&
+				shoot.equalsIgnoreCase(null) &&
+				shootAfterHopper.equalsIgnoreCase(null) &&
+				hopperPickup.equalsIgnoreCase(null))){	
 			autoMode = RobotStates.noStringNoMove;
 		}
-		
-		if((botPosition == "right" || botPosition == "left") &&			
-				(allianceColor == "blue" || allianceColor == "red") &&
-				(chooseBoilerOrLoading == "boiler" && chooseBoilerOrLoading == "loading") &&
-				baselineCross == "yes" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){	
+		if((botPosition.equalsIgnoreCase("right") || botPosition.equalsIgnoreCase("left")) &&			
+				(allianceColor.equalsIgnoreCase("blue") || allianceColor.equalsIgnoreCase("red")) &&
+				(chooseBoilerOrLoading.equalsIgnoreCase("boiler") || chooseBoilerOrLoading.equalsIgnoreCase("loading")) &&
+				baselineCross.equalsIgnoreCase("yes") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){	
+			System.out.println("auto changed");
 			autoMode = RobotStates.baseline;
 		}
-		if((botPosition == "middle") &&										
-				(allianceColor == "blue" || allianceColor == "red") &&
-				chooseBoilerOrLoading == "nil" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){	
+		if((botPosition.equalsIgnoreCase("middle") &&										
+				(allianceColor.equalsIgnoreCase("blue") || allianceColor.equalsIgnoreCase("red")) &&
+				chooseBoilerOrLoading.equalsIgnoreCase("nil") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no"))){	
 			autoMode = RobotStates.gearMiddle;
 		}
 		
 		//**************BOILER-BASED FUNCTIONS**************
 		
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearMiddleBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearMiddleBoilerRight;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearBoilerRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearBoilerRightWhileMiddle;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.shootOnlyBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.shootOnlyBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.shootOnlyBoilerRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.shootOnlyBoilerRightWhileMiddle;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperOnlyBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperOnlyBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperOnlyBoilerRight;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperOnlyBoilerRightWhileMiddle;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearMiddleShootBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearMiddleShootBoilerRight;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearShootBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearShootBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearShootBoilerRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "yes" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearShootBoilerRightWhileMiddle;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperShootBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperShootBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperShootBoilerRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperShootBoilerRightWhileMiddle;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearMiddleHopperBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearMiddleHopperBoilerRight;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperBoilerRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperBoilerRightWhileMiddle;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearMiddleHopperShootBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearMiddleHopperShootBoilerRight;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperShootBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperShootBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperShootBoilerRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperShootBoilerRightWhileMiddle;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.shootHopperShootBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.shootHopperShootBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.shootHopperShootBoilerRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.shootHopperShootBoilerRightWhileMiddle;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.ultimateAutoGearMiddleBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.ultimateAutoGearMiddleBoilerRight;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.ultimateAutoBoilerLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.ultimateAutoBoilerLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.ultimateAutoBoilerRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "boiler" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "yes" &&
-				shootAfterHopper == "yes" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("boiler") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("yes") &&
+				shootAfterHopper.equalsIgnoreCase("yes") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.ultimateAutoBoilerRightWhileMiddle;
 		}
 		
 		//**************LOADING-BASED FUNCTIONS**************
 		
-		if(botPosition == "left" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.loadingOnlyLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.loadingOnlyLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.loadingOnlyRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.loadingOnlyRightWhileMiddle;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearMiddleLoadingLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearMiddleLoadingRight;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearLoadingLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearLoadingLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearLoadingRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "no"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("no")){
 			autoMode = RobotStates.gearLoadingRightWhileMiddle;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperLoadingLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperLoadingLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperLoadingRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "nil" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("nil") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.hopperLoadingRightWhileMiddle;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearMiddleHopperLoadingLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "middle" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("middle") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearMiddleHopperLoadingRight;
 		}
-		if(botPosition == "left" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("left") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperLoadingLeft;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "red" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "left" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("red") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("left") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperLoadingLeftWhileMiddle;
 		}
-		if(botPosition == "right" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("right") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperLoadingRight;
 		}
-		if(botPosition == "middle" &&
-				allianceColor == "blue" &&
-				chooseBoilerOrLoading == "loading" &&
-				baselineCross == "no" &&
-				gearPlacement == "right" &&
-				shoot == "no" &&
-				shootAfterHopper == "no" &&
-				hopperPickup == "yes"){
+		if(botPosition.equalsIgnoreCase("middle") &&
+				allianceColor.equalsIgnoreCase("blue") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("loading") &&
+				baselineCross.equalsIgnoreCase("no") &&
+				gearPlacement.equalsIgnoreCase("right") &&
+				shoot.equalsIgnoreCase("no") &&
+				shootAfterHopper.equalsIgnoreCase("no") &&
+				hopperPickup.equalsIgnoreCase("yes")){
 			autoMode = RobotStates.gearHopperLoadingRightWhileMiddle;
 		}
-		if(botPosition == "turn" &&
-				allianceColor == "turn" &&
-				chooseBoilerOrLoading == "turn" &&
-				baselineCross == "turn" &&
-				gearPlacement == "turn" &&
-				shoot == "turn" &&
-				shootAfterHopper == "turn" &&
-				hopperPickup == "turn"){
+		if(botPosition.equalsIgnoreCase("turn") &&
+				allianceColor.equalsIgnoreCase("turn") &&
+				chooseBoilerOrLoading.equalsIgnoreCase("turn") &&
+				baselineCross.equalsIgnoreCase("turn") &&
+				gearPlacement.equalsIgnoreCase("turn") &&
+				shoot.equalsIgnoreCase("turn") &&
+				shootAfterHopper.equalsIgnoreCase("turn") &&
+				hopperPickup.equalsIgnoreCase("turn")){
 			autoMode = RobotStates.turnMacroTest;
 		}
 	}
 
-
+	
 	public void autonomousPeriodic() {
-/*NOTE: the notions of the method driveMotors are to be paired with encoder data.
- * Make sure to pair!!!!!!!
- * 
- *NOTE: The hopper only methods for boiler side and loading side return from the hopper. If a "hopperStay" auton sequence is needed,
- *contact Sam Sidhu ASAP 
- *
- */ 	Scheduler.getInstance().run();
- 
- 
-	distance = drive.getDistance();
-
-	rotationCountForDrive = drive.get();
-	rotationRateForDrive = drive.getRate();
-
-	
-	
-	
-
+		/*NOTE: the notions of the method driveMotors are to be paired with encoder data.
+		 * Make sure to pair!!!!!!!
+		 * 
+		 *NOTE: The hopper only methods for boiler side and loading side return from the hopper. If a "hopperStay" auton sequence is needed,
+		 *contact Sam Sidhu ASAP 
+		 *
+		 */ 	Scheduler.getInstance().run();
+		 
+		    cycleCounter++;
+		 
+		 
+			distance = drive.getDistance();
+		
+			rotationCountForDrive = drive.get();
+			rotationRateForDrive = drive.getRate();
+		/*	
+		    if(autoSelecter == 0.0){
+			    driveStraightFeet(5);	
+			}
+		
+		switch((int)autoSelecter){
+		case 0:
+			driveStraightFeet(5); //Gear simple
+			break;
+		case 1:
+			driveStraightFeet(5);//baseline
+			break;
+		}
+		*/
+		System.out.println(autoMode);
 		switch(autoMode){
 			case baseline: //Cross baseline
-				//encoderMacro(250);
-				/*
+				encoderMacro(250);
+			 
 				if(cycleCounter < 250){
 					driveMotors(1, 1);
 				}
-				*/
+			
 				break;
-			case noStringNoMove:
-				//driveMotors(0,0);
-			default:
-			//	driveMotors(0,0);
-				break;
-		}
-				/*
 			case gearMiddle:
 				gearMiddle();
-				*/
-				/*if(cycleCounter < 100){
+				
+				if(cycleCounter < 100){
 					driveMotors(1, 1);
 				}else if(cycleCounter < 350){
 					driveMotors(0.3, 0.3);
 				}else if(cycleCounter < 450){
-					gearTrayCylinder.set(DoubleSolenoid.Value.kForward);
+					reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 					driveMotors(0, 0);
-				}*/
-	/*
+				}
+	
 				break;
 			case gearMiddleBoilerLeft:
 				gearMiddle();
@@ -2293,18 +2341,17 @@ public class Robot extends IterativeRobot {
 			case noStringNoMove:
 				driveMotors(0,0);
 				break;
-			default:
-				driveMotors(0,0);
-				break;
 		}	
-	*/
-		cycleCounter++;
 		
 		
 	}
 
 	public void teleopInit() {
+		distance = 0;
 		
+		rotationCountForDrive = 0;
+		rotationRateForDrive = 0;
+		arcadeDrive(joyStickLeft.getRawAxis(1),-joyStickLeft.getRawAxis(2));
 	}
 
 	public void teleopPeriodic() {
@@ -2329,6 +2376,8 @@ public class Robot extends IterativeRobot {
 		System.out.println(rotationCountForDrive);
 		System.out.println(rotationRateForDrive);
 		System.out.println("************");
+		System.out.println("Angle: "+ahrs.getAngle());
+	
 		
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
