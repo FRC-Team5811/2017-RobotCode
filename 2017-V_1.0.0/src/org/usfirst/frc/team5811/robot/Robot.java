@@ -2356,7 +2356,7 @@ public class Robot extends IterativeRobot {
 
 	public void teleopPeriodic() {
 
-		Scheduler.getInstance().run();
+		Scheduler.getInstance().run(); 
 		compressor.setClosedLoopControl(true);
 		
 		rotationCount = shooterRightEnc.get();
@@ -2383,7 +2383,7 @@ public class Robot extends IterativeRobot {
 		//System.out.println(shooterEncoder.get());
 
 
-		switchDriveModes();
+		switchDriveModes();  
 
 		testForCorrectionMode();
 
