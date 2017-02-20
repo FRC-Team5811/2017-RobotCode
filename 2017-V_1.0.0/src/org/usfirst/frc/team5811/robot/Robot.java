@@ -7,7 +7,7 @@ import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.*;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+//import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import com.kauailabs.navx.frc.AHRS;
 
@@ -77,6 +77,8 @@ public class Robot extends IterativeRobot {
 	double rotationPeriod;
 	boolean spinUpComplete;
 	
+	boolean driveState;
+	
 	DigitalInput limitSwitch;
 	
 	
@@ -86,20 +88,6 @@ public class Robot extends IterativeRobot {
 	double distance;
 	
 	double autoSelecter;
-	
-	
-	// misc
-	// double intakePower;
-	/*
-	 * //Auto Intake values double autoSelecter; boolean releaseToggle; boolean
-	 * raiseAfterRelease; boolean returnAfter; double turnTime; double
-	 * turnPower; boolean shootBall;
-	 * 
-	 * //Intake current values int cycleCounter; int intakeCounter; boolean
-	 * firstSpikeStarted; boolean firstSpikeFinished; boolean
-	 * secondSpikeStarted; int secondIntakeCounter; double ultrasonicVoltage;
-	 * int rightThreshold; int centerThreshold; int leftThreshold;
-	 */
 	
 	//Autonomous
 	int cycleCounter;
@@ -247,8 +235,8 @@ public class Robot extends IterativeRobot {
 	boolean wasPressedLogitechA;
 	boolean shouldBeRunningClimberDown;
 	boolean wasPressedLogitechY;
-	boolean shouldBeRunningElevator;
-	boolean wasPressedLogitechX;
+	//boolean shouldBeRunningElevator;
+	//boolean wasPressedLogitechX;
 	boolean shouldBeRunningGearTray;
 	boolean wasPressedLogitechB;
 	
@@ -282,9 +270,21 @@ public class Robot extends IterativeRobot {
 	float rotationPos;
 	float macroPos;
 	
+	private void dualStick(){
+		arcadeDrive(-joyStickLeft.getRawAxis(1),joyStickLeft.getRawAxis(2));
+	}
+	private void slowMove(double reduction){
+		shifterCylinder.set(DoubleSolenoid.Value.kForward);
+		arcadeDrive((-joyStickLeft.getRawAxis(1)*reduction), (joyStickLeft.getRawAxis(2)*reduction));
+	}
+	
+	public void intakeOnOff(double speed){
+		intake.set(speed);
+	}
+	/*
 	private void switchDriveModes(){
 		// SWITCHING BETWEEN DRIVE MODES
-		if (logitechLeftStickPress.get()) {
+		if (logitechX.get()) {
 			if (!wasPressedLeftStick) {
 				shouldBeRunningSwitch = !shouldBeRunningSwitch;
 			}
@@ -295,16 +295,16 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningSwitch) {
-			singleStickArcade();
+			slowMove(0.5);
 			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
 			joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
 		} else {
-			arcadeDrive(joyStickLeft.getRawAxis(1),-joyStickLeft.getRawAxis(2));
+			dualStick();
 			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
 			joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
 		}
 	}
-	
+	*/
 	private void testForCorrectionMode() {
 		// CORRECTION MODE
 		if (logitechBack.get()) {
@@ -338,7 +338,7 @@ public class Robot extends IterativeRobot {
 			wasPressedRightBumper = false;
 		}
 
-		if(rotationRate >= 19000){
+		if(rotationRate >= 18500){
 			spinUpComplete = true;
 		} else {
 			spinUpComplete = false;
@@ -347,7 +347,9 @@ public class Robot extends IterativeRobot {
 		if(shouldBeRunningShooter && !spinUpComplete){
 			shooterRight.set(.62);
 			shooterLeft.set(-.62);
+			elevator.set(-1);
 		} else if (shouldBeRunningShooter && spinUpComplete) {
+			elevator.set(-1);
 			rotationRate = shooterRightEnc.getRate();
 			shooterSpeedCorrection = (19200-rotationRate)/5000;   //.62 is 19200, .65 is 20000, .61 is 19000
 			shooterRight.set(.65+shooterSpeedCorrection);
@@ -356,18 +358,19 @@ public class Robot extends IterativeRobot {
 			System.out.println("Power Correction: " + shooterSpeedCorrection);
 			
 		} else {
+			elevator.set(0);
 			shooterRight.set(0);
 		    shooterLeft.set(0);
 			
 		}
 		
 	}
-	
+	/*
 	private void toggleIntake() {
 		
 		// INTAKE MY DUDES
 
-		if (logitechLeftBumper.get()) {
+		if (logitechLeftBumper2.get()) {
 			if (!wasPressedLeftBumper) {
 				shouldBeRunningIntake = !shouldBeRunningIntake;
 			}
@@ -387,25 +390,25 @@ public class Robot extends IterativeRobot {
 
 
 	}
-	/*
+	*/
 	private void checkClimberState(){
 		//CLIMBER LOGIC
 		
-		if (logitechRightTrigger.get()) {
+		if (logitechRightTrigger2.get()) {
 			// CLIMBER DOWN
 			climberRight.set(-joyStickLeft.getRawAxis(6));
-			climberLeft.set(joyStickLeft.getRawAxis(6));
-		} else if(logitechLeftTrigger.get()) {
-			// CLIMBER UP
-			climberRight.set(joyStickLeft.getRawAxis(6));
 			climberLeft.set(-joyStickLeft.getRawAxis(6));
+		} else if(logitechStart2.get()) {
+			// CLIMBER UP
+			climberRight.set(.3);
+			climberLeft.set(.3);
 		}else{
 			climberRight.set(0);
 			climberLeft.set(0);
 		}
 				
 	} 
-*/
+	/*
 	private void toggleElevator() {
 		
 		// ELEVATOR
@@ -428,7 +431,7 @@ public class Robot extends IterativeRobot {
 
 		
 	}
-	
+	*/
 	private void toggleResExpansion(){
 		if (logitechB2.get()) {
 			if (!wasPressedLogitechB) {
@@ -440,20 +443,21 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningGearTray) {
-			reservoirCylinder.set(DoubleSolenoid.Value.kForward);
-		} else {
 			reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
+		} else {
+			reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 		}
 
 		
 	} 
-	private void shifterDelay(){
+	public void shifterDelay(){
 		int cycleCounterTele = 0;
 		while(cycleCounterTele < 20){
 			driveMotors(.3,-.3);
 			cycleCounterTele++;
 		}
 	}
+	/*
 	private void toggleShifter() {
 
 		if (logitechRightStickPress.get()) {
@@ -474,17 +478,27 @@ public class Robot extends IterativeRobot {
 			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 			
 		}
-
 		
 	} 
-	
+	*/
+	private void checkShift(){
+		if(logitechRightBumper.get()){
+			shifterDelay();
+			shifterCylinder.set(DoubleSolenoid.Value.kForward);
+		}
+		if(logitechLeftBumper.get()){
+			shifterDelay();
+			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
+		}
+	}
+	/*
 	private void singleStickArcade() {
 		frontLeftDriveMotor.set(joyStickLeft.getX() - joyStickLeft.getY());
 		frontRightDriveMotor.set(joyStickLeft.getX() + joyStickLeft.getY());
 		backLeftDriveMotor.set(joyStickLeft.getX() - joyStickLeft.getY());
 		backRightDriveMotor.set(joyStickLeft.getX() + joyStickLeft.getY());
 	}
-
+*/
 	// SINGLE STICK DRIVE METHOD
 	private void driveMotors(double speedLeftDM, double speedRightDM) {
 		// System.out.println("Command: " + speedLeftDM);
@@ -575,26 +589,7 @@ public class Robot extends IterativeRobot {
 			driveMotors(.5,.5);
 		}
     }
-	/*
-    public void correctSwitch(){
-        if(logitechBack.get()){
-        	if(!wasPressedBackButton){
-        		rotationPos = (float) ahrs.getAngle();
-        		shouldBeRunningCorrect = !shouldBeRunningCorrect;
-        	}
-        	wasPressedBackButton = true;
-        }else{
-        	wasPressedBackButton = false;
-        }
-        
-        if(shouldBeRunningCorrect){
-        	correct();
-        	System.out.println("in correct mode");
-        }else{
-        	System.out.println("not in correct mode");
-        }
-    }
-    */
+
     public void encoderMacro(float encValue){
     	rotationCount = 0;
     	if(rotationCount < encValue){
@@ -838,26 +833,28 @@ public class Robot extends IterativeRobot {
     }
 
     public void shootAutonomous(double shootTime){
-    	if(rotationRate >= 19000){
+    	if(rotationRate >= 18500){
 			spinUpComplete = true;
 		} else {
 			spinUpComplete = false;
 		}
 		
 		if(!spinUpComplete){
-			shooterRight.set(.61);
-			shooterLeft.set(-.61);
-		} else if (spinUpComplete) {
+			shooterRight.set(.62);
+			shooterLeft.set(-.62);
+		} else if (shouldBeRunningShooter && spinUpComplete) {
 			rotationRate = shooterRightEnc.getRate();
-			shooterSpeedCorrection = (19000-rotationRate)/5000;
-			shooterRight.set(.61 + shooterSpeedCorrection);
-			shooterLeft.set(-.61 + shooterSpeedCorrection);
+			shooterSpeedCorrection = (19200-rotationRate)/5000;   //.62 is 19200, .65 is 20000, .61 is 19000
+			shooterRight.set(.65+shooterSpeedCorrection);
+			shooterLeft.set(-.65+shooterSpeedCorrection);
+			System.out.println("Rotation Rate: " + rotationRate);
+			System.out.println("Power Correction: " + shooterSpeedCorrection);
 			
-			Timer.delay(shootTime);
+		} else {
 			shooterRight.set(0);
-			shooterLeft.set(0);
-		
-		} 
+		    shooterLeft.set(0);
+			
+		}
     }
 
 
@@ -963,7 +960,7 @@ public class Robot extends IterativeRobot {
 		shifterCylinder = new DoubleSolenoid(2, 3);
 		reservoirCylinder = new DoubleSolenoid(6, 7);
 		shifterCylinder.set(DoubleSolenoid.Value.kForward);
-		reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
+		reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 
 		// compressor port init
 		compressor = new Compressor(0);
@@ -986,8 +983,8 @@ public class Robot extends IterativeRobot {
 		wasPressedLogitechA = false;
 		shouldBeRunningClimberDown = false;
 		wasPressedLogitechY = false;
-		shouldBeRunningElevator = false;
-		wasPressedLogitechX = false;
+		//shouldBeRunningElevator = false;
+	//	wasPressedLogitechX = false;
 		shouldBeRunningGearTray = false;
 		wasPressedLogitechB = false;
 		
@@ -1001,6 +998,8 @@ public class Robot extends IterativeRobot {
 
 		rotationPos = 0;
 		
+		driveState = true;
+		
 		//limitSwitch = new DigitalInput(1);
 		
 		//logicError = SmartDashboard.getString("DB/String 6", "No error");
@@ -1008,8 +1007,8 @@ public class Robot extends IterativeRobot {
 		
 		// NavX instantiation
 		try {
-			//ahrs = new AHRS(SerialPort.Port.kUSB);
-			 ahrs = new AHRS(I2C.Port.kMXP); //WE WILL NEED I2C IN THE FUTURE.
+			ahrs = new AHRS(SerialPort.Port.kUSB);
+			//ahrs = new AHRS(I2C.Port.kMXP); //WE WILL NEED I2C IN THE FUTURE.
 			// RIGHT NOW WE WILL STICK WITH USB
 		} catch (RuntimeException ex) {
 			System.out.println("NavX instantiation error");
@@ -1126,7 +1125,7 @@ public class Robot extends IterativeRobot {
 			 * For more info, see
 			 * http://navx-mxp.kauailabs.com/installation/omnimount
 			 */
-			AHRS.BoardYawAxis yaw_axis = ahrs.getBoardYawAxis();
+		//	AHRS.BoardYawAxis yaw_axis = ahrs.getBoardYawAxis();
 			/*
 			SmartDashboard.putString("YawAxisDirection", yaw_axis.up ? "Up" : "Down");
 			SmartDashboard.putNumber("YawAxis", yaw_axis.board_axis.getValue());
@@ -1911,7 +1910,7 @@ public class Robot extends IterativeRobot {
 		 *NOTE: The hopper only methods for boiler side and loading side return from the hopper. If a "hopperStay" auton sequence is needed,
 		 *contact Sam Sidhu ASAP 
 		 *
-		 */ 	Scheduler.getInstance().run();
+		 */Scheduler.getInstance().run();
 		 
 		    cycleCounter++;
 		 
@@ -1920,20 +1919,6 @@ public class Robot extends IterativeRobot {
 		
 			rotationCountForDrive = drive.get();
 			rotationRateForDrive = drive.getRate();
-		/*	
-		    if(autoSelecter == 0.0){
-			    driveStraightFeet(5);	
-			}
-		
-		switch((int)autoSelecter){
-		case 0:
-			driveStraightFeet(5); //Gear simple
-			break;
-		case 1:
-			driveStraightFeet(5);//baseline
-			break;
-		}
-		*/
 		System.out.println(autoMode);
 		switch(autoMode){
 			case baseline: //Cross baseline
@@ -2351,7 +2336,7 @@ public class Robot extends IterativeRobot {
 		
 		rotationCountForDrive = 0;
 		rotationRateForDrive = 0;
-		arcadeDrive(joyStickLeft.getRawAxis(1),-joyStickLeft.getRawAxis(2));
+		dualStick();
 	}
 
 	public void teleopPeriodic() {
@@ -2381,25 +2366,48 @@ public class Robot extends IterativeRobot {
 		
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
-
-
-		switchDriveModes();  
+		if(logitechA.get()){
+			intakeOnOff(-.4);         //INTAKE CODE 
+		}
+		else if(logitechB.get()){
+			intakeOnOff(0);
+		}
+		
+		
+		if(logitechX.get()){
+			driveState = true;
+		}
+		if(logitechY.get()){
+			driveState = false;           //STATE CHANGE CODE
+		}
+		if(driveState){
+			dualStick();
+		}
+		else{
+			slowMove(.5);
+		}
+		
+		
+		
+		//switchDriveModes();  
 
 		testForCorrectionMode();
 
 		toggleShooterMotor();
 
-		toggleIntake();
+		//toggleIntake();
 		
-		//checkClimberState();
+		checkClimberState();
 		
-		toggleElevator();
+		//toggleElevator();
 
 		toggleResExpansion();
 		
-		toggleShifter();
+		checkShift();
 		
-		operatorControl();
+	//	toggleShifter();
+		
+		//operatorControl();
 
 	}
 
