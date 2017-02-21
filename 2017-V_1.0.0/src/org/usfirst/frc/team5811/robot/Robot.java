@@ -29,6 +29,8 @@ public class Robot extends IterativeRobot {
 
 	// Buttons
 	JoystickButton logitechY;
+	
+	//random addition
 	JoystickButton logitechA;
 	JoystickButton logitechX;
 	JoystickButton logitechB;
