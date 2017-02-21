@@ -262,7 +262,13 @@ public class Robot extends IterativeRobot {
 	// Current logic
 	double currentElevator;
 	double currentIntake;
-	double currentCycle;
+	double currentFrontRightDrive;
+	double currentBackRightDrive;
+	double currentFrontLeftDrive;
+	double currentBackLeftDrive;
+	double currentClimber1;
+	double currentClimber2;
+	//double currentCycle;
 	double n;
 
 	// A cylinder
@@ -398,8 +404,8 @@ public class Robot extends IterativeRobot {
 	*/
 	private void checkClimberState(){
 		//CLIMBER LOGIC
-		climberRight.set(Math.abs(joyStickRight.getY()));
-		climberLeft.set(Math.abs(joyStickRight.getY()));
+		climberRight.set(joyStickRight.getY());
+		climberLeft.set(joyStickRight.getY());
 				
 	} 
 	
@@ -978,7 +984,7 @@ public class Robot extends IterativeRobot {
 		
 		driveState = true;
 		
-		currentCycle = 0;
+		//currentCycle = 0;
 		
 		//limitSwitch = new DigitalInput(1);
 		
@@ -2328,7 +2334,7 @@ public class Robot extends IterativeRobot {
 		rotationCountForDrive = 0;
 		rotationRateForDrive = 0;
 		
-		currentCycle = 0;
+		//currentCycle = 0;
 		dualStick();
 	}
 
@@ -2357,6 +2363,12 @@ public class Robot extends IterativeRobot {
 		System.out.println("Angle: "+ahrs.getAngle());
 		System.out.println("Elevator Current: "+currentElevator);
 		System.out.println("Intake Current: "+currentIntake);
+		System.out.println("Front Right Drive Current: "+currentFrontRightDrive);
+		System.out.println("Back Right Drive Current: "+currentBackRightDrive);
+		System.out.println("Front Left Drive Current: "+currentFrontLeftDrive);
+		System.out.println("Back Left Drive Current: "+currentBackLeftDrive);
+		System.out.println("Climber 1 Current: "+currentClimber1);
+		System.out.println("Climber 2 Current: "+currentClimber2);
 		
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
@@ -2386,6 +2398,12 @@ public class Robot extends IterativeRobot {
 		
 		currentElevator = power.getCurrent(3);
 		currentIntake = power.getCurrent(13);
+		currentFrontRightDrive = power.getCurrent(15);
+		currentBackRightDrive = power.getCurrent(14);
+		currentFrontLeftDrive = power.getCurrent(0);
+		currentBackLeftDrive = power.getCurrent(1);
+		currentClimber1 = power.getCurrent(12);
+		currentClimber2 = power.getCurrent(2);
 		 
 			if(currentIntake >= 28){
 				intakeOnOff(0);
