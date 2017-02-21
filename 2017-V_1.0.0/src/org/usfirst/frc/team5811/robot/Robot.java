@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import com.kauailabs.navx.frc.AHRS;
 
+import java.math.*;
+
 public class Robot extends IterativeRobot {
 
 	public static OI oi;
@@ -206,6 +208,8 @@ public class Robot extends IterativeRobot {
 		//**************************************************************
 		turnMacroTest,
 		noStringNoMove,
+		
+		test,
 	}
 	
 	RobotStates autoMode; 
@@ -235,8 +239,8 @@ public class Robot extends IterativeRobot {
 	boolean wasPressedLogitechA;
 	boolean shouldBeRunningClimberDown;
 	boolean wasPressedLogitechY;
-	//boolean shouldBeRunningElevator;
-	//boolean wasPressedLogitechX;
+	boolean shouldBeRunningElevator;
+	boolean wasPressedLogitechX;
 	boolean shouldBeRunningGearTray;
 	boolean wasPressedLogitechB;
 	
@@ -254,7 +258,9 @@ public class Robot extends IterativeRobot {
 	double rightSpeed;
 
 	// Current logic
-	double current;
+	double currentElevator;
+	double currentIntake;
+	double currentCycle;
 	double n;
 
 	// A cylinder
@@ -338,7 +344,7 @@ public class Robot extends IterativeRobot {
 			wasPressedRightBumper = false;
 		}
 
-		if(rotationRate >= 18500){
+		if(rotationRate >= 19000){
 			spinUpComplete = true;
 		} else {
 			spinUpComplete = false;
@@ -347,9 +353,8 @@ public class Robot extends IterativeRobot {
 		if(shouldBeRunningShooter && !spinUpComplete){
 			shooterRight.set(.62);
 			shooterLeft.set(-.62);
-			elevator.set(-1);
+		
 		} else if (shouldBeRunningShooter && spinUpComplete) {
-			elevator.set(-1);
 			rotationRate = shooterRightEnc.getRate();
 			shooterSpeedCorrection = (19200-rotationRate)/5000;   //.62 is 19200, .65 is 20000, .61 is 19000
 			shooterRight.set(.65+shooterSpeedCorrection);
@@ -358,10 +363,8 @@ public class Robot extends IterativeRobot {
 			System.out.println("Power Correction: " + shooterSpeedCorrection);
 			
 		} else {
-			elevator.set(0);
 			shooterRight.set(0);
 		    shooterLeft.set(0);
-			
 		}
 		
 	}
@@ -393,22 +396,11 @@ public class Robot extends IterativeRobot {
 	*/
 	private void checkClimberState(){
 		//CLIMBER LOGIC
-		
-		if (logitechRightTrigger2.get()) {
-			// CLIMBER DOWN
-			climberRight.set(-joyStickLeft.getRawAxis(6));
-			climberLeft.set(-joyStickLeft.getRawAxis(6));
-		} else if(logitechStart2.get()) {
-			// CLIMBER UP
-			climberRight.set(.3);
-			climberLeft.set(.3);
-		}else{
-			climberRight.set(0);
-			climberLeft.set(0);
-		}
+		climberRight.set(Math.abs(joyStickRight.getY()));
+		climberLeft.set(Math.abs(joyStickRight.getY()));
 				
 	} 
-	/*
+	
 	private void toggleElevator() {
 		
 		// ELEVATOR
@@ -422,7 +414,7 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningElevator) {
-			elevator.set(-1);
+			elevator.set(-.3);
 			SmartDashboard.putNumber("ELEVATOR ON", 101);
 		} else {
 			elevator.set(0);
@@ -431,9 +423,9 @@ public class Robot extends IterativeRobot {
 
 		
 	}
-	*/
+	
 	private void toggleResExpansion(){
-		if (logitechB2.get()) {
+		if (logitechY2.get()) {
 			if (!wasPressedLogitechB) {
 				shouldBeRunningGearTray = !shouldBeRunningGearTray;
 			}
@@ -447,8 +439,6 @@ public class Robot extends IterativeRobot {
 		} else {
 			reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 		}
-
-		
 	} 
 	public void shifterDelay(){
 		int cycleCounterTele = 0;
@@ -601,6 +591,7 @@ public class Robot extends IterativeRobot {
     	while(rotationCount >= 0.9 * encValue && rotationCount < encValue){
 			driveMotors(0.3, 0.3);
 		}
+    	driveMotors(.5,.5);
     }
 
     public void gotoBoilerLeftWhileMiddlePosition(){
@@ -651,14 +642,6 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
     
-    public void gotoLoadingLeftWhileLeftPosition(){
-    	encoderMacro(000);
-    	turnMacro(-90);
-    	encoderMacro(000);
-    	turnMacro(-45);
-    	encoderCreep(000);
-    }
-    
     public void gotoLoadingRightWhileRightPosition(){
     	encoderMacro(000);
     	turnMacro(90);
@@ -671,36 +654,31 @@ public class Robot extends IterativeRobot {
     	encoderMacro(-000);
     	turnMacro(-120);
     	encoderMacro(000);
-    	if(current < 000){
-    		encoderMacro(0);
-    	}
     }
     
-    public void gotoBoilerRightFromMiddleGear(){  //Priority
+    public void gotoLoadingLeftWhileLeftPosition(){
+		encoderMacro(000);
+		turnMacro(-90);
+		encoderMacro(000);
+		turnMacro(-45);
+		encoderCreep(000);
+	}
+	public void gotoBoilerRightFromMiddleGear(){  //Priority
     	encoderMacro(-000);
     	turnMacro(120);
     	encoderMacro(000);
-    	if(current < 000){
-    		encoderMacro(0);
-    	}
     }
     
     public void gotoLoadingRightFromMiddleGear(){
     	encoderMacro(-000);
     	turnMacro(120);
     	encoderMacro(000);
-    	if(current < 000){
-    		encoderMacro(0);
-    	}
     }
     
     public void gotoLoadingLeftFromMiddleGear(){
     	encoderMacro(-000);
     	turnMacro(-120);
     	encoderMacro(000);
-    	if(current < 000){
-    		encoderMacro(0);
-    	}
     }
     
     public void gearMiddle(){
@@ -833,7 +811,7 @@ public class Robot extends IterativeRobot {
     }
 
     public void shootAutonomous(double shootTime){
-    	if(rotationRate >= 18500){
+    	if(rotationRate >= 19000){
 			spinUpComplete = true;
 		} else {
 			spinUpComplete = false;
@@ -969,8 +947,6 @@ public class Robot extends IterativeRobot {
 		// limit switch init
 		// imitSwitch = new DigitalInput(1);
 
-		current = power.getCurrent(15);
-		System.out.println(current);
 
 		// Boolean Toggle Switch
 		shouldBeRunningSwitch = false;
@@ -983,8 +959,8 @@ public class Robot extends IterativeRobot {
 		wasPressedLogitechA = false;
 		shouldBeRunningClimberDown = false;
 		wasPressedLogitechY = false;
-		//shouldBeRunningElevator = false;
-	//	wasPressedLogitechX = false;
+		shouldBeRunningElevator = false;
+		wasPressedLogitechX = false;
 		shouldBeRunningGearTray = false;
 		wasPressedLogitechB = false;
 		
@@ -999,6 +975,8 @@ public class Robot extends IterativeRobot {
 		rotationPos = 0;
 		
 		driveState = true;
+		
+		currentCycle = 0;
 		
 		//limitSwitch = new DigitalInput(1);
 		
@@ -1192,7 +1170,16 @@ public class Robot extends IterativeRobot {
 	    
 	 
 		//**************DEFAULT CODE IN CASE OF AN L**************
-		
+		if((botPosition.equalsIgnoreCase("test") &&										
+				(allianceColor.equalsIgnoreCase(null) || allianceColor.equalsIgnoreCase(null)) &&
+				chooseBoilerOrLoading.equalsIgnoreCase(null) &&
+				baselineCross.equalsIgnoreCase(null) &&
+				gearPlacement.equalsIgnoreCase(null) &&
+				shoot.equalsIgnoreCase(null) &&
+				shootAfterHopper.equalsIgnoreCase(null) &&
+				hopperPickup.equalsIgnoreCase(null))){	
+			autoMode = RobotStates.test;
+		}
 		if((botPosition.equalsIgnoreCase(null) &&										
 				(allianceColor.equalsIgnoreCase(null) || allianceColor.equalsIgnoreCase(null)) &&
 				chooseBoilerOrLoading.equalsIgnoreCase(null) &&
@@ -2326,6 +2313,8 @@ public class Robot extends IterativeRobot {
 			case noStringNoMove:
 				driveMotors(0,0);
 				break;
+			case test:
+				encoderCreep(3735);
 		}	
 		
 		
@@ -2336,6 +2325,8 @@ public class Robot extends IterativeRobot {
 		
 		rotationCountForDrive = 0;
 		rotationRateForDrive = 0;
+		
+		currentCycle = 0;
 		dualStick();
 	}
 
@@ -2362,15 +2353,19 @@ public class Robot extends IterativeRobot {
 		System.out.println(rotationRateForDrive);
 		System.out.println("************");
 		System.out.println("Angle: "+ahrs.getAngle());
-	
+		System.out.println("Elevator Current: "+currentElevator);
+		System.out.println("Intake Current: "+currentIntake);
 		
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
-		if(logitechA.get()){
-			intakeOnOff(-.4);         //INTAKE CODE 
+		
+		if(logitechA2.get()){
+			intakeOnOff(.5);         //INTAKE CODE 
+			shouldBeRunningIntake = true;
 		}
-		else if(logitechB.get()){
+		else if(logitechB2.get()){
 			intakeOnOff(0);
+			shouldBeRunningIntake = false;
 		}
 		
 		
@@ -2387,7 +2382,31 @@ public class Robot extends IterativeRobot {
 			slowMove(.5);
 		}
 		
-		
+		currentElevator = power.getCurrent(3);
+		currentIntake = power.getCurrent(13);
+		 
+			if(currentIntake >= 28){
+				intakeOnOff(0);
+				Timer.delay(0.25);
+				if(currentIntake >= 24 && currentIntake <= 28){
+					intakeOnOff(-0.6);
+				}else if(currentIntake < 24){
+					intakeOnOff(-0.85);
+					
+				}
+			}
+	
+			if(currentIntake >= 28){
+				elevator.set(0);
+				Timer.delay(0.25);
+				if(currentIntake >= 24 && currentIntake <= 28){
+					elevator.set(-0.15);
+				}else if(currentIntake < 24){
+					elevator.set(-0.3);
+					
+				}
+			}
+	
 		
 		//switchDriveModes();  
 
@@ -2399,13 +2418,13 @@ public class Robot extends IterativeRobot {
 		
 		checkClimberState();
 		
-		//toggleElevator();
+		toggleElevator();
 
 		toggleResExpansion();
 		
 		checkShift();
 		
-	//	toggleShifter();
+		//toggleShifter();
 		
 		//operatorControl();
 
