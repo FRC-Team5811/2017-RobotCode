@@ -39,8 +39,6 @@ public class Robot extends IterativeRobot {
 
 	// Buttons
 	JoystickButton logitechY;
-	
-	//random addition
 	JoystickButton logitechA;
 	JoystickButton logitechX;
 	JoystickButton logitechB;
@@ -90,7 +88,6 @@ public class Robot extends IterativeRobot {
 	boolean encIfStopped;
 	double rotationPeriod;
 	boolean spinUpComplete;
-	
 	boolean driveState;
 	
 	DigitalInput limitSwitch;
@@ -226,11 +223,6 @@ public class Robot extends IterativeRobot {
 	
 	RobotStates autoMode; 
 	
-	/*
-	public Robot(RobotStates autoMode){
-		this.autoMode = autoMode;
-	}
-    */
 	String botPosition;
 	String allianceColor;
 	String chooseBoilerOrLoading;
@@ -278,8 +270,6 @@ public class Robot extends IterativeRobot {
 	double currentBackLeftDrive;
 	double currentClimber1;
 	double currentClimber2;
-	//double currentCycle;
-	double n;
 
 	// A cylinder
 	DoubleSolenoid shifterCylinder;
@@ -305,6 +295,7 @@ public class Robot extends IterativeRobot {
 	public void intakeOnOff(double speed){
 		intake.set(speed);
 	}
+	
 	/*
 	private void switchDriveModes(){
 		// SWITCHING BETWEEN DRIVE MODES
@@ -329,6 +320,7 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	*/
+	
 	private void testForCorrectionMode() {
 		// CORRECTION MODE
 		if (logitechBack.get()) {
@@ -438,8 +430,6 @@ public class Robot extends IterativeRobot {
 			elevator.set(0);
 			SmartDashboard.putNumber("ELEVATOR OFF", 101);
 		}
-
-		
 	}
 	
 	private void toggleResExpansion(){
@@ -867,47 +857,47 @@ public class Robot extends IterativeRobot {
 		autoMode = RobotStates.noStringNoMove;
 
 		// Motor port instantiating
-		frontLeftDriveMotor = new Victor(9);
-		frontRightDriveMotor = new Victor(4);
-		backLeftDriveMotor = new Victor(8);
-		backRightDriveMotor = new Victor(3);
+		frontLeftDriveMotor = new Victor(Map.frontLeftDriveMotor);
+		frontRightDriveMotor = new Victor(Map.frontRightDriveMotor);
+		backLeftDriveMotor = new Victor(Map.backLeftDriveMotor);
+		backRightDriveMotor = new Victor(Map.backRightDriveMotor);
 
 		// Accessory motors
-		intake = new Victor(2);
-		shooterRight = new Spark(0);
-		shooterLeft = new Spark(5);
-		climberLeft = new Victor(1);
-		climberRight = new Victor(7);
-		elevator = new Victor(6);
-		// agitator = new Victor(6);
+		intake = new Victor(Map.intakeMotor);
+		shooterRight = new Spark(Map.rightShooterMotor);
+		shooterLeft = new Spark(Map.leftShooterMotor);
+		climberLeft = new Victor(Map.leftClimberMotor);
+		climberRight = new Victor(Map.rightClimberMotor);
+		elevator = new Victor(Map.elevatorMotor);
 
 		// Encoder inits and instantiations
-		shooterRightEnc = new Encoder(0, 1, true, Encoder.EncodingType.k1X);
+		shooterRightEnc = new Encoder(
+			Map.shooterEncoderChannelA,
+			Map.shooterEncoderChannelB,
+			true,
+			Encoder.EncodingType.k4X
+		);
+		
 		shooterRightEnc.setMaxPeriod(1);
 		shooterRightEnc.setDistancePerPulse(36);
 		shooterRightEnc.setMinRate(10);
 		shooterRightEnc.setSamplesToAverage(32);
 		
-		drive = new Encoder(2,3, true, Encoder.EncodingType.k1X);
+		drive = new Encoder(
+			Map.driveEncoderChannelA,
+			Map.driveEncoderChannelB,
+			true,
+			Encoder.EncodingType.k4X
+		);
+		
 		drive.setMaxPeriod(1);
 		drive.setDistancePerPulse(36);
 		drive.setMinRate(10);
 		drive.setSamplesToAverage(32);
-		
-		
-		
-		//shooterEncoder = new Counter(0);
-		//shooterEncoder.setSemiPeriodMode(true);
-		//rotationCount = shooterRightEnc.get();
-		//rotationRate = shooterRightEnc.getRate();
-		//encIfStopped = shooterRightEnc.getStopped();
-		//encDirection = shooterRightEnc.getDirection();// since it is a boolean its
-													// either 0 or 1 (obv)...not
-													// sure which value is which
-													// direction though
 
-		joyStickLeft = new Joystick(0);
-		joyStickRight = new Joystick(1);
+
+		joyStickLeft = new Joystick(Map.joystickDriverSlot);
+		joyStickRight = new Joystick(Map.joystickManipulatorSlot);
 
 		// BUTTON MAPPING. REASON ITS HERE IS BECAUSE IT WAS WRONG AND THESE ARE
 		// THE CORRECT VALUES
@@ -949,21 +939,17 @@ public class Robot extends IterativeRobot {
 		logitechBack2 = new JoystickButton(joyStickRight, 9);
 		logitechRightTrigger2 = new JoystickButton(joyStickRight, 8);
 		logitechLeftTrigger2 = new JoystickButton(joyStickRight,7);
-		// rightTrim = SmartDashboard.getNumber("DB/Slider 3", 1.0);
-		// if(rightTrim == 0){ SmartDashboard.putNumber("DB/Slider 3", 1);
-		// rightTrim = 1;}
 
-		shifterCylinder = new DoubleSolenoid(2, 3);
-		reservoirCylinder = new DoubleSolenoid(6, 7);
+		
+		shifterCylinder = new DoubleSolenoid(Map.shifterForwardChannel, Map.shifterBackwardChannel);
 		shifterCylinder.set(DoubleSolenoid.Value.kForward);
+		
+		reservoirCylinder = new DoubleSolenoid(Map.reservoirForwardChannel, Map.reservoirBackwardChannel);
 		reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 
 		// compressor port init
-		compressor = new Compressor(0);
+		compressor = new Compressor(Map.CompressorChannel);
 		compressor.setClosedLoopControl(false);
-
-		// limit switch init
-		// imitSwitch = new DigitalInput(1);
 
 
 		// Boolean Toggle Switch
@@ -994,12 +980,6 @@ public class Robot extends IterativeRobot {
 		
 		driveState = true;
 		
-		//currentCycle = 0;
-		
-		//limitSwitch = new DigitalInput(1);
-		
-		//logicError = SmartDashboard.getString("DB/String 6", "No error");
-		//endgameAutonomous = SmartDashboard.getString("DB/String 8", "Hah....BASIC");
 		
 		// NavX instantiation
 		try {
@@ -1022,132 +1002,10 @@ public class Robot extends IterativeRobot {
 		
 	}
 
-	private void operatorControl() {
+	private void dashboardDisplay() {
 		if (isOperatorControl() && isEnabled()) {
 
-			Timer.delay(0.020); /* wait for one motor update time period (50Hz) */
-
-			/*
-			 * boolean zero_yaw_pressed = stick.getTrigger(); if (
-			 * zero_yaw_pressed ) { ahrs.zeroYaw(); }
-			 */
-
-			/* Display 6-axis Processed Angle Data */
-			/*
-			SmartDashboard.putBoolean("IMU_Connected", ahrs.isConnected());
-			SmartDashboard.putBoolean("IMU_IsCalibrating", ahrs.isCalibrating());
-			SmartDashboard.putNumber("IMU_Yaw", ahrs.getYaw());
-			SmartDashboard.putNumber("IMU_Pitch", ahrs.getPitch());
-			SmartDashboard.putNumber("IMU_Roll", ahrs.getRoll());
-
-			/* Display tilt-corrected, Magnetometer-based heading (requires */
-			/* magnetometer calibration to be useful) */
-
-			//SmartDashboard.putNumber("IMU_CompassHeading", ahrs.getCompassHeading());
-
-			/*
-			 * Display 9-axis Heading (requires magnetometer calibration to be
-			 * useful)
-			 */
-		//	SmartDashboard.putNumber("IMU_FusedHeading", ahrs.getFusedHeading());
-
-			/*
-			 * These functions are compatible w/the WPI Gyro Class, providing a
-			 * simple
-			 */
-			/* path for upgrading from the Kit-of-Parts gyro to the navx MXP */
-
 			SmartDashboard.putNumber("IMU_TotalYaw", ahrs.getAngle());
-			//SmartDashboard.putNumber("IMU_YawRateDPS", ahrs.getRate());
-
-			/*
-			 * Display Processed Acceleration Data (Linear Acceleration, Motion
-			 * Detect)
-			 */
-/*
-			SmartDashboard.putNumber("IMU_Accel_X", ahrs.getWorldLinearAccelX());
-			SmartDashboard.putNumber("IMU_Accel_Y", ahrs.getWorldLinearAccelY());
-			SmartDashboard.putBoolean("IMU_IsMoving", ahrs.isMoving());
-			SmartDashboard.putBoolean("IMU_IsRotating", ahrs.isRotating());
-*/
-			/*
-			 * Display estimates of velocity/displacement. Note that these
-			 * values are
-			 */
-			/*
-			 * not expected to be accurate enough for estimating robot position
-			 * on a
-			 */
-			/*
-			 * FIRST FRC Robotics Field, due to accelerometer noise and the
-			 * compounding
-			 */
-			/*
-			 * of these errors due to single (velocity) integration and
-			 * especially
-			 */
-			/* double (displacement) integration. */
-/*
-			SmartDashboard.putNumber("Velocity_X", ahrs.getVelocityX());
-			SmartDashboard.putNumber("Velocity_Y", ahrs.getVelocityY());
-			SmartDashboard.putNumber("Displacement_X", ahrs.getDisplacementX());
-			SmartDashboard.putNumber("Displacement_Y", ahrs.getDisplacementY());
-*/
-			/* Display Raw Gyro/Accelerometer/Magnetometer Values */
-			/*
-			 * NOTE: These values are not normally necessary, but are made
-			 * available
-			 */
-			/*
-			 * for advanced users. Before using this data, please consider
-			 * whether
-			 */
-			/* the processed data (see above) will suit your needs. */
-/*
-			SmartDashboard.putNumber("RawGyro_X", ahrs.getRawGyroX());
-			SmartDashboard.putNumber("RawGyro_Y", ahrs.getRawGyroY());
-			SmartDashboard.putNumber("RawGyro_Z", ahrs.getRawGyroZ());
-			SmartDashboard.putNumber("RawAccel_X", ahrs.getRawAccelX());
-			SmartDashboard.putNumber("RawAccel_Y", ahrs.getRawAccelY());
-			SmartDashboard.putNumber("RawAccel_Z", ahrs.getRawAccelZ());
-			SmartDashboard.putNumber("RawMag_X", ahrs.getRawMagX());
-			SmartDashboard.putNumber("RawMag_Y", ahrs.getRawMagY());
-			SmartDashboard.putNumber("RawMag_Z", ahrs.getRawMagZ());
-			SmartDashboard.putNumber("IMU_Temp_C", ahrs.getTempC());
-			SmartDashboard.putNumber("IMU_Timestamp", ahrs.getLastSensorTimestamp());
-*/
-			/* Omnimount Yaw Axis Information */
-			/*
-			 * For more info, see
-			 * http://navx-mxp.kauailabs.com/installation/omnimount
-			 */
-		//	AHRS.BoardYawAxis yaw_axis = ahrs.getBoardYawAxis();
-			/*
-			SmartDashboard.putString("YawAxisDirection", yaw_axis.up ? "Up" : "Down");
-			SmartDashboard.putNumber("YawAxis", yaw_axis.board_axis.getValue());
-
-			/* Sensor Board Information */
-			//SmartDashboard.putString("FirmwareVersion", ahrs.getFirmwareVersion());
-			/* Quaternion Data */
-			/*
-			 * Quaternions are fascinating, and are the most compact
-			 * representation of
-			 */
-			/*
-			 * orientation data. All of the Yaw, Pitch and Roll Values can be
-			 * derived
-			 */
-			/*
-			 * from the Quaternions. If interested in motion processing,
-			 * knowledge of
-			 */
-			
-			/* Quaternions is highly recommended. */
-			/*
-			SmartDashboard.putNumber("QuaternionW", ahrs.getQuaternionW());
-			SmartDashboard.putNumber("QuaternionX", ahrs.getQuaternionX());
-			SmartDashboard.putNumber("QuaternionY", ahrs.getQuaternionY());
-			SmartDashboard.putNumber("QuaternionZ", ahrs.getQuaternionZ());
 
 			/* Connectivity Debugging Support */
 			SmartDashboard.putNumber("IMU_Byte_Count", ahrs.getByteCount());
@@ -2462,6 +2320,6 @@ public class Robot extends IterativeRobot {
 
 	public void testPeriodic() {
 		LiveWindow.run();
-		operatorControl();
+		dashboardDisplay();
 	}
 }
