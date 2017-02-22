@@ -39,4 +39,13 @@ public class Map {
 	
 	public static int CompressorChannel = 0;
 	
+	public static int PDPElevatorChannel = 3;
+	public static int PDPIntakeChannel = 13;
+	public static int PDPFrontRightMotorChannel = 15;
+	public static int PDPBackRightMotorChannel = 14;
+	public static int PDPFrontLeftMotorChannel = 0;
+	public static int PDPBackLeftMotorChannel = 1;
+	public static int PDPClimber1MotorChannel = 12;
+	public static int PDPClimber2MotorChannel = 2;
+	
 }

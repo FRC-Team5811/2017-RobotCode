@@ -1,11 +1,12 @@
 package org.usfirst.frc.team5811.robot;
 
-import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
+import org.usfirst.frc.team5811.robot.commands.*;
+import org.usfirst.frc.team5811.robot.subsystems.*;
 
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
@@ -80,6 +81,8 @@ public class Robot extends IterativeRobot {
 	Encoder shooterRightEnc;
 	Encoder drive;
 	
+	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+	
 	//Counter shooterEncoder;
 	int rotationCount;
 	double rotationRate;
@@ -89,11 +92,7 @@ public class Robot extends IterativeRobot {
 	double rotationPeriod;
 	boolean spinUpComplete;
 	boolean driveState;
-	
-	DigitalInput limitSwitch;
-	
-	
-	
+		
 	int rotationCountForDrive;
 	double rotationRateForDrive;
 	double distance;
@@ -152,7 +151,7 @@ public class Robot extends IterativeRobot {
 		hopperShootBoilerLeftWhileMiddle,
 		hopperShootBoilerRight,
 		hopperShootBoilerRightWhileMiddle,
-		
+	
 		//Gear and Hopper
 		gearMiddleHopperBoilerLeft,
 		gearMiddleHopperBoilerRight,
@@ -261,25 +260,13 @@ public class Robot extends IterativeRobot {
 	double leftSpeed;
 	double rightSpeed;
 
-	// Current logic
-	double currentElevator;
-	double currentIntake;
-	double currentFrontRightDrive;
-	double currentBackRightDrive;
-	double currentFrontLeftDrive;
-	double currentBackLeftDrive;
-	double currentClimber1;
-	double currentClimber2;
-
 	// A cylinder
 	DoubleSolenoid shifterCylinder;
 	DoubleSolenoid reservoirCylinder;
 
-	// COMPRESSOR!!!
-	Compressor compressor;
-
-	// power distribution panel
-	PowerDistributionPanel power = new PowerDistributionPanel();
+	
+	CompressorSubsystem compressor = new CompressorSubsystem();
+	PowerManagementSubsystem power = new PowerManagementSubsystem();
 
 	float rotationPos;
 	float macroPos;
@@ -510,8 +497,6 @@ public class Robot extends IterativeRobot {
 	private void arcadeDrive(double throttle, double turn) {
 		driveMotors((throttle + turn), (throttle - turn));
 	}
-	
-	
 	
     private void turnMacro(float degrees){
     	ahrs.reset();
@@ -947,11 +932,7 @@ public class Robot extends IterativeRobot {
 		reservoirCylinder = new DoubleSolenoid(Map.reservoirForwardChannel, Map.reservoirBackwardChannel);
 		reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 
-		// compressor port init
-		compressor = new Compressor(Map.CompressorChannel);
-		compressor.setClosedLoopControl(false);
-
-
+		
 		// Boolean Toggle Switch
 		shouldBeRunningSwitch = false;
 		wasPressedLeftStick = false;
@@ -1041,8 +1022,6 @@ public class Robot extends IterativeRobot {
 		cycleCounter = 0;
 		driveMotors(0, 0);
 	   //autoSelecter = SmartDashboard.getNumber("DB/Slider 0", 0.0);
-	   
-	  
 	    
 	 
 		//**************DEFAULT CODE IN CASE OF AN L**************
@@ -2208,8 +2187,9 @@ public class Robot extends IterativeRobot {
 
 	public void teleopPeriodic() {
 
-		Scheduler.getInstance().run(); 
-		compressor.setClosedLoopControl(true);
+		Scheduler.getInstance().run();
+		
+		compressor.setClosedLoopControlOn();
 		
 		rotationCount = shooterRightEnc.get();
 		rotationRate = shooterRightEnc.getRate();
@@ -2228,15 +2208,15 @@ public class Robot extends IterativeRobot {
 		System.out.println(rotationCountForDrive);
 		System.out.println(rotationRateForDrive);
 		System.out.println("************");
-		System.out.println("Angle: "+ahrs.getAngle());
-		System.out.println("Elevator Current: "+currentElevator);
-		System.out.println("Intake Current: "+currentIntake);
-		System.out.println("Front Right Drive Current: "+currentFrontRightDrive);
-		System.out.println("Back Right Drive Current: "+currentBackRightDrive);
-		System.out.println("Front Left Drive Current: "+currentFrontLeftDrive);
-		System.out.println("Back Left Drive Current: "+currentBackLeftDrive);
-		System.out.println("Climber 1 Current: "+currentClimber1);
-		System.out.println("Climber 2 Current: "+currentClimber2);
+		System.out.println("Angle: "+ ahrs.getAngle());
+		System.out.println("Elevator Current: "+power.elevator());
+		System.out.println("Intake Current: "+power.intake());
+		System.out.println("Front Right Drive Current: "+ power.frontRightDrive());
+		System.out.println("Back Right Drive Current: "+ power.backLeftDrive());
+		System.out.println("Front Left Drive Current: "+ power.frontLeftDrive());
+		System.out.println("Back Left Drive Current: "+ power.backLeftDrive());
+		System.out.println("Climber 1 Current: "+ power.climber1());
+		System.out.println("Climber 2 Current: "+ power.climber2());
 		
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
@@ -2263,38 +2243,28 @@ public class Robot extends IterativeRobot {
 		else{
 			slowMove(.5);
 		}
-		
-		currentElevator = power.getCurrent(3);
-		currentIntake = power.getCurrent(13);
-		currentFrontRightDrive = power.getCurrent(15);
-		currentBackRightDrive = power.getCurrent(14);
-		currentFrontLeftDrive = power.getCurrent(0);
-		currentBackLeftDrive = power.getCurrent(1);
-		currentClimber1 = power.getCurrent(12);
-		currentClimber2 = power.getCurrent(2);
 		 
-			if(currentIntake >= 28){
-				intakeOnOff(0);
-				Timer.delay(0.25);
-				if(currentIntake >= 24 && currentIntake <= 28){
-					intakeOnOff(-0.6);
-				}else if(currentIntake < 24){
-					intakeOnOff(-0.85);
-					
-				}
+		double intake = power.intake();
+		if (intake >= 28) {
+			intakeOnOff(0);
+			Timer.delay(0.25);
+			if (intake >= 24 && intake <= 28) {
+				intakeOnOff(-0.6);
+			} else if (intake < 24) {
+				intakeOnOff(-0.85);
+
 			}
-	
-			if(currentIntake >= 28){
-				elevator.set(0);
-				Timer.delay(0.25);
-				if(currentIntake >= 24 && currentIntake <= 28){
-					elevator.set(-0.15);
-				}else if(currentIntake < 24){
-					elevator.set(-0.3);
-					
-				}
+		}
+
+		if (intake >= 28) {
+			elevator.set(0);
+			Timer.delay(0.25);
+			if (intake >= 24 && intake <= 28) {
+				elevator.set(-0.15);
+			} else if (intake < 24) {
+				elevator.set(-0.3);
 			}
-	
+		}
 		
 		//switchDriveModes();  
 
