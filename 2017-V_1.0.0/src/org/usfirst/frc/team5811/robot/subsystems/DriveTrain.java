@@ -2,9 +2,9 @@ package org.usfirst.frc.team5811.robot.subsystems;
 
 import edu.wpi.first.wpilibj.command.Subsystem;
 
-public class ClimberSubsystem extends Subsystem {
+public class DriveTrain extends Subsystem {
 
-	public ClimberSubsystem() {
+	public DriveTrain() {
 		// TODO Auto-generated constructor stub
 	}
 

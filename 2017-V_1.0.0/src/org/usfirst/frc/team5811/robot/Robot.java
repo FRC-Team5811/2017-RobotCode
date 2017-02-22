@@ -145,7 +145,7 @@ public class Robot extends IterativeRobot {
 
 	
 	CompressorSubsystem compressor = new CompressorSubsystem();
-	PowerManagementSubsystem power = new PowerManagementSubsystem();
+	PowerManagement power = new PowerManagement();
 
 	float rotationPos;
 	float macroPos;

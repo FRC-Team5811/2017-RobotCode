@@ -7,12 +7,12 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 
-public class PowerManagementSubsystem extends Subsystem {
+public class PowerManagement extends Subsystem {
 	
 	// power distribution panel
 	PowerDistributionPanel power = new PowerDistributionPanel();
 
-	public PowerManagementSubsystem() {
+	public PowerManagement() {
 		// TODO Auto-generated constructor stub
 	}
 

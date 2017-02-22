@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 //rotationRate = shooterRightEnc.getRate();
 //rotationPeriod = shooterRightEnc.getRaw();
 
-public class ShooterSubsystem extends Subsystem {
+public class Shooter extends Subsystem {
 	
 	Encoder shooterEncoder;
 	Spark shooterRight;
@@ -20,7 +20,7 @@ public class ShooterSubsystem extends Subsystem {
 	PIDController pid1;
 	PIDController pid2;
 
-	public ShooterSubsystem() {
+	public Shooter() {
 		// NAME, P, I, D
 		//super("Shooter", 2.0, 0.0, 0.0);
 		
