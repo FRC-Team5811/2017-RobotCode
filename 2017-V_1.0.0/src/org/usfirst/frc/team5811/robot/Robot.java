@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import org.usfirst.frc.team5811.robot.commands.ExampleCommand;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.*;
 //import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
@@ -67,6 +68,10 @@ public class Robot extends IterativeRobot {
 	Victor climberLeft;
 	Victor climberRight;
 	Victor elevator;
+	
+	DigitalOutput agitator;
+	
+	UsbCamera camera;
 
 	// Encoder definitions and variables
 	Encoder shooterRightEnc;
@@ -278,6 +283,9 @@ public class Robot extends IterativeRobot {
 	// COMPRESSOR!!!
 	Compressor compressor;
 
+	//Camera
+	
+	
 	// power distribution panel
 	PowerDistributionPanel power = new PowerDistributionPanel();
 
@@ -310,12 +318,12 @@ public class Robot extends IterativeRobot {
 
 		if (shouldBeRunningSwitch) {
 			slowMove(0.5);
-			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-			joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
+			//joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
+			//joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
 		} else {
 			dualStick();
-			joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-			joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
+			//joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
+			//joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
 		}
 	}
 	*/
@@ -359,12 +367,12 @@ public class Robot extends IterativeRobot {
 		}
 		
 		if(shouldBeRunningShooter && !spinUpComplete){
-			shooterRight.set(.62);
-			shooterLeft.set(-.62);
+			shooterRight.set(.67);
+			shooterLeft.set(-.67);
 		
 		} else if (shouldBeRunningShooter && spinUpComplete) {
 			rotationRate = shooterRightEnc.getRate();
-			shooterSpeedCorrection = (19200-rotationRate)/5000;   //.62 is 19200, .65 is 20000, .61 is 19000
+			shooterSpeedCorrection = (21300-rotationRate)/5000;   //.62 is 19200, .65 is 20000, .61 is 19000 , .70 s 22000 ,.67 is 21300
 			shooterRight.set(.65+shooterSpeedCorrection);
 			shooterLeft.set(-.65+shooterSpeedCorrection);
 			System.out.println("Rotation Rate: " + rotationRate);
@@ -422,7 +430,7 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningElevator) {
-			elevator.set(-.3);
+			elevator.set(-.5);
 			SmartDashboard.putNumber("ELEVATOR ON", 101);
 		} else {
 			elevator.set(0);
@@ -580,11 +588,11 @@ public class Robot extends IterativeRobot {
 		float nowRot = (float) ahrs.getAngle();
 		System.out.println(rotationPos);
 		System.out.println(nowRot);
-		if (nowRot >= rotationPos + 10) {
-			driveMotors(-.5,-.5);
+		if (nowRot >= rotationPos + 5) {
+			driveMotors(-.5,.5);
 		}
-		if (nowRot <= rotationPos - 10) {
-			driveMotors(.5,.5);
+		if (nowRot <= rotationPos - 5) {
+			driveMotors(.5,-.5);
 		}
     }
 
@@ -869,7 +877,9 @@ public class Robot extends IterativeRobot {
 		climberLeft = new Victor(1);
 		climberRight = new Victor(7);
 		elevator = new Victor(6);
-		// agitator = new Victor(6);
+		
+		
+		agitator = new DigitalOutput(4);
 
 		// Encoder inits and instantiations
 		shooterRightEnc = new Encoder(0, 1, true, Encoder.EncodingType.k1X);
@@ -898,6 +908,8 @@ public class Robot extends IterativeRobot {
 
 		joyStickLeft = new Joystick(0);
 		joyStickRight = new Joystick(1);
+		
+		camera = CameraServer.getInstance().startAutomaticCapture();
 
 		// BUTTON MAPPING. REASON ITS HERE IS BECAUSE IT WAS WRONG AND THESE ARE
 		// THE CORRECT VALUES
@@ -2393,7 +2405,7 @@ public class Robot extends IterativeRobot {
 			dualStick();
 		}
 		else{
-			slowMove(.5);
+			slowMove(.35);
 		}
 		
 		currentElevator = power.getCurrent(3);
@@ -2416,12 +2428,12 @@ public class Robot extends IterativeRobot {
 				}
 			}
 	
-			if(currentIntake >= 28){
+			if(currentElevator >= 28){
 				elevator.set(0);
 				Timer.delay(0.25);
-				if(currentIntake >= 24 && currentIntake <= 28){
+				if(currentElevator >= 24 && currentElevator <= 28){
 					elevator.set(-0.15);
-				}else if(currentIntake < 24){
+				}else if(currentElevator < 24){
 					elevator.set(-0.3);
 					
 				}
@@ -2443,6 +2455,8 @@ public class Robot extends IterativeRobot {
 		toggleResExpansion();
 		
 		checkShift();
+		
+		agitator.set(false);
 		
 		//toggleShifter();
 		
