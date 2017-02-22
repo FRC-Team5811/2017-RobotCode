@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Timer;
@@ -70,20 +69,18 @@ public class Robot extends IterativeRobot {
 	Victor frontRightDriveMotor;
 	Victor backLeftDriveMotor;
 	Victor backRightDriveMotor;
+	
 	Victor intake;
-	Spark shooterRight;
-	Spark shooterLeft;
+	
 	Victor climberLeft;
 	Victor climberRight;
 	Victor elevator;
 
 	// Encoder definitions and variables
-	Encoder shooterRightEnc;
 	Encoder drive;
 	
 	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 	
-	//Counter shooterEncoder;
 	int rotationCount;
 	double rotationRate;
 	double shooterSpeedCorrection;
@@ -101,124 +98,6 @@ public class Robot extends IterativeRobot {
 	
 	//Autonomous
 	int cycleCounter;
-	enum RobotStates{ //#blessed because our dude Chris taught us the ways of the enumerations
-		/*
-		 * How to read: (sequence of methods [i.e. shootgear = shoot then place gear])
-		 * + (location on field where interaction occurs [i.e. Boiler is at the Boiler])
-		 * + (side of field, depends on alliance due to field being rotationally asymmetrical [i.e. Boiler Right is Red Alliance])
-		*/ 
-		
-		//**************BASE FUNCTIONS**************
-		
-		//Baseline Only
-		baseline,
-		
-		//Gear Base
-		gearMiddle,
-		
-		//**************BOILER-BASED FUNCTIONS**************
-		
-		//Gear Only
-		gearMiddleBoilerLeft,
-		gearMiddleBoilerRight,
-		gearBoilerLeft,
-		gearBoilerLeftWhileMiddle,
-		gearBoilerRight,
-		gearBoilerRightWhileMiddle,
-		
-		//Shoot Only
-		shootOnlyBoilerLeft,
-		shootOnlyBoilerLeftWhileMiddle,
-		shootOnlyBoilerRight,
-		shootOnlyBoilerRightWhileMiddle,
-		
-		//Hopper Only
-		hopperOnlyBoilerLeft,
-		hopperOnlyBoilerLeftWhileMiddle,
-		hopperOnlyBoilerRight,
-		hopperOnlyBoilerRightWhileMiddle,
-		
-		//Gear and Shoot
-		gearMiddleShootBoilerLeft, //Priority
-		gearMiddleShootBoilerRight,  //Priority
-		gearShootBoilerLeft,
-		gearShootBoilerLeftWhileMiddle,
-		gearShootBoilerRight,
-		gearShootBoilerRightWhileMiddle,
-		
-		//Hopper then Shoot
-		hopperShootBoilerLeft,
-		hopperShootBoilerLeftWhileMiddle,
-		hopperShootBoilerRight,
-		hopperShootBoilerRightWhileMiddle,
-	
-		//Gear and Hopper
-		gearMiddleHopperBoilerLeft,
-		gearMiddleHopperBoilerRight,
-		gearHopperBoilerLeft,
-		gearHopperBoilerLeftWhileMiddle,
-		gearHopperBoilerRight,
-		gearHopperBoilerRightWhileMiddle,
-		
-		//Hopper, Shoot, Place Gear || Place Gear, Hopper, then Shoot (Hopper Shoot Gear Sequences)
-		gearMiddleHopperShootBoilerLeft,
-		gearMiddleHopperShootBoilerRight,
-		gearHopperShootBoilerLeft,
-		gearHopperShootBoilerLeftWhileMiddle,
-		gearHopperShootBoilerRight,
-		gearHopperShootBoilerRightWhileMiddle,
-
-		//Shoot, Hopper, Shoot
-		shootHopperShootBoilerLeft,
-		shootHopperShootBoilerLeftWhileMiddle,
-		shootHopperShootBoilerRight,
-		shootHopperShootBoilerRightWhileMiddle,
-		
-		//Ultimate Autonomous
-		ultimateAutoGearMiddleBoilerLeft,
-		ultimateAutoGearMiddleBoilerRight,
-		ultimateAutoBoilerLeft, //gear shoot hopper shoot boiler left
-		ultimateAutoBoilerLeftWhileMiddle,
-		ultimateAutoBoilerRight,  //gear shoot hopper shoot boiler right
-		ultimateAutoBoilerRightWhileMiddle,
-		
-		
-		//**************LOADING-BASED FUNCTIONS**************
-		
-		//Loading Only
-		loadingOnlyLeft,
-		loadingOnlyLeftWhileMiddle,
-		loadingOnlyRight,
-		loadingOnlyRightWhileMiddle,
-		
-		//Gear and Loading
-		gearMiddleLoadingLeft,
-		gearMiddleLoadingRight,
-		gearLoadingLeft,
-		gearLoadingLeftWhileMiddle,
-		gearLoadingRight,
-		gearLoadingRightWhileMiddle,
-		
-		//Hopper and Loading
-		hopperLoadingLeft,
-		hopperLoadingLeftWhileMiddle,
-		hopperLoadingRight,
-		hopperLoadingRightWhileMiddle,
-		
-		//Hopper and Gear
-		gearMiddleHopperLoadingLeft,
-		gearMiddleHopperLoadingRight,
-		gearHopperLoadingLeft,
-		gearHopperLoadingLeftWhileMiddle,
-		gearHopperLoadingRight,
-		gearHopperLoadingRightWhileMiddle,
-		
-		//**************************************************************
-		turnMacroTest,
-		noStringNoMove,
-		
-		test,
-	}
 	
 	RobotStates autoMode; 
 	
@@ -328,43 +207,7 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	
-	private void toggleShooterMotor() {
-		
-		// SHOOTER + BLOCK PNEUMATIC
-
-		if (logitechRightBumper2.get()) {
-			if (!wasPressedRightBumper) {
-				shouldBeRunningShooter = !shouldBeRunningShooter;
-			}
-			wasPressedRightBumper = true;
-		} else {
-			wasPressedRightBumper = false;
-		}
-
-		if(rotationRate >= 19000){
-			spinUpComplete = true;
-		} else {
-			spinUpComplete = false;
-		}
-		
-		if(shouldBeRunningShooter && !spinUpComplete){
-			shooterRight.set(.62);
-			shooterLeft.set(-.62);
-		
-		} else if (shouldBeRunningShooter && spinUpComplete) {
-			rotationRate = shooterRightEnc.getRate();
-			shooterSpeedCorrection = (19200-rotationRate)/5000;   //.62 is 19200, .65 is 20000, .61 is 19000
-			shooterRight.set(.65+shooterSpeedCorrection);
-			shooterLeft.set(-.65+shooterSpeedCorrection);
-			System.out.println("Rotation Rate: " + rotationRate);
-			System.out.println("Power Correction: " + shooterSpeedCorrection);
-			
-		} else {
-			shooterRight.set(0);
-		    shooterLeft.set(0);
-		}
-		
-	}
+	
 	/*
 	private void toggleIntake() {
 		
@@ -803,7 +646,7 @@ public class Robot extends IterativeRobot {
     	encoderCreep(000);
     }
 
-    public void shootAutonomous(double shootTime){
+    /*public void shootAutonomous(double shootTime){
     	if(rotationRate >= 19000){
 			spinUpComplete = true;
 		} else {
@@ -824,9 +667,8 @@ public class Robot extends IterativeRobot {
 		} else {
 			shooterRight.set(0);
 		    shooterLeft.set(0);
-			
 		}
-    }
+    }*/
 
 
     public void robotInit() {
@@ -849,25 +691,12 @@ public class Robot extends IterativeRobot {
 
 		// Accessory motors
 		intake = new Victor(Map.intakeMotor);
-		shooterRight = new Spark(Map.rightShooterMotor);
-		shooterLeft = new Spark(Map.leftShooterMotor);
+		
 		climberLeft = new Victor(Map.leftClimberMotor);
 		climberRight = new Victor(Map.rightClimberMotor);
+		
 		elevator = new Victor(Map.elevatorMotor);
 
-		// Encoder inits and instantiations
-		shooterRightEnc = new Encoder(
-			Map.shooterEncoderChannelA,
-			Map.shooterEncoderChannelB,
-			true,
-			Encoder.EncodingType.k4X
-		);
-		
-		shooterRightEnc.setMaxPeriod(1);
-		shooterRightEnc.setDistancePerPulse(36);
-		shooterRightEnc.setMinRate(10);
-		shooterRightEnc.setSamplesToAverage(32);
-		
 		drive = new Encoder(
 			Map.driveEncoderChannelA,
 			Map.driveEncoderChannelB,
@@ -1810,19 +1639,19 @@ public class Robot extends IterativeRobot {
 				break;
 			case shootOnlyBoilerLeft:
 				gotoBoilerLeftWhileLeftPosition();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case shootOnlyBoilerLeftWhileMiddle:
 				gotoBoilerLeftWhileMiddlePosition();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case shootOnlyBoilerRight:
 				gotoBoilerRightWhileRightPosition();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case shootOnlyBoilerRightWhileMiddle:
 				gotoBoilerRightWhileMiddlePosition();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case hopperOnlyBoilerLeft:
 				gotoBoilerLeftWhileLeftPosition();
@@ -1847,60 +1676,60 @@ public class Robot extends IterativeRobot {
 			case gearMiddleShootBoilerLeft: //Priority
 				gearMiddle();
 				gotoBoilerLeftFromMiddleGear();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearMiddleShootBoilerRight: //Priority
 				gearMiddle();
 				gotoBoilerRightFromMiddleGear();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearShootBoilerLeft:
 				gotoBoilerLeftWhileLeftPosition();
 				gearLeftWhileBoiler();
 				returnGearLeftWhileBoiler();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearShootBoilerLeftWhileMiddle:
 				gotoBoilerLeftWhileMiddlePosition();
 				gearLeftWhileBoiler();
 				returnGearLeftWhileBoiler();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearShootBoilerRight:
 				gotoBoilerRightWhileRightPosition();
 				gearRightWhileBoiler();
 				returnGearRightWhileBoiler();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearShootBoilerRightWhileMiddle:
 				gotoBoilerRightWhileMiddlePosition();
 				gearRightWhileBoiler();
 				returnGearRightWhileBoiler();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case hopperShootBoilerLeft:
 				gotoBoilerLeftWhileLeftPosition();
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case hopperShootBoilerLeftWhileMiddle:
 				gotoBoilerLeftWhileMiddlePosition();
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case hopperShootBoilerRight:
 				gotoBoilerRightWhileRightPosition();
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case hopperShootBoilerRightWhileMiddle:
 				gotoBoilerRightWhileMiddlePosition();
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearMiddleHopperBoilerLeft:
 				gearMiddle();
@@ -1941,14 +1770,14 @@ public class Robot extends IterativeRobot {
 				gotoBoilerLeftFromMiddleGear();
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearMiddleHopperShootBoilerRight:
 				gearMiddle();
 				gotoBoilerRightFromMiddleGear();
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearHopperShootBoilerLeft:
 				gotoBoilerLeftWhileLeftPosition();
@@ -1956,7 +1785,7 @@ public class Robot extends IterativeRobot {
 				returnGearLeftWhileBoiler();
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearHopperShootBoilerLeftWhileMiddle:
 				gotoBoilerLeftWhileMiddlePosition();
@@ -1964,7 +1793,7 @@ public class Robot extends IterativeRobot {
 				returnGearLeftWhileBoiler();
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearHopperShootBoilerRight:
 				gotoBoilerRightWhileRightPosition();
@@ -1972,7 +1801,7 @@ public class Robot extends IterativeRobot {
 				returnGearRightWhileBoiler();
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case gearHopperShootBoilerRightWhileMiddle:
 				gotoBoilerRightWhileMiddlePosition();
@@ -1980,87 +1809,87 @@ public class Robot extends IterativeRobot {
 				returnGearRightWhileBoiler();
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case shootHopperShootBoilerLeft:
 				gotoBoilerLeftWhileLeftPosition();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case shootHopperShootBoilerLeftWhileMiddle:
 				gotoBoilerLeftWhileMiddlePosition();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case shootHopperShootBoilerRight:
 				gotoBoilerRightWhileRightPosition();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case shootHopperShootBoilerRightWhileMiddle:
 				gotoBoilerRightWhileMiddlePosition();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case ultimateAutoGearMiddleBoilerLeft:
 				gearMiddle();
 				gotoBoilerLeftFromMiddleGear();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case ultimateAutoGearMiddleBoilerRight:
 				gearMiddle();
 				gotoBoilerRightFromMiddleGear();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case ultimateAutoBoilerLeft:
 				gotoBoilerLeftWhileLeftPosition();
 				gearLeftWhileBoiler();
 				returnGearLeftWhileBoiler();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case ultimateAutoBoilerLeftWhileMiddle:
 				gotoBoilerLeftWhileMiddlePosition();
 				gearLeftWhileBoiler();
 				returnGearLeftWhileBoiler();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerLeft();
 				returnHopperWhileBoilerLeft();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case ultimateAutoBoilerRight:
 				gotoBoilerRightWhileRightPosition();
 				gearRightWhileBoiler();
 				returnGearRightWhileBoiler();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case ultimateAutoBoilerRightWhileMiddle:
 				gotoBoilerRightWhileMiddlePosition();
 				gearRightWhileBoiler();
 				returnGearRightWhileBoiler();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				hopperWhileBoilerRight();
 				returnHopperWhileBoilerRight();
-				shootAutonomous(0);
+				//shootAutonomous(0);
 				break;
 			case loadingOnlyLeft:
 				gotoLoadingLeftWhileLeftPosition();
@@ -2189,15 +2018,6 @@ public class Robot extends IterativeRobot {
 
 		Scheduler.getInstance().run();
 		
-		compressor.setClosedLoopControlOn();
-		
-		rotationCount = shooterRightEnc.get();
-		rotationRate = shooterRightEnc.getRate();
-		//double distance = shooterRightEnc.getDistance();
-		boolean direction = shooterRightEnc.getDirection();
-		boolean stopped = shooterRightEnc.getStopped();
-		rotationPeriod = shooterRightEnc.getRaw();
-		
 		distance = drive.getDistance();
 		
 		rotationCountForDrive = drive.get();
@@ -2237,6 +2057,7 @@ public class Robot extends IterativeRobot {
 		if(logitechY.get()){
 			driveState = false;           //STATE CHANGE CODE
 		}
+		
 		if(driveState){
 			dualStick();
 		}
@@ -2270,7 +2091,7 @@ public class Robot extends IterativeRobot {
 
 		testForCorrectionMode();
 
-		toggleShooterMotor();
+		//toggleShooterMotor();
 
 		//toggleIntake();
 		

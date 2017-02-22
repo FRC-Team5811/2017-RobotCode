@@ -19,7 +19,8 @@ public class CompressorSubsystem extends Subsystem {
 	public CompressorSubsystem() {
 		// compressor port init
 		compressor = new Compressor(Map.CompressorChannel);
-		this.setClosedLoopControlOff();
+		//this.setClosedLoopControlOff();
+		this.setClosedLoopControlOn();
 	}
 	
 	public void setClosedLoopControlOn(){
