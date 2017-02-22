@@ -10,10 +10,10 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 public class PowerManagement extends Subsystem {
 	
 	// power distribution panel
-	PowerDistributionPanel power = new PowerDistributionPanel();
+	PowerDistributionPanel power;
 
-	public PowerManagement() {
-		// TODO Auto-generated constructor stub
+	public PowerManagement(PowerDistributionPanel panel) {
+		power = panel;
 	}
 
 	@Override

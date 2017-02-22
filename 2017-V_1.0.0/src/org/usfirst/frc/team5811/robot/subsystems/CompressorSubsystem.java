@@ -16,10 +16,9 @@ public class CompressorSubsystem extends Subsystem {
 		// setDefaultCommand(new MySpecialCommand());
 	}
 	
-	public CompressorSubsystem() {
+	public CompressorSubsystem(Compressor _compressor) {
 		// compressor port init
-		compressor = new Compressor(Map.CompressorChannel);
-		//this.setClosedLoopControlOff();
+		compressor = _compressor;
 		this.setClosedLoopControlOn();
 	}
 	
