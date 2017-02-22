@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 
-	public static OI oi;
+	public static Controls oi;
 	
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
@@ -673,7 +673,7 @@ public class Robot extends IterativeRobot {
 
     public void robotInit() {
 
-		oi = new OI();
+		oi = new Controls();
 		chooser = new SendableChooser();
 		chooser.addDefault("Default Auto", new ExampleCommand());
 		// chooser.addObject("My Auto", new MyAutoCommand());
