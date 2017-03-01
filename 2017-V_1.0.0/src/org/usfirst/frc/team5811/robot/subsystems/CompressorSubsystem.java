@@ -3,7 +3,7 @@ package org.usfirst.frc.team5811.robot.subsystems;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import edu.wpi.first.wpilibj.Compressor;
 
-import org.usfirst.frc.team5811.robot.Map;
+import org.usfirst.frc.team5811.robot.RobotMap;
 
 public class CompressorSubsystem extends Subsystem {
 	// Put methods for controlling this subsystem

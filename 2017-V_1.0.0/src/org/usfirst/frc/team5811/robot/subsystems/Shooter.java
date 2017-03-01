@@ -1,6 +1,6 @@
 package org.usfirst.frc.team5811.robot.subsystems;
 
-import org.usfirst.frc.team5811.robot.Map;
+import org.usfirst.frc.team5811.robot.RobotMap;
 import org.usfirst.frc.team5811.robot.RobotStates;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -26,16 +26,16 @@ public class Shooter extends Subsystem {
 		// NAME, P, I, D
 		//super("Shooter", 2.0, 0.0, 0.0);
 		
-		shooterRight = new Spark(Map.rightShooterMotor);
-		shooterLeft = new Spark(Map.leftShooterMotor);
+		shooterRight = new Spark(RobotMap.rightShooterMotor);
+		shooterLeft = new Spark(RobotMap.leftShooterMotor);
 		
 		//motor is inverted control
 		shooterLeft.setInverted(true);
 		
 		// Encoder inits and instantiations
 		shooterEncoder = new Encoder(
-			Map.shooterEncoderChannelA,
-			Map.shooterEncoderChannelB,
+			RobotMap.shooterEncoderChannelA,
+			RobotMap.shooterEncoderChannelB,
 			true,
 			Encoder.EncodingType.k4X
 		);

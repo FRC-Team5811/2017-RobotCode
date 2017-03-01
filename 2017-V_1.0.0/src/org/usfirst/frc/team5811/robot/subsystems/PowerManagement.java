@@ -1,7 +1,7 @@
 
 package org.usfirst.frc.team5811.robot.subsystems;
 
-import org.usfirst.frc.team5811.robot.Map;
+import org.usfirst.frc.team5811.robot.RobotMap;
 
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -22,35 +22,35 @@ public class PowerManagement extends Subsystem {
 	}
 	
 	public double elevator(){
-		return power.getCurrent(Map.PDPElevatorChannel);
+		return power.getCurrent(RobotMap.PDPElevatorChannel);
 	}
 	
 	public double intake(){
-		return power.getCurrent(Map.PDPIntakeChannel);
+		return power.getCurrent(RobotMap.PDPIntakeChannel);
 	}
 	
 	public double frontRightDrive(){
-		return power.getCurrent(Map.PDPFrontRightMotorChannel);
+		return power.getCurrent(RobotMap.PDPFrontRightMotorChannel);
 	}
 	
 	public double backRightDrive(){
-		return power.getCurrent(Map.PDPBackRightMotorChannel);
+		return power.getCurrent(RobotMap.PDPBackRightMotorChannel);
 	}
 	
 	public double frontLeftDrive(){
-		return power.getCurrent(Map.PDPFrontLeftMotorChannel);
+		return power.getCurrent(RobotMap.PDPFrontLeftMotorChannel);
 	}
 	
 	public double backLeftDrive(){
-		return power.getCurrent(Map.PDPBackLeftMotorChannel);
+		return power.getCurrent(RobotMap.PDPBackLeftMotorChannel);
 	}
 	
 	public double climber1(){
-		return power.getCurrent(Map.PDPClimber1MotorChannel);
+		return power.getCurrent(RobotMap.PDPClimber1MotorChannel);
 	}
 	
 	public double climber2(){
-		return power.getCurrent(Map.PDPClimber2MotorChannel);
+		return power.getCurrent(RobotMap.PDPClimber2MotorChannel);
 	}
 
 }

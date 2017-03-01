@@ -24,7 +24,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 
-	public static Controls oi = new Controls();
+	public static Controls oi;
+	public static RobotMap map;
+	
 	public static Climber climber;
 	public static PowerManagement power;
 	public static CompressorSubsystem compressor;
@@ -380,13 +382,15 @@ public class Robot extends IterativeRobot {
 
 
     public void robotInit() {
-    	
-    	compressor = new CompressorSubsystem(new Compressor(Map.CompressorChannel));
+    	//this should be first as nothing can exist without it
+    	map = new RobotMap();
+    	    	
+    	compressor = new CompressorSubsystem(new Compressor(RobotMap.CompressorChannel));
     	power = new PowerManagement(new PowerDistributionPanel());
     	
     	climber = new Climber(
-    		new Victor(Map.leftClimberMotor), 
-    		new Victor(Map.rightClimberMotor)
+    		new Victor(RobotMap.leftClimberMotor), 
+    		new Victor(RobotMap.rightClimberMotor)
     	);
 
 		chooser = new SendableChooser();
@@ -400,19 +404,19 @@ public class Robot extends IterativeRobot {
 		autoMode = RobotStates.noStringNoMove;
 
 		// Motor port instantiating
-		frontLeftDriveMotor = new Victor(Map.frontLeftDriveMotor);
-		frontRightDriveMotor = new Victor(Map.frontRightDriveMotor);
-		backLeftDriveMotor = new Victor(Map.backLeftDriveMotor);
-		backRightDriveMotor = new Victor(Map.backRightDriveMotor);
+		frontLeftDriveMotor = new Victor(RobotMap.frontLeftDriveMotor);
+		frontRightDriveMotor = new Victor(RobotMap.frontRightDriveMotor);
+		backLeftDriveMotor = new Victor(RobotMap.backLeftDriveMotor);
+		backRightDriveMotor = new Victor(RobotMap.backRightDriveMotor);
 
 		// Accessory motors
-		intake = new Victor(Map.intakeMotor);
+		intake = new Victor(RobotMap.intakeMotor);
 		
-		elevator = new Victor(Map.elevatorMotor);
+		elevator = new Victor(RobotMap.elevatorMotor);
 
 		drive = new Encoder(
-			Map.driveEncoderChannelA,
-			Map.driveEncoderChannelB,
+			RobotMap.driveEncoderChannelA,
+			RobotMap.driveEncoderChannelB,
 			true,
 			Encoder.EncodingType.k4X
 		);
@@ -423,10 +427,10 @@ public class Robot extends IterativeRobot {
 		drive.setSamplesToAverage(32);
 
 		
-		shifterCylinder = new DoubleSolenoid(Map.shifterForwardChannel, Map.shifterBackwardChannel);
+		shifterCylinder = new DoubleSolenoid(RobotMap.shifterForwardChannel, RobotMap.shifterBackwardChannel);
 		shifterCylinder.set(DoubleSolenoid.Value.kForward);
 		
-		reservoirCylinder = new DoubleSolenoid(Map.reservoirForwardChannel, Map.reservoirBackwardChannel);
+		reservoirCylinder = new DoubleSolenoid(RobotMap.reservoirForwardChannel, RobotMap.reservoirBackwardChannel);
 		reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 
 		
@@ -457,6 +461,8 @@ public class Robot extends IterativeRobot {
 		
 		driveState = true;
 		
+		
+		oi = new Controls();
 		
 		// NavX instantiation
 		try {
