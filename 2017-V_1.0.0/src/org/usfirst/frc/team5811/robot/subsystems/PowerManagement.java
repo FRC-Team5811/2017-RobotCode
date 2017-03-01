@@ -49,7 +49,7 @@ public class PowerManagement extends Subsystem {
 		return power.getCurrent(Map.PDPClimber1MotorChannel);
 	}
 	
-public double climber2(){
+	public double climber2(){
 		return power.getCurrent(Map.PDPClimber2MotorChannel);
 	}
 

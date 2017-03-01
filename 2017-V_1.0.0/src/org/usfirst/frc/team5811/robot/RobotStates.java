@@ -1,6 +1,6 @@
 package org.usfirst.frc.team5811.robot;
 
-enum RobotStates{
+public enum RobotStates{
 	/*
 	 * How to read: (sequence of methods [i.e. shootgear = shoot then place gear])
 	 * + (location on field where interaction occurs [i.e. Boiler is at the Boiler])

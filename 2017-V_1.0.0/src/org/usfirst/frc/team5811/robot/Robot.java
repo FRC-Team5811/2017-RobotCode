@@ -12,12 +12,10 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
-import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -26,7 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends IterativeRobot {
 
-	public static Controls oi;
+	public static Controls oi = new Controls();
 	public static Climber climber;
 	public static PowerManagement power;
 	public static CompressorSubsystem compressor;
@@ -35,39 +33,8 @@ public class Robot extends IterativeRobot {
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
 
-	// Controllers
-	Joystick joyStickLeft;
-	Joystick joyStickRight;
-
 	// NavX
 	AHRS ahrs;
-
-	// Buttons
-	JoystickButton logitechY;
-	JoystickButton logitechA;
-	JoystickButton logitechX;
-	JoystickButton logitechB;
-	JoystickButton logitechLeftBumper;
-	JoystickButton logitechRightBumper;
-	JoystickButton logitechLeftStickPress;
-	JoystickButton logitechRightStickPress;
-	JoystickButton logitechStart;
-	JoystickButton logitechBack;
-	JoystickButton logitechRightTrigger;
-	JoystickButton logitechLeftTrigger;
-	
-	JoystickButton logitechY2;
-	JoystickButton logitechA2;
-	JoystickButton logitechX2;
-	JoystickButton logitechB2;
-	JoystickButton logitechLeftBumper2;
-	JoystickButton logitechRightBumper2;
-	JoystickButton logitechLeftStickPress2;
-	JoystickButton logitechRightStickPress2;
-	JoystickButton logitechStart2;
-	JoystickButton logitechBack2;
-	JoystickButton logitechRightTrigger2;
-	JoystickButton logitechLeftTrigger2;
 
 	// Motors
 	Victor frontLeftDriveMotor;
@@ -146,11 +113,11 @@ public class Robot extends IterativeRobot {
 	float macroPos;
 	
 	private void dualStick(){
-		arcadeDrive(-joyStickLeft.getRawAxis(1),joyStickLeft.getRawAxis(2));
+		arcadeDrive(-Controls.joyStickLeft.getRawAxis(1),Controls.joyStickLeft.getRawAxis(2));
 	}
 	private void slowMove(double reduction){
 		shifterCylinder.set(DoubleSolenoid.Value.kForward);
-		arcadeDrive((-joyStickLeft.getRawAxis(1)*reduction), (joyStickLeft.getRawAxis(2)*reduction));
+		arcadeDrive((-Controls.joyStickLeft.getRawAxis(1)*reduction), (Controls.joyStickLeft.getRawAxis(2)*reduction));
 	}
 	
 	public void intakeOnOff(double speed){
@@ -184,7 +151,7 @@ public class Robot extends IterativeRobot {
 	
 	private void testForCorrectionMode() {
 		// CORRECTION MODE
-		if (logitechBack.get()) {
+		if (Controls.logitechBack.get()) {
 			if (!wasPressedBackButton) {
 				rotationPos = (float) ahrs.getAngle();
 				shouldBeRunningCorrect = !shouldBeRunningCorrect;
@@ -231,13 +198,13 @@ public class Robot extends IterativeRobot {
 	*/
 	
 	private void checkClimberState(){
-		climber.set(joyStickRight.getY());
+		climber.set(Controls.joyStickRight.getY());
 	} 
 	
 	private void toggleElevator() {
 		
 		// ELEVATOR
-		if (logitechX2.get()) {
+		if (Controls.logitechX2.get()) {
 			if (!wasPressedLogitechX) {
 				shouldBeRunningElevator = !shouldBeRunningElevator;
 			}
@@ -256,7 +223,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	private void toggleResExpansion(){
-		if (logitechY2.get()) {
+		if (Controls.logitechY2.get()) {
 			if (!wasPressedLogitechB) {
 				shouldBeRunningGearTray = !shouldBeRunningGearTray;
 			}
@@ -304,11 +271,11 @@ public class Robot extends IterativeRobot {
 	} 
 	*/
 	private void checkShift(){
-		if(logitechRightBumper.get()){
+		if(Controls.logitechRightBumper.get()){
 			shifterDelay();
 			shifterCylinder.set(DoubleSolenoid.Value.kForward);
 		}
-		if(logitechLeftBumper.get()){
+		if(Controls.logitechLeftBumper.get()){
 			shifterDelay();
 			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		}
@@ -411,10 +378,6 @@ public class Robot extends IterativeRobot {
 		}
     }
 
- 
-
-
-
 
     public void robotInit() {
     	
@@ -426,13 +389,12 @@ public class Robot extends IterativeRobot {
     		new Victor(Map.rightClimberMotor)
     	);
 
-
-		oi = new Controls();
 		chooser = new SendableChooser();
 		chooser.addDefault("Default Auto", new ExampleCommand());
 		// chooser.addObject("My Auto", new MyAutoCommand());
 		chooser.addObject("My Auto", "My Auto");
 		SmartDashboard.putData("Auto mode", chooser);
+		
 		System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
 		
 		autoMode = RobotStates.noStringNoMove;
@@ -459,51 +421,6 @@ public class Robot extends IterativeRobot {
 		drive.setDistancePerPulse(36);
 		drive.setMinRate(10);
 		drive.setSamplesToAverage(32);
-
-
-		joyStickLeft = new Joystick(Map.joystickDriverSlot);
-		joyStickRight = new Joystick(Map.joystickManipulatorSlot);
-
-		// BUTTON MAPPING. REASON ITS HERE IS BECAUSE IT WAS WRONG AND THESE ARE
-		// THE CORRECT VALUES
-		// back button 9
-		// left stick 11
-		// right stick 12
-		// start 10
-		// lefttrigger 7
-		// righttrigger 8
-		// leftbumper 5
-		// rightbumper 6
-		// y 4
-		// b 3
-		// a 2
-		// x 1
-
-		logitechY = new JoystickButton(joyStickLeft, 4);
-		logitechA = new JoystickButton(joyStickLeft, 2);
-		logitechX = new JoystickButton(joyStickLeft, 1);
-		logitechB = new JoystickButton(joyStickLeft, 3);
-		logitechLeftBumper = new JoystickButton(joyStickLeft, 5);
-		logitechRightBumper = new JoystickButton(joyStickLeft, 6);
-		logitechLeftStickPress = new JoystickButton(joyStickLeft, 11);
-		logitechRightStickPress = new JoystickButton(joyStickLeft,12);
-		logitechStart = new JoystickButton(joyStickLeft, 10);
-		logitechBack = new JoystickButton(joyStickLeft, 9);
-		logitechRightTrigger = new JoystickButton(joyStickLeft, 8);
-		logitechLeftTrigger = new JoystickButton(joyStickLeft,7);
-		
-		logitechY2 = new JoystickButton(joyStickRight, 4);
-		logitechA2= new JoystickButton(joyStickRight, 2);
-		logitechX2 = new JoystickButton(joyStickRight, 1);
-		logitechB2 = new JoystickButton(joyStickRight, 3);
-		logitechLeftBumper2 = new JoystickButton(joyStickRight, 5);
-		logitechRightBumper2 = new JoystickButton(joyStickRight, 6);
-		logitechLeftStickPress2 = new JoystickButton(joyStickRight, 11);
-		logitechRightStickPress2 = new JoystickButton(joyStickRight,12);
-		logitechStart2 = new JoystickButton(joyStickRight, 10);
-		logitechBack2 = new JoystickButton(joyStickRight, 9);
-		logitechRightTrigger2 = new JoystickButton(joyStickRight, 8);
-		logitechLeftTrigger2 = new JoystickButton(joyStickRight,7);
 
 		
 		shifterCylinder = new DoubleSolenoid(Map.shifterForwardChannel, Map.shifterBackwardChannel);
@@ -600,7 +517,6 @@ public class Robot extends IterativeRobot {
 		
 		cycleCounter = 0;
 		driveMotors(0, 0);
-	   //autoSelecter = SmartDashboard.getNumber("DB/Slider 0", 0.0);
 		
 	}
 
@@ -648,20 +564,20 @@ public class Robot extends IterativeRobot {
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
 		
-		if(logitechA2.get()){
+		if(Controls.logitechA2.get()){
 			intakeOnOff(.5);         //INTAKE CODE 
 			shouldBeRunningIntake = true;
 		}
-		else if(logitechB2.get()){
+		else if(Controls.logitechB2.get()){
 			intakeOnOff(0);
 			shouldBeRunningIntake = false;
 		}
 		
 		
-		if(logitechX.get()){
+		if(Controls.logitechX.get()){
 			driveState = true;
 		}
-		if(logitechY.get()){
+		if(Controls.logitechY.get()){
 			driveState = false;           //STATE CHANGE CODE
 		}
 		
@@ -680,7 +596,6 @@ public class Robot extends IterativeRobot {
 				intakeOnOff(-0.6);
 			} else if (intake < 24) {
 				intakeOnOff(-0.85);
-
 			}
 		}
 

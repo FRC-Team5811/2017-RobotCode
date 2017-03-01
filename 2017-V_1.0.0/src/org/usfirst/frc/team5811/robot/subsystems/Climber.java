@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import org.usfirst.frc.team5811.interfaces.*;
 
-public class Climber extends Subsystem implements BiDirectionalElement{
+public class Climber extends Subsystem {
 	
 	private Victor leftMotor;
 	private Victor rightMotor;
@@ -19,24 +19,20 @@ public class Climber extends Subsystem implements BiDirectionalElement{
 	@Override
 	protected void initDefaultCommand() {}
 
-	@Override
 	public void stop() {
 		leftMotor.set(speed);
 		rightMotor.set(speed);
 	}
 
-	@Override
 	public void set(double rate) {
 		speed = rate;
 	}
 
-	@Override
 	public void inward() {
 		leftMotor.set(speed);
 		rightMotor.set(speed);
 	}
 
-	@Override
 	public void outward() {
 		leftMotor.set(speed);
 		rightMotor.set(speed);
