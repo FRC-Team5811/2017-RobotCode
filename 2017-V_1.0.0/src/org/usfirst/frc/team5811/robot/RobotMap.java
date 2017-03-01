@@ -1,5 +1,10 @@
 package org.usfirst.frc.team5811.robot;
 
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.Spark;
+import edu.wpi.first.wpilibj.Victor;
+
 /**
  * The RobotMap is a mapping from the ports sensors and actuators are wired into
  * to a variable name. This provides flexibility changing wiring, makes checking
@@ -8,34 +13,34 @@ package org.usfirst.frc.team5811.robot;
  */
 public class RobotMap {
 	
-	public static int frontLeftDriveMotor = 9;
-	public static int frontRightDriveMotor = 4;
-	public static int backLeftDriveMotor = 8;
-	public static int backRightDriveMotor = 3;
+	// Motors
+	public static Victor frontLeftDriveMotor;
+	public static Victor frontRightDriveMotor;
+	public static Victor backLeftDriveMotor;
+	public static Victor backRightDriveMotor;
 	
-	public static int intakeMotor = 2;
-	public static int rightShooterMotor = 0;
-	public static int leftShooterMotor = 5;
+	public static Victor intakeMotor;
+
+	public static Victor elevatorMotor;
 	
-	public static int leftClimberMotor = 1;
-	public static int rightClimberMotor = 7;
+	public static Encoder driveEncoder;
 	
-	public static int elevatorMotor = 6;
+	public static DoubleSolenoid shifterCylinder;
 	
-	public static int shooterEncoderChannelA = 0;
-	public static int shooterEncoderChannelB = 1;
+	public static DoubleSolenoid reservoirCylinder;
 	
-	public static int driveEncoderChannelA = 2;
-	public static int driveEncoderChannelB = 3;
 	
+	public static Encoder shooterEncoder;
+	public static Spark rightShooterMotor;
+	public static Spark leftShooterMotor;
+	
+	public static Victor leftClimberMotor;
+	public static Victor rightClimberMotor;
+	
+	
+	//magic numbers of things/ports that are created elsewhere
 	public static int joystickDriverSlot = 0;
 	public static int joystickManipulatorSlot = 1;
-	
-	public static int shifterForwardChannel = 2;
-	public static int shifterBackwardChannel = 3;
-	
-	public static int reservoirForwardChannel = 6;
-	public static int reservoirBackwardChannel = 7;
 	
 	public static int CompressorChannel = 0;
 	
@@ -48,4 +53,43 @@ public class RobotMap {
 	public static int PDPClimber1MotorChannel = 12;
 	public static int PDPClimber2MotorChannel = 2;
 	
+	//create all the static references...
+	public RobotMap(){
+		// Motor port instantiating
+		frontLeftDriveMotor = new Victor(9);
+		frontRightDriveMotor = new Victor(4);
+		backLeftDriveMotor = new Victor(8);
+		backRightDriveMotor = new Victor(3);
+		
+		intakeMotor = new Victor(2);
+		
+		elevatorMotor = new Victor(6);
+		
+		driveEncoder = new Encoder(2,3,true,Encoder.EncodingType.k4X);
+		driveEncoder.setMaxPeriod(1);
+		driveEncoder.setDistancePerPulse(36);
+		driveEncoder.setMinRate(10);
+		driveEncoder.setSamplesToAverage(32);
+		
+		leftClimberMotor = new Victor(1);
+		rightClimberMotor = new Victor(7);
+		
+		shifterCylinder = new DoubleSolenoid(2, 3);
+		shifterCylinder.set(DoubleSolenoid.Value.kForward);
+		
+		reservoirCylinder = new DoubleSolenoid(6, 7);
+		reservoirCylinder.set(DoubleSolenoid.Value.kForward);
+		
+		rightShooterMotor = new Spark(0);
+		leftShooterMotor = new Spark(5);
+		//motor is inverted control
+		leftShooterMotor.setInverted(true);
+		
+		// Encoder inits and instantiations
+		shooterEncoder = new Encoder(0,1,true,Encoder.EncodingType.k4X);
+		shooterEncoder.setMaxPeriod(1);
+		shooterEncoder.setDistancePerPulse(36);
+		shooterEncoder.setMinRate(10);
+		shooterEncoder.setSamplesToAverage(32);
+	}
 }

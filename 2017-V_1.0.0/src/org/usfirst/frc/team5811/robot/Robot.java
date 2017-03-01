@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.SerialPort;
@@ -37,19 +36,6 @@ public class Robot extends IterativeRobot {
 
 	// NavX
 	AHRS ahrs;
-
-	// Motors
-	Victor frontLeftDriveMotor;
-	Victor frontRightDriveMotor;
-	Victor backLeftDriveMotor;
-	Victor backRightDriveMotor;
-	
-	Victor intake;
-	
-	Victor elevator;
-
-	// Encoder definitions and variables
-	Encoder drive;
 	
 	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 	
@@ -107,9 +93,6 @@ public class Robot extends IterativeRobot {
     boolean wasPressedStart;
 
 
-	// A cylinder
-	DoubleSolenoid shifterCylinder;
-	DoubleSolenoid reservoirCylinder;
 	
 	float rotationPos;
 	float macroPos;
@@ -118,12 +101,12 @@ public class Robot extends IterativeRobot {
 		arcadeDrive(-Controls.joyStickLeft.getRawAxis(1),Controls.joyStickLeft.getRawAxis(2));
 	}
 	private void slowMove(double reduction){
-		shifterCylinder.set(DoubleSolenoid.Value.kForward);
+		RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kForward);
 		arcadeDrive((-Controls.joyStickLeft.getRawAxis(1)*reduction), (Controls.joyStickLeft.getRawAxis(2)*reduction));
 	}
 	
 	public void intakeOnOff(double speed){
-		intake.set(speed);
+		RobotMap.intakeMotor.set(speed);
 	}
 	
 	/*
@@ -216,10 +199,10 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningElevator) {
-			elevator.set(-.3);
+			RobotMap.elevatorMotor.set(-.3);
 			SmartDashboard.putNumber("ELEVATOR ON", 101);
 		} else {
-			elevator.set(0);
+			RobotMap.elevatorMotor.set(0);
 			SmartDashboard.putNumber("ELEVATOR OFF", 101);
 		}
 	}
@@ -235,9 +218,9 @@ public class Robot extends IterativeRobot {
 		}
 
 		if (shouldBeRunningGearTray) {
-			reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
+			RobotMap.reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
 		} else {
-			reservoirCylinder.set(DoubleSolenoid.Value.kForward);
+			RobotMap.reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 		}
 	} 
 	public void shifterDelay(){
@@ -275,11 +258,11 @@ public class Robot extends IterativeRobot {
 	private void checkShift(){
 		if(Controls.logitechRightBumper.get()){
 			shifterDelay();
-			shifterCylinder.set(DoubleSolenoid.Value.kForward);
+			RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kForward);
 		}
 		if(Controls.logitechLeftBumper.get()){
 			shifterDelay();
-			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
+			RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		}
 	}
 
@@ -294,10 +277,10 @@ public class Robot extends IterativeRobot {
 	// SINGLE STICK DRIVE METHOD
 	private void driveMotors(double speedLeftDM, double speedRightDM) {
 		// System.out.println("Command: " + speedLeftDM);
-		frontLeftDriveMotor.set(-speedLeftDM);
-		backLeftDriveMotor.set(-speedLeftDM);
-		frontRightDriveMotor.set(speedRightDM);
-		backRightDriveMotor.set(speedRightDM);
+		RobotMap.frontLeftDriveMotor.set(-speedLeftDM);
+		RobotMap.backLeftDriveMotor.set(-speedLeftDM);
+		RobotMap.frontRightDriveMotor.set(speedRightDM);
+		RobotMap.backRightDriveMotor.set(speedRightDM);
 	}
 
 	// 2 STICK DRIVE METHOD
@@ -388,10 +371,7 @@ public class Robot extends IterativeRobot {
     	compressor = new CompressorSubsystem(new Compressor(RobotMap.CompressorChannel));
     	power = new PowerManagement(new PowerDistributionPanel());
     	
-    	climber = new Climber(
-    		new Victor(RobotMap.leftClimberMotor), 
-    		new Victor(RobotMap.rightClimberMotor)
-    	);
+    	climber = new Climber();
 
 		chooser = new SendableChooser();
 		chooser.addDefault("Default Auto", new ExampleCommand());
@@ -402,36 +382,6 @@ public class Robot extends IterativeRobot {
 		System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
 		
 		autoMode = RobotStates.noStringNoMove;
-
-		// Motor port instantiating
-		frontLeftDriveMotor = new Victor(RobotMap.frontLeftDriveMotor);
-		frontRightDriveMotor = new Victor(RobotMap.frontRightDriveMotor);
-		backLeftDriveMotor = new Victor(RobotMap.backLeftDriveMotor);
-		backRightDriveMotor = new Victor(RobotMap.backRightDriveMotor);
-
-		// Accessory motors
-		intake = new Victor(RobotMap.intakeMotor);
-		
-		elevator = new Victor(RobotMap.elevatorMotor);
-
-		drive = new Encoder(
-			RobotMap.driveEncoderChannelA,
-			RobotMap.driveEncoderChannelB,
-			true,
-			Encoder.EncodingType.k4X
-		);
-		
-		drive.setMaxPeriod(1);
-		drive.setDistancePerPulse(36);
-		drive.setMinRate(10);
-		drive.setSamplesToAverage(32);
-
-		
-		shifterCylinder = new DoubleSolenoid(RobotMap.shifterForwardChannel, RobotMap.shifterBackwardChannel);
-		shifterCylinder.set(DoubleSolenoid.Value.kForward);
-		
-		reservoirCylinder = new DoubleSolenoid(RobotMap.reservoirForwardChannel, RobotMap.reservoirBackwardChannel);
-		reservoirCylinder.set(DoubleSolenoid.Value.kForward);
 
 		
 		// Boolean Toggle Switch
@@ -461,7 +411,7 @@ public class Robot extends IterativeRobot {
 		
 		driveState = true;
 		
-		
+		//this should go last after all the subsystems have be initialized
 		oi = new Controls();
 		
 		// NavX instantiation
@@ -518,8 +468,8 @@ public class Robot extends IterativeRobot {
 		hopperPickup = SmartDashboard.getString("DB/String 7", "Pickup balls from hopper? yes or no");
 		
 		
-		shifterCylinder.set(DoubleSolenoid.Value.kReverse);
-		reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
+		RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kReverse);
+		RobotMap.reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
 		
 		cycleCounter = 0;
 		driveMotors(0, 0);
@@ -547,10 +497,10 @@ public class Robot extends IterativeRobot {
 
 		Scheduler.getInstance().run();
 		
-		distance = drive.getDistance();
+		distance = RobotMap.driveEncoder.getDistance();
 		
-		rotationCountForDrive = drive.get();
-		rotationRateForDrive = drive.getRate();
+		rotationCountForDrive = RobotMap.driveEncoder.get();
+		rotationRateForDrive = RobotMap.driveEncoder.getRate();
 		
 		System.out.println("************");
 		System.out.println(distance);
@@ -607,12 +557,12 @@ public class Robot extends IterativeRobot {
 
 		intake = power.elevator();
 		if (intake >= 28) {
-			elevator.set(0);
+			RobotMap.elevatorMotor.set(0);
 			Timer.delay(0.25);
 			if (intake >= 24 && intake <= 28) {
-				elevator.set(-0.15);
+				RobotMap.elevatorMotor.set(-0.15);
 			} else if (intake < 24) {
-				elevator.set(-0.3);
+				RobotMap.elevatorMotor.set(-0.3);
 			}
 		}
 		

@@ -56,8 +56,6 @@ public class Controls {
 	public static JoystickButton logitechRightTrigger2;
 	public static JoystickButton logitechLeftTrigger2;
 	
-
-	
 	public Controls(){
 		joyStickLeft = new Joystick(RobotMap.joystickDriverSlot);
 		joyStickRight = new Joystick(RobotMap.joystickManipulatorSlot);

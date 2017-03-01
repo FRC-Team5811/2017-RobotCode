@@ -15,9 +15,9 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Shooter extends Subsystem {
 	
-	Encoder shooterEncoder;
-	Spark shooterRight;
-	Spark shooterLeft;
+	Encoder shooterEncoder = RobotMap.shooterEncoder;
+	Spark shooterRight = RobotMap.rightShooterMotor;
+	Spark shooterLeft = RobotMap.leftShooterMotor;
 	
 	PIDController pid1;
 	PIDController pid2;
@@ -25,25 +25,6 @@ public class Shooter extends Subsystem {
 	public Shooter() {
 		// NAME, P, I, D
 		//super("Shooter", 2.0, 0.0, 0.0);
-		
-		shooterRight = new Spark(RobotMap.rightShooterMotor);
-		shooterLeft = new Spark(RobotMap.leftShooterMotor);
-		
-		//motor is inverted control
-		shooterLeft.setInverted(true);
-		
-		// Encoder inits and instantiations
-		shooterEncoder = new Encoder(
-			RobotMap.shooterEncoderChannelA,
-			RobotMap.shooterEncoderChannelB,
-			true,
-			Encoder.EncodingType.k4X
-		);
-		
-		shooterEncoder.setMaxPeriod(1);
-		shooterEncoder.setDistancePerPulse(36);
-		shooterEncoder.setMinRate(10);
-		shooterEncoder.setSamplesToAverage(32);
 		
 		//: The feedforward term is multiplied by the setpoint for
 		//the PID controller so that it scales with the desired output speed.
@@ -66,7 +47,7 @@ public class Shooter extends Subsystem {
 		pid2.setSetpoint(.62);
 	}
 	
-	public void disable(){
+	public void disable(){	
 		pid1.disable();
 		pid2.disable();
 	}

@@ -2,17 +2,15 @@ package org.usfirst.frc.team5811.robot.subsystems;
 
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.Subsystem;
-import org.usfirst.frc.team5811.interfaces.*;
+import org.usfirst.frc.team5811.robot.RobotMap;
 
 public class Climber extends Subsystem {
 	
-	private Victor leftMotor;
-	private Victor rightMotor;
+	private Victor leftMotor = RobotMap.leftClimberMotor;
+	private Victor rightMotor = RobotMap.rightClimberMotor;
 	private double speed;
 
-	public Climber(Victor left, Victor right) {
-		leftMotor = left;
-		rightMotor = right;
+	public Climber() {
 		speed = 0.8;
 	}
 
