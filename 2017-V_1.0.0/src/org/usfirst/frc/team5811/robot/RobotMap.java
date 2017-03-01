@@ -1,7 +1,10 @@
 package org.usfirst.frc.team5811.robot;
 
+import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Victor;
 
@@ -36,6 +39,9 @@ public class RobotMap {
 	
 	public static Victor leftClimberMotor;
 	public static Victor rightClimberMotor;
+	
+	// NavX
+	public static AHRS ahrs;
 	
 	
 	//magic numbers of things/ports that are created elsewhere
@@ -91,5 +97,14 @@ public class RobotMap {
 		shooterEncoder.setDistancePerPulse(36);
 		shooterEncoder.setMinRate(10);
 		shooterEncoder.setSamplesToAverage(32);
+		
+		// NavX instantiation
+		try {
+			ahrs = new AHRS(SerialPort.Port.kUSB);
+			//ahrs = new AHRS(I2C.Port.kMXP);
+		} catch (RuntimeException ex) {
+			System.out.println("NavX instantiation error");
+			DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
+		}
 	}
 }

@@ -3,18 +3,13 @@ package org.usfirst.frc.team5811.robot;
 import org.usfirst.frc.team5811.robot.commands.*;
 import org.usfirst.frc.team5811.robot.subsystems.*;
 
-import com.kauailabs.navx.frc.AHRS;
-
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -30,12 +25,8 @@ public class Robot extends IterativeRobot {
 	public static PowerManagement power;
 	public static CompressorSubsystem compressor;
 	
-	
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
-
-	// NavX
-	AHRS ahrs;
 	
 	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 	
@@ -92,17 +83,15 @@ public class Robot extends IterativeRobot {
     boolean shouldBeRunningAutoTurn;
     boolean wasPressedStart;
 
-
-	
 	float rotationPos;
 	float macroPos;
 	
 	private void dualStick(){
-		arcadeDrive(-Controls.joyStickLeft.getRawAxis(1),Controls.joyStickLeft.getRawAxis(2));
+		arcadeDrive(-Controls.driverJoystick.getRawAxis(1),Controls.driverJoystick.getRawAxis(2));
 	}
 	private void slowMove(double reduction){
 		RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kForward);
-		arcadeDrive((-Controls.joyStickLeft.getRawAxis(1)*reduction), (Controls.joyStickLeft.getRawAxis(2)*reduction));
+		arcadeDrive((-Controls.driverJoystick.getRawAxis(1)*reduction), (Controls.driverJoystick.getRawAxis(2)*reduction));
 	}
 	
 	public void intakeOnOff(double speed){
@@ -136,9 +125,9 @@ public class Robot extends IterativeRobot {
 	
 	private void testForCorrectionMode() {
 		// CORRECTION MODE
-		if (Controls.logitechBack.get()) {
+		if (Controls.driverBack.get()) {
 			if (!wasPressedBackButton) {
-				rotationPos = (float) ahrs.getAngle();
+				rotationPos = (float) RobotMap.ahrs.getAngle();
 				shouldBeRunningCorrect = !shouldBeRunningCorrect;
 			}
 			wasPressedBackButton = true;
@@ -183,13 +172,13 @@ public class Robot extends IterativeRobot {
 	*/
 	
 	private void checkClimberState(){
-		climber.set(Controls.joyStickRight.getY());
+		climber.set(Controls.manipulatorJoystick.getY());
 	} 
 	
 	private void toggleElevator() {
 		
 		// ELEVATOR
-		if (Controls.logitechX2.get()) {
+		if (Controls.manipulatorX.get()) {
 			if (!wasPressedLogitechX) {
 				shouldBeRunningElevator = !shouldBeRunningElevator;
 			}
@@ -208,7 +197,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	private void toggleResExpansion(){
-		if (Controls.logitechY2.get()) {
+		if (Controls.manipulatorY.get()) {
 			if (!wasPressedLogitechB) {
 				shouldBeRunningGearTray = !shouldBeRunningGearTray;
 			}
@@ -256,11 +245,11 @@ public class Robot extends IterativeRobot {
 	} 
 	*/
 	private void checkShift(){
-		if(Controls.logitechRightBumper.get()){
+		if(Controls.driverRightBumper.get()){
 			shifterDelay();
 			RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kForward);
 		}
-		if(Controls.logitechLeftBumper.get()){
+		if(Controls.driverLeftBumper.get()){
 			shifterDelay();
 			RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		}
@@ -289,8 +278,8 @@ public class Robot extends IterativeRobot {
 	}
 	
     private void turnMacro(float degrees){
-    	ahrs.reset();
-    	float nowRot = (float) ahrs.getAngle();
+    	RobotMap.ahrs.reset();
+    	float nowRot = (float) RobotMap.ahrs.getAngle();
     	double outputDirection;
     	double outputPower;
     	while(degrees+5 > nowRot && nowRot > degrees-5){
@@ -301,13 +290,13 @@ public class Robot extends IterativeRobot {
     		}
     		outputPower = outputDirection*(((nowRot-degrees)/200)+.1);
     		driveMotors(outputPower,-outputPower);
-    		nowRot = (float) ahrs.getAngle();
+    		nowRot = (float) RobotMap.ahrs.getAngle();
     	}
     }
     
     private void driveStraightFeet(float feet){
-    	ahrs.reset();
-    	float nowRot = (float) ahrs.getAngle();
+    	RobotMap.ahrs.reset();
+    	float nowRot = (float) RobotMap.ahrs.getAngle();
     	double outputDirection;
     	double outputPower;
     	//double currentLocation;
@@ -322,7 +311,7 @@ public class Robot extends IterativeRobot {
         		
         		outputPower = outputDirection*(((0-nowRot)/200)+.1);
         		driveMotors(outputPower + 0.8 ,outputPower + -0.8);
-        		nowRot = (float) ahrs.getAngle();
+        		nowRot = (float) RobotMap.ahrs.getAngle();
         	}
     	}
     	else{
@@ -352,7 +341,7 @@ public class Robot extends IterativeRobot {
 	// POSTITIONING
     //Spectre says HI 
 	private void correct() {
-		float nowRot = (float) ahrs.getAngle();
+		float nowRot = (float) RobotMap.ahrs.getAngle();
 		System.out.println(rotationPos);
 		System.out.println(nowRot);
 		if (nowRot >= rotationPos + 10) {
@@ -414,15 +403,6 @@ public class Robot extends IterativeRobot {
 		//this should go last after all the subsystems have be initialized
 		oi = new Controls();
 		
-		// NavX instantiation
-		try {
-			ahrs = new AHRS(SerialPort.Port.kUSB);
-			//ahrs = new AHRS(I2C.Port.kMXP); //WE WILL NEED I2C IN THE FUTURE.
-			// RIGHT NOW WE WILL STICK WITH USB
-		} catch (RuntimeException ex) {
-			System.out.println("NavX instantiation error");
-			DriverStation.reportError("Error instantiating navX MXP:  " + ex.getMessage(), true);
-		}
 		
 		SmartDashboard.putString("DB/String 0", "left, right, middle");
 		SmartDashboard.putString("DB/String 1", "red, blue");
@@ -438,11 +418,11 @@ public class Robot extends IterativeRobot {
 	private void dashboardDisplay() {
 		if (isOperatorControl() && isEnabled()) {
 
-			SmartDashboard.putNumber("IMU_TotalYaw", ahrs.getAngle());
+			SmartDashboard.putNumber("IMU_TotalYaw", RobotMap.ahrs.getAngle());
 
 			/* Connectivity Debugging Support */
-			SmartDashboard.putNumber("IMU_Byte_Count", ahrs.getByteCount());
-			SmartDashboard.putNumber("IMU_Update_Count", ahrs.getUpdateCount());
+			SmartDashboard.putNumber("IMU_Byte_Count", RobotMap.ahrs.getByteCount());
+			SmartDashboard.putNumber("IMU_Update_Count", RobotMap.ahrs.getUpdateCount());
 		}
 	}
 
@@ -507,7 +487,7 @@ public class Robot extends IterativeRobot {
 		System.out.println(rotationCountForDrive);
 		System.out.println(rotationRateForDrive);
 		System.out.println("************");
-		System.out.println("Angle: "+ ahrs.getAngle());
+		System.out.println("Angle: "+ RobotMap.ahrs.getAngle());
 		System.out.println("Elevator Current: "+power.elevator());
 		System.out.println("Intake Current: "+power.intake());
 		System.out.println("Front Right Drive Current: "+ power.frontRightDrive());
@@ -520,20 +500,20 @@ public class Robot extends IterativeRobot {
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
 		
-		if(Controls.logitechA2.get()){
+		if(Controls.manipulatorA.get()){
 			intakeOnOff(.5);         //INTAKE CODE 
 			shouldBeRunningIntake = true;
 		}
-		else if(Controls.logitechB2.get()){
+		else if(Controls.manipulatorB.get()){
 			intakeOnOff(0);
 			shouldBeRunningIntake = false;
 		}
 		
 		
-		if(Controls.logitechX.get()){
+		if(Controls.driverX.get()){
 			driveState = true;
 		}
-		if(Controls.logitechY.get()){
+		if(Controls.driverY.get()){
 			driveState = false;           //STATE CHANGE CODE
 		}
 		

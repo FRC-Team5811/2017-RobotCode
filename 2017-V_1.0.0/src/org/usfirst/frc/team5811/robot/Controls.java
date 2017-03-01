@@ -26,66 +26,66 @@ public class Controls {
 	// x 1
 	
 	// Controllers
-	public static Joystick joyStickLeft;
-	public static Joystick joyStickRight;
+	public static Joystick driverJoystick;
+	public static Joystick manipulatorJoystick;
 
 	// Buttons
-	public static JoystickButton logitechY;
-	public static JoystickButton logitechA;
-	public static JoystickButton logitechX;
-	public static JoystickButton logitechB;
-	public static JoystickButton logitechLeftBumper;
-	public static JoystickButton logitechRightBumper;
-	public static JoystickButton logitechLeftStickPress;
-	public static JoystickButton logitechRightStickPress;
-	public static JoystickButton logitechStart;
-	public static JoystickButton logitechBack;
-	public static JoystickButton logitechRightTrigger;
-	public static JoystickButton logitechLeftTrigger;
+	public static JoystickButton driverY;
+	public static JoystickButton driverA;
+	public static JoystickButton driverX;
+	public static JoystickButton driverB;
+	public static JoystickButton driverLeftBumper;
+	public static JoystickButton driverRightBumper;
+	public static JoystickButton driverLeftStick;
+	public static JoystickButton driverRightStick;
+	public static JoystickButton driverStart;
+	public static JoystickButton driverBack;
+	public static JoystickButton driverRightTrigger;
+	public static JoystickButton driverLeftTrigger;
 	
-	public static JoystickButton logitechY2;
-	public static JoystickButton logitechA2;
-	public static JoystickButton logitechX2;
-	public static JoystickButton logitechB2;
-	public static JoystickButton logitechLeftBumper2;
-	public static JoystickButton logitechRightBumper2;
-	public static JoystickButton logitechLeftStickPress2;
-	public static JoystickButton logitechRightStickPress2;
-	public static JoystickButton logitechStart2;
-	public static JoystickButton logitechBack2;
-	public static JoystickButton logitechRightTrigger2;
-	public static JoystickButton logitechLeftTrigger2;
+	public static JoystickButton manipulatorY;
+	public static JoystickButton manipulatorA;
+	public static JoystickButton manipulatorX;
+	public static JoystickButton manipulatorB;
+	public static JoystickButton manipulatorLeftBumper;
+	public static JoystickButton manipulatorRightBumper;
+	public static JoystickButton manipulatorLeftStick;
+	public static JoystickButton manipulatorRightStick;
+	public static JoystickButton manipulatorStart;
+	public static JoystickButton manipulatorBack;
+	public static JoystickButton manipulatorRightTrigger;
+	public static JoystickButton manipulatorLeftTrigger;
 	
 	public Controls(){
-		joyStickLeft = new Joystick(RobotMap.joystickDriverSlot);
-		joyStickRight = new Joystick(RobotMap.joystickManipulatorSlot);
+		driverJoystick = new Joystick(RobotMap.joystickDriverSlot);
+		manipulatorJoystick = new Joystick(RobotMap.joystickManipulatorSlot);
 
 		// Buttons
-		logitechY = new JoystickButton(joyStickLeft, 4);
-		logitechA = new JoystickButton(joyStickLeft, 2);
-		logitechX = new JoystickButton(joyStickLeft, 1);
-		logitechB = new JoystickButton(joyStickLeft, 3);
-		logitechLeftBumper = new JoystickButton(joyStickLeft, 5);
-		logitechRightBumper = new JoystickButton(joyStickLeft, 6);
-		logitechLeftStickPress = new JoystickButton(joyStickLeft, 11);
-		logitechRightStickPress = new JoystickButton(joyStickLeft,12);
-		logitechStart = new JoystickButton(joyStickLeft, 10);
-		logitechBack = new JoystickButton(joyStickLeft, 9);
-		logitechRightTrigger = new JoystickButton(joyStickLeft, 8);
-		logitechLeftTrigger = new JoystickButton(joyStickLeft,7);
+		driverY = new JoystickButton(driverJoystick, 4);
+		driverA = new JoystickButton(driverJoystick, 2);
+		driverX = new JoystickButton(driverJoystick, 1);
+		driverB = new JoystickButton(driverJoystick, 3);
+		driverLeftBumper = new JoystickButton(driverJoystick, 5);
+		driverRightBumper = new JoystickButton(driverJoystick, 6);
+		driverLeftStick = new JoystickButton(driverJoystick, 11);
+		driverRightStick = new JoystickButton(driverJoystick,12);
+		driverStart = new JoystickButton(driverJoystick, 10);
+		driverBack = new JoystickButton(driverJoystick, 9);
+		driverRightTrigger = new JoystickButton(driverJoystick, 8);
+		driverLeftTrigger = new JoystickButton(driverJoystick,7);
 		
-		logitechY2 = new JoystickButton(joyStickRight, 4);
-		logitechA2 = new JoystickButton(joyStickRight, 2);
-		logitechX2 = new JoystickButton(joyStickRight, 1);
-		logitechB2 = new JoystickButton(joyStickRight, 3);
-		logitechLeftBumper2 = new JoystickButton(joyStickRight, 5);
-		logitechRightBumper2 = new JoystickButton(joyStickRight, 6);
-		logitechLeftStickPress2 = new JoystickButton(joyStickRight, 11);
-		logitechRightStickPress2 = new JoystickButton(joyStickRight,12);
-		logitechStart2 = new JoystickButton(joyStickRight, 10);
-		logitechBack2 = new JoystickButton(joyStickRight, 9);
-		logitechRightTrigger2 = new JoystickButton(joyStickRight, 8);
-		logitechLeftTrigger2 = new JoystickButton(joyStickRight,7);
+		manipulatorY = new JoystickButton(manipulatorJoystick, 4);
+		manipulatorA = new JoystickButton(manipulatorJoystick, 2);
+		manipulatorX = new JoystickButton(manipulatorJoystick, 1);
+		manipulatorB = new JoystickButton(manipulatorJoystick, 3);
+		manipulatorLeftBumper = new JoystickButton(manipulatorJoystick, 5);
+		manipulatorRightBumper = new JoystickButton(manipulatorJoystick, 6);
+		manipulatorLeftStick = new JoystickButton(manipulatorJoystick, 11);
+		manipulatorRightStick = new JoystickButton(manipulatorJoystick,12);
+		manipulatorStart = new JoystickButton(manipulatorJoystick, 10);
+		manipulatorBack = new JoystickButton(manipulatorJoystick, 9);
+		manipulatorRightTrigger = new JoystickButton(manipulatorJoystick, 8);
+		manipulatorLeftTrigger = new JoystickButton(manipulatorJoystick,7);
 		
 	}
 	
