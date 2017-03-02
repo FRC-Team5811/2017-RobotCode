@@ -67,9 +67,8 @@ public class Robot extends IterativeRobot {
 	
 	boolean shouldBeRunningIntake;
 	boolean wasPressedLeftBumper;
+	
 	boolean wasPressedLogitechA;
-	boolean shouldBeRunningClimberDown;
-	boolean wasPressedLogitechY;
 	
 	
 	boolean shouldBeRunningGearTray;
@@ -171,10 +170,6 @@ public class Robot extends IterativeRobot {
 
 	}
 	*/
-	
-	private void checkClimberState(){
-		climber.set(Controls.manipulatorJoystick.getY());
-	} 
 	
 	private void toggleResExpansion(){
 		if (Controls.manipulatorY.get()) {
@@ -343,8 +338,7 @@ public class Robot extends IterativeRobot {
 		shouldBeRunningIntake = false;
 		wasPressedLeftBumper = false;
 		wasPressedLogitechA = false;
-		shouldBeRunningClimberDown = false;
-		wasPressedLogitechY = false;
+
 		shouldBeRunningGearTray = false;
 		wasPressedLogitechB = false;
 		
@@ -497,11 +491,8 @@ public class Robot extends IterativeRobot {
 
 		testForCorrectionMode();
 
-		//toggleShooterMotor();
 
 		//toggleIntake();
-		
-		checkClimberState();
 
 		toggleResExpansion();
 		

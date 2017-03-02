@@ -3,37 +3,29 @@ package org.usfirst.frc.team5811.robot.subsystems;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.Subsystem;
 import org.usfirst.frc.team5811.robot.RobotMap;
+import org.usfirst.frc.team5811.robot.commands.RunClimber;
 
 public class Climber extends Subsystem {
 	
 	private Victor leftMotor = RobotMap.leftClimberMotor;
 	private Victor rightMotor = RobotMap.rightClimberMotor;
-	private double speed;
 
 	public Climber() {
-		speed = 0.8;
 	}
 
 	@Override
-	protected void initDefaultCommand() {}
+	protected void initDefaultCommand() {
+		setDefaultCommand(new RunClimber());
+	}
 
 	public void stop() {
-		leftMotor.set(speed);
-		rightMotor.set(speed);
+		leftMotor.set(0);
+		rightMotor.set(0);
 	}
 
-	public void set(double rate) {
-		speed = rate;
-	}
-
-	public void inward() {
-		leftMotor.set(speed);
-		rightMotor.set(speed);
-	}
-
-	public void outward() {
-		leftMotor.set(speed);
-		rightMotor.set(speed);
+	public void run(double rate) {
+		leftMotor.set(rate);
+		rightMotor.set(rate);
 	}
 
 }
