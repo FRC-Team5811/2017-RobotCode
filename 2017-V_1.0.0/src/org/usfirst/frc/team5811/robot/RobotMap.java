@@ -4,6 +4,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.Victor;
@@ -21,6 +22,8 @@ public class RobotMap {
 	public static Victor frontRightDriveMotor;
 	public static Victor backLeftDriveMotor;
 	public static Victor backRightDriveMotor;
+	
+	public static RobotDrive driveTrain;
 	
 	public static Victor intakeMotor;
 
@@ -66,6 +69,8 @@ public class RobotMap {
 		frontRightDriveMotor = new Victor(4);
 		backLeftDriveMotor = new Victor(8);
 		backRightDriveMotor = new Victor(3);
+		
+		driveTrain = new RobotDrive(frontLeftDriveMotor, backLeftDriveMotor, frontRightDriveMotor, backRightDriveMotor);
 		
 		intakeMotor = new Victor(2);
 		

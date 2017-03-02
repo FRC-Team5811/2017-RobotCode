@@ -1,6 +1,5 @@
 package org.usfirst.frc.team5811.robot;
 
-import org.usfirst.frc.team5811.robot.commands.*;
 import org.usfirst.frc.team5811.robot.subsystems.*;
 
 import edu.wpi.cscore.UsbCamera;
@@ -9,7 +8,6 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.livewindow.LiveWindow;
@@ -29,6 +27,7 @@ public class Robot extends IterativeRobot {
 	public static Shooter shooter;
 	public static Intake intake;
 	public static Pneumatics wings;
+	public static DriveTrain train;
 	
 	//stuff
 	Command autonomousCommand;
@@ -86,11 +85,6 @@ public class Robot extends IterativeRobot {
 		
 	}
 
-	private void dashboardDisplay() {
-		SmartDashboard.putNumber("IMU_TotalYaw", RobotMap.ahrs.getAngle());
-		SmartDashboard.putNumber("IMU_Byte_Count", RobotMap.ahrs.getByteCount());
-		SmartDashboard.putNumber("IMU_Update_Count", RobotMap.ahrs.getUpdateCount());
-	}
 
 	public void disabledInit() {
 		
@@ -119,23 +113,15 @@ public class Robot extends IterativeRobot {
 	}
 	
 	public void autonomousPeriodic() {
-		
 		Scheduler.getInstance().run();
 		 
 	}
 
 	public void teleopInit() {
-		distance = 0;
-		
-		rotationCountForDrive = 0;
-		rotationRateForDrive = 0;
-		
-		//currentCycle = 0;
-		dualStick();
+
 	}
 
 	public void teleopPeriodic() {
-
 		Scheduler.getInstance().run();
 		
 		System.out.println("************");
@@ -153,29 +139,6 @@ public class Robot extends IterativeRobot {
 		System.out.println("Climber 1 Current: "+ power.climber1());
 		System.out.println("Climber 2 Current: "+ power.climber2());
 		
-		
-		if(Controls.driverX.get()){
-			driveState = true;
-		}
-		if(Controls.driverY.get()){
-			driveState = false;           //STATE CHANGE CODE
-		}
-		
-		if(driveState){
-			dualStick();
-		}
-		else{
-			slowMove(.5);
-		}
-		
-		//switchDriveModes();  
-
-		testForCorrectionMode();
-		
-		checkShift();
-		
-		//toggleShifter();
-		
 		//operatorControl();
 
 	}
@@ -184,4 +147,11 @@ public class Robot extends IterativeRobot {
 		LiveWindow.run();
 		dashboardDisplay();
 	}
+
+	private void dashboardDisplay() {
+		SmartDashboard.putNumber("IMU_TotalYaw", RobotMap.ahrs.getAngle());
+		SmartDashboard.putNumber("IMU_Byte_Count", RobotMap.ahrs.getByteCount());
+		SmartDashboard.putNumber("IMU_Update_Count", RobotMap.ahrs.getUpdateCount());
+	}
+	
 }
