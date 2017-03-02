@@ -94,6 +94,8 @@ public class Controls {
 		manipulatorRightBumper.toggleWhenPressed(new RunShooter());
 		manipulatorA.toggleWhenPressed(new RunIntake());
 		
+		manipulatorY.whenPressed(new TogglePneumatics());
+		
 	}
 
 	//// TRIGGERING COMMANDS WITH BUTTONS
