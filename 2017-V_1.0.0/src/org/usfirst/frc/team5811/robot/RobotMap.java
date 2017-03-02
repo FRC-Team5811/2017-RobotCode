@@ -89,7 +89,7 @@ public class RobotMap {
 		rightShooterMotor = new Spark(0);
 		leftShooterMotor = new Spark(5);
 		//motor is inverted control
-		leftShooterMotor.setInverted(true);
+		//leftShooterMotor.setInverted(true);
 		
 		// Encoder inits and instantiations
 		shooterEncoder = new Encoder(0,1,true,Encoder.EncodingType.k4X);

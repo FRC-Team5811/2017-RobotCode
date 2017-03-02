@@ -25,6 +25,7 @@ public class Robot extends IterativeRobot {
 	public static PowerManagement power;
 	public static CompressorSubsystem compressor;
 	public static Elevator elevator;
+	public static Shooter shooter;
 	
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
@@ -63,16 +64,13 @@ public class Robot extends IterativeRobot {
 	// Boolean state changes
 	boolean shouldBeRunningSwitch;
 	boolean wasPressedLeftStick;
-	boolean shouldBeRunningShooter;
-	boolean wasPressedRightBumper;
+	
 	boolean shouldBeRunningIntake;
 	boolean wasPressedLeftBumper;
 	boolean wasPressedLogitechA;
 	boolean shouldBeRunningClimberDown;
 	boolean wasPressedLogitechY;
 	
-	//boolean shouldBeRunningElevator;
-	//boolean wasPressedLogitechX;
 	
 	boolean shouldBeRunningGearTray;
 	boolean wasPressedLogitechB;
@@ -86,8 +84,8 @@ public class Robot extends IterativeRobot {
     boolean shouldBeRunningAutoTurn;
     boolean wasPressedStart;
 
+    //used in "correction" mode
 	float rotationPos;
-	float macroPos;
 	
 	private void dualStick(){
 		arcadeDrive(-Controls.driverJoystick.getRawAxis(1),Controls.driverJoystick.getRawAxis(2));
@@ -177,27 +175,6 @@ public class Robot extends IterativeRobot {
 	private void checkClimberState(){
 		climber.set(Controls.manipulatorJoystick.getY());
 	} 
-	
-	private void toggleElevator() {
-		
-		// ELEVATOR
-		if (Controls.manipulatorX.get()) {
-			if (!wasPressedLogitechX) {
-				shouldBeRunningElevator = !shouldBeRunningElevator;
-			}
-			wasPressedLogitechX = true;
-		} else {
-			wasPressedLogitechX = false;
-		}
-
-		if (shouldBeRunningElevator) {
-			RobotMap.elevatorMotor.set(-.3);
-			SmartDashboard.putNumber("ELEVATOR ON", 101);
-		} else {
-			RobotMap.elevatorMotor.set(0);
-			SmartDashboard.putNumber("ELEVATOR OFF", 101);
-		}
-	}
 	
 	private void toggleResExpansion(){
 		if (Controls.manipulatorY.get()) {
@@ -321,25 +298,7 @@ public class Robot extends IterativeRobot {
     		driveMotors(0,0);
     	}
     }
-    /*
-    private void rotationMacro(){
-    	if(logitechStart.get()){
-			if(!wasPressedStart){
-				macroPos = (float) ahrs.getAngle();
-				shouldBeRunningAutoTurn = !shouldBeRunningAutoTurn;
-			}
-			wasPressedStart = true;
-			System.out.println("yah boi be on");
-		}else{
-			wasPressedStart = false;
-		}
-    	if(shouldBeRunningSwitch){
-    		turnMacro(30);
-    	}else{
-    		
-    	}
-    }
-	*/
+
 	// CORRECTION METHOD. WE USE THE VALUE QUARTERNION Z FOR ROTATIONAL
 	// POSTITIONING
     //Spectre says HI 
@@ -364,9 +323,10 @@ public class Robot extends IterativeRobot {
     	power = new PowerManagement(new PowerDistributionPanel());
     	climber = new Climber();
     	elevator = new Elevator();
+    	shooter = new Shooter();
 
 		chooser = new SendableChooser();
-		chooser.addDefault("Default Auto", new ExampleCommand());
+		// chooser.addDefault("Default Auto", new ExampleCommand());
 		// chooser.addObject("My Auto", new MyAutoCommand());
 		chooser.addObject("My Auto", "My Auto");
 		SmartDashboard.putData("Auto mode", chooser);
@@ -379,8 +339,7 @@ public class Robot extends IterativeRobot {
 		// Boolean Toggle Switch
 		shouldBeRunningSwitch = false;
 		wasPressedLeftStick = false;
-		shouldBeRunningShooter = false;
-		wasPressedRightBumper = false;
+
 		shouldBeRunningIntake = false;
 		wasPressedLeftBumper = false;
 		wasPressedLogitechA = false;
@@ -498,8 +457,6 @@ public class Robot extends IterativeRobot {
 		System.out.println("Climber 1 Current: "+ power.climber1());
 		System.out.println("Climber 2 Current: "+ power.climber2());
 		
-		//System.out.println(shooterEncoder.getDistance());
-		//System.out.println(shooterEncoder.get());
 		
 		if(Controls.manipulatorA.get()){
 			intakeOnOff(.5);         //INTAKE CODE 
@@ -535,17 +492,6 @@ public class Robot extends IterativeRobot {
 				intakeOnOff(-0.85);
 			}
 		}
-
-		intake = power.elevator();
-		if (intake >= 28) {
-			RobotMap.elevatorMotor.set(0);
-			Timer.delay(0.25);
-			if (intake >= 24 && intake <= 28) {
-				RobotMap.elevatorMotor.set(-0.15);
-			} else if (intake < 24) {
-				RobotMap.elevatorMotor.set(-0.3);
-			}
-		}
 		
 		//switchDriveModes();  
 
@@ -556,8 +502,6 @@ public class Robot extends IterativeRobot {
 		//toggleIntake();
 		
 		checkClimberState();
-		
-		toggleElevator();
 
 		toggleResExpansion();
 		

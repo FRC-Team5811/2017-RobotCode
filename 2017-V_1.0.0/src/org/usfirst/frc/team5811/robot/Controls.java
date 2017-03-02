@@ -91,6 +91,7 @@ public class Controls {
 		
 		
 		manipulatorX.toggleWhenPressed(new RunElevator());
+		manipulatorRightBumper.toggleWhenPressed(new RunShooter());
 		
 	}
 
