@@ -21,12 +21,15 @@ public class Robot extends IterativeRobot {
 	public static Controls oi;
 	public static RobotMap map;
 	
+	//Subsystems declarations
 	public static Climber climber;
 	public static PowerManagement power;
 	public static CompressorSubsystem compressor;
 	public static Elevator elevator;
 	public static Shooter shooter;
+	public static Intake intake;
 	
+	//stuff
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
 	
@@ -65,7 +68,8 @@ public class Robot extends IterativeRobot {
 	boolean shouldBeRunningSwitch;
 	boolean wasPressedLeftStick;
 	
-	boolean shouldBeRunningIntake;
+	//boolean shouldBeRunningIntake;
+	
 	boolean wasPressedLeftBumper;
 	
 	boolean wasPressedLogitechA;
@@ -92,10 +96,6 @@ public class Robot extends IterativeRobot {
 	private void slowMove(double reduction){
 		RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kForward);
 		arcadeDrive((-Controls.driverJoystick.getRawAxis(1)*reduction), (Controls.driverJoystick.getRawAxis(2)*reduction));
-	}
-	
-	public void intakeOnOff(double speed){
-		RobotMap.intakeMotor.set(speed);
 	}
 	
 	/*
@@ -143,34 +143,6 @@ public class Robot extends IterativeRobot {
 		}
 	}
 	
-	
-	/*
-	private void toggleIntake() {
-		
-		// INTAKE MY DUDES
-
-		if (logitechLeftBumper2.get()) {
-			if (!wasPressedLeftBumper) {
-				shouldBeRunningIntake = !shouldBeRunningIntake;
-			}
-			wasPressedLeftBumper = true;
-			// System.out.println("yah boi be on");
-		} else {
-			wasPressedLeftBumper = false;
-		}
-
-		if (shouldBeRunningIntake) {
-			intake.set(-.4);
-			// SmartDashboard.putNumber("INTAKE ON", 101);
-		} else {
-			intake.set(0);
-			// SmartDashboard.putNumber("INTAKE OFF", 101);
-		}
-
-
-	}
-	*/
-	
 	private void toggleResExpansion(){
 		if (Controls.manipulatorY.get()) {
 			if (!wasPressedLogitechB) {
@@ -216,9 +188,9 @@ public class Robot extends IterativeRobot {
 			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 			
 		}
-		
 	} 
 	*/
+	
 	private void checkShift(){
 		if(Controls.driverRightBumper.get()){
 			shifterDelay();
@@ -319,6 +291,7 @@ public class Robot extends IterativeRobot {
     	climber = new Climber();
     	elevator = new Elevator();
     	shooter = new Shooter();
+    	intake = new Intake();
 
 		chooser = new SendableChooser();
 		// chooser.addDefault("Default Auto", new ExampleCommand());
@@ -335,7 +308,6 @@ public class Robot extends IterativeRobot {
 		shouldBeRunningSwitch = false;
 		wasPressedLeftStick = false;
 
-		shouldBeRunningIntake = false;
 		wasPressedLeftBumper = false;
 		wasPressedLogitechA = false;
 
@@ -409,7 +381,6 @@ public class Robot extends IterativeRobot {
 		driveMotors(0, 0);
 		
 	}
-
 	
 	public void autonomousPeriodic() {
 		
@@ -452,16 +423,6 @@ public class Robot extends IterativeRobot {
 		System.out.println("Climber 2 Current: "+ power.climber2());
 		
 		
-		if(Controls.manipulatorA.get()){
-			intakeOnOff(.5);         //INTAKE CODE 
-			shouldBeRunningIntake = true;
-		}
-		else if(Controls.manipulatorB.get()){
-			intakeOnOff(0);
-			shouldBeRunningIntake = false;
-		}
-		
-		
 		if(Controls.driverX.get()){
 			driveState = true;
 		}
@@ -475,24 +436,10 @@ public class Robot extends IterativeRobot {
 		else{
 			slowMove(.5);
 		}
-		 
-		double intake = power.intake();
-		if (intake >= 28) {
-			intakeOnOff(0);
-			Timer.delay(0.25);
-			if (intake >= 24 && intake <= 28) {
-				intakeOnOff(-0.6);
-			} else if (intake < 24) {
-				intakeOnOff(-0.85);
-			}
-		}
 		
 		//switchDriveModes();  
 
 		testForCorrectionMode();
-
-
-		//toggleIntake();
 
 		toggleResExpansion();
 		
