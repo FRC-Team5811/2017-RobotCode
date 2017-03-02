@@ -24,6 +24,7 @@ public class Robot extends IterativeRobot {
 	public static Climber climber;
 	public static PowerManagement power;
 	public static CompressorSubsystem compressor;
+	public static Elevator elevator;
 	
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
@@ -69,8 +70,10 @@ public class Robot extends IterativeRobot {
 	boolean wasPressedLogitechA;
 	boolean shouldBeRunningClimberDown;
 	boolean wasPressedLogitechY;
-	boolean shouldBeRunningElevator;
-	boolean wasPressedLogitechX;
+	
+	//boolean shouldBeRunningElevator;
+	//boolean wasPressedLogitechX;
+	
 	boolean shouldBeRunningGearTray;
 	boolean wasPressedLogitechB;
 	
@@ -359,8 +362,8 @@ public class Robot extends IterativeRobot {
     	    	
     	compressor = new CompressorSubsystem(new Compressor(RobotMap.CompressorChannel));
     	power = new PowerManagement(new PowerDistributionPanel());
-    	
     	climber = new Climber();
+    	elevator = new Elevator();
 
 		chooser = new SendableChooser();
 		chooser.addDefault("Default Auto", new ExampleCommand());
@@ -383,8 +386,6 @@ public class Robot extends IterativeRobot {
 		wasPressedLogitechA = false;
 		shouldBeRunningClimberDown = false;
 		wasPressedLogitechY = false;
-		shouldBeRunningElevator = false;
-		wasPressedLogitechX = false;
 		shouldBeRunningGearTray = false;
 		wasPressedLogitechB = false;
 		

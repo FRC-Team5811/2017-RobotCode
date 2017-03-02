@@ -1,5 +1,7 @@
 package org.usfirst.frc.team5811.robot;
 
+import org.usfirst.frc.team5811.robot.commands.*;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 
@@ -87,7 +89,11 @@ public class Controls {
 		manipulatorRightTrigger = new JoystickButton(manipulatorJoystick, 8);
 		manipulatorLeftTrigger = new JoystickButton(manipulatorJoystick,7);
 		
+		
+		manipulatorX.toggleWhenPressed(new RunElevator());
+		
 	}
+
 	
 	// One type of button is a joystick button which is any button on a
 	//// joystick.
