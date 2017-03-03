@@ -76,6 +76,7 @@ public class Controls {
 		driverRightTrigger = new JoystickButton(driverJoystick, 8);
 		driverLeftTrigger = new JoystickButton(driverJoystick,7);
 		
+		/*
 		manipulatorY = new JoystickButton(manipulatorJoystick, 4);
 		manipulatorA = new JoystickButton(manipulatorJoystick, 2);
 		manipulatorX = new JoystickButton(manipulatorJoystick, 1);
@@ -88,13 +89,13 @@ public class Controls {
 		manipulatorBack = new JoystickButton(manipulatorJoystick, 9);
 		manipulatorRightTrigger = new JoystickButton(manipulatorJoystick, 8);
 		manipulatorLeftTrigger = new JoystickButton(manipulatorJoystick,7);
+		*/
 		
+		//manipulatorX.toggleWhenPressed(new RunElevator());
+		//manipulatorRightBumper.toggleWhenPressed(new RunShooter());
+		//manipulatorA.toggleWhenPressed(new RunIntake());
 		
-		manipulatorX.toggleWhenPressed(new RunElevator());
-		manipulatorRightBumper.toggleWhenPressed(new RunShooter());
-		manipulatorA.toggleWhenPressed(new RunIntake());
-		
-		manipulatorY.whenPressed(new TogglePneumatics());
+		//manipulatorY.whenPressed(new TogglePneumatics());
 		
 	}
 

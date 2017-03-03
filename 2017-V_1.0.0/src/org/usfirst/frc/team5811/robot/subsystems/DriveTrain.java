@@ -1,10 +1,12 @@
 package org.usfirst.frc.team5811.robot.subsystems;
 
 import org.usfirst.frc.team5811.robot.Controls;
+import org.usfirst.frc.team5811.robot.Robot;
 import org.usfirst.frc.team5811.robot.RobotMap;
 import org.usfirst.frc.team5811.robot.commands.RunDrive;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotDrive;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Subsystem;
@@ -14,9 +16,12 @@ public class DriveTrain extends Subsystem {
 
     //used in "correction" mode
 	float rotationPos;
+	double distance;
+	int count = 0;
 	
 	RobotDrive drive = RobotMap.driveTrain;
 	DoubleSolenoid shifter = RobotMap.shifterCylinder;
+	Encoder encoder = RobotMap.driveEncoder;
 
 	public DriveTrain() {
 		// TODO Auto-generated constructor stub
@@ -28,8 +33,22 @@ public class DriveTrain extends Subsystem {
 		setDefaultCommand(new RunDrive());
 	}
 	
-	public void runTankDrive(){
-		drive.tankDrive(Controls.driverJoystick.getX(), Controls.driverJoystick.getY());
+	
+	
+	public void runDrive(){
+		count++;
+		
+		double left = -Controls.driverJoystick.getRawAxis(1);
+		double right = -Controls.driverJoystick.getRawAxis(2);
+		drive.arcadeDrive(left, right);
+		distance = encoder.getDistance();
+		
+		
+		if(count % 100 == 0){
+			Robot.log("Distance: "+distance);
+		}
+		
+		
 	}
 	
 	public void shifterDelay(){

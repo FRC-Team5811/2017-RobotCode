@@ -20,7 +20,8 @@ public class RunClimber extends Command {
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	Robot.climber.run(Controls.manipulatorJoystick.getY());
+    	//TODO: don't forget to enable this
+    	//Robot.climber.run(Controls.manipulatorJoystick.getY());
     }
 
     // Make this return true when this Command no longer needs to run execute()

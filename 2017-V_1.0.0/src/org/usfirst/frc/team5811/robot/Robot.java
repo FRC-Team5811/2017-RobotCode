@@ -59,6 +59,8 @@ public class Robot extends IterativeRobot {
     	elevator = new Elevator();
     	shooter = new Shooter();
     	intake = new Intake();
+    	wings = new Pneumatics();
+    	train = new DriveTrain();
 
 		chooser = new SendableChooser();
 		// chooser.addDefault("Default Auto", new ExampleCommand());
@@ -73,7 +75,7 @@ public class Robot extends IterativeRobot {
 		//this should go last after all the subsystems have be initialized
 		oi = new Controls();
 		
-		
+		/*
 		SmartDashboard.putString("DB/String 0", "left, right, middle");
 		SmartDashboard.putString("DB/String 1", "red, blue");
 		SmartDashboard.putString("DB/String 2", "boiler, loading");
@@ -82,6 +84,8 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putString("DB/String 5", "Shoot before hopper?");
 		SmartDashboard.putString("DB/String 6", "Shoot after hopper?");
 		SmartDashboard.putString("DB/String 7", "Pickup at Hopper?");
+		*/
+		log("Bot Init Done");
 		
 	}
 
@@ -124,20 +128,20 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
 		
-		System.out.println("************");
+		/*log("************");
 		System.out.println(RobotMap.driveEncoder.getDistance());
 		System.out.println(RobotMap.driveEncoder.get());
 		System.out.println(RobotMap.driveEncoder.getRate());
-		System.out.println("************");
-		System.out.println("Angle: "+ RobotMap.ahrs.getAngle());
-		System.out.println("Elevator Current: "+power.elevator());
-		System.out.println("Intake Current: "+power.intake());
-		System.out.println("Front Right Drive Current: "+ power.frontRightDrive());
-		System.out.println("Back Right Drive Current: "+ power.backLeftDrive());
-		System.out.println("Front Left Drive Current: "+ power.frontLeftDrive());
-		System.out.println("Back Left Drive Current: "+ power.backLeftDrive());
-		System.out.println("Climber 1 Current: "+ power.climber1());
-		System.out.println("Climber 2 Current: "+ power.climber2());
+		log("************");
+		log("Angle: "+ RobotMap.ahrs.getAngle());
+		log("Elevator Current: "+power.elevator());
+		log("Intake Current: "+power.intake());
+		log("Front Right Drive Current: "+ power.frontRightDrive());
+		log("Back Right Drive Current: "+ power.backLeftDrive());
+		log("Front Left Drive Current: "+ power.frontLeftDrive());
+		log("Back Left Drive Current: "+ power.backLeftDrive());
+		log("Climber 1 Current: "+ power.climber1());
+		log("Climber 2 Current: "+ power.climber2());*/
 		
 		//operatorControl();
 
@@ -152,6 +156,10 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putNumber("IMU_TotalYaw", RobotMap.ahrs.getAngle());
 		SmartDashboard.putNumber("IMU_Byte_Count", RobotMap.ahrs.getByteCount());
 		SmartDashboard.putNumber("IMU_Update_Count", RobotMap.ahrs.getUpdateCount());
+	}
+	
+	public static void log(String str){
+		System.out.println(str);
 	}
 	
 }
