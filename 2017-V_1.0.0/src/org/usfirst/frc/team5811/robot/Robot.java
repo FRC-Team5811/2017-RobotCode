@@ -128,7 +128,7 @@ public class Robot extends IterativeRobot {
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
 		
-		/*log("************");
+		log("************");
 		System.out.println(RobotMap.driveEncoder.getDistance());
 		System.out.println(RobotMap.driveEncoder.get());
 		System.out.println(RobotMap.driveEncoder.getRate());
@@ -141,7 +141,7 @@ public class Robot extends IterativeRobot {
 		log("Front Left Drive Current: "+ power.frontLeftDrive());
 		log("Back Left Drive Current: "+ power.backLeftDrive());
 		log("Climber 1 Current: "+ power.climber1());
-		log("Climber 2 Current: "+ power.climber2());*/
+		log("Climber 2 Current: "+ power.climber2());
 		
 		//operatorControl();
 
