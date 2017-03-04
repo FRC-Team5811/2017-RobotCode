@@ -40,8 +40,6 @@ public class DriveTrain extends Subsystem {
 		setDefaultCommand(new RunDrive());
 	}
 	
-	
-	
 	public void runDrive(){
 		
 		double left = -Controls.driverJoystick.getRawAxis(1);

@@ -35,7 +35,7 @@ public class Robot extends IterativeRobot {
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
 	
-	UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+	//UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 
 	//Autonomous
 	int cycleCounter;
@@ -73,7 +73,7 @@ public class Robot extends IterativeRobot {
 		
 		SmartDashboard.putData("Auto mode", chooser);
 		
-		System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
+		//System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
 		
 		autoMode = RobotStates.noStringNoMove;
 		
@@ -90,7 +90,6 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putString("DB/String 6", "Shoot after hopper?");
 		SmartDashboard.putString("DB/String 7", "Pickup at Hopper?");
 		*/
-		log("Bot Init Done");
 		
 	}
 
