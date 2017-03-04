@@ -12,18 +12,18 @@ public class ShifterPneumaticsHigh extends Subsystem{
 		
 		highGear
 	}
-	public shiftState state = shiftState.highGear;
+	public shiftState stateHigh = shiftState.highGear;
 	
 	public void initDefaultCommand() {}
 
 	public void shiftHigh(){
-		if(state != shiftState.highGear){
+		if(stateHigh != shiftState.highGear){
 			shifterCylinder.set(DoubleSolenoid.Value.kForward);
-			state = shiftState.highGear;
+			stateHigh = shiftState.highGear;
 		}
 	}
 	public boolean isHigh(){
-		return state == shiftState.highGear;
+		return stateHigh == shiftState.highGear;
 	}
 	
 	

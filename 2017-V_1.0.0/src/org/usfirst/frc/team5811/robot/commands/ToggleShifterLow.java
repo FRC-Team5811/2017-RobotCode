@@ -11,22 +11,22 @@ public class ToggleShifterLow extends Command {
 
     public ToggleShifterLow() {
         // Use requires() here to declare subsystem dependencies
-        requires(Robot.shift);
+        requires(Robot.shiftLow);
     }
 
     // Called just before this Command runs the first time
     protected void initialize() {
-    	oldState = Robot.shift.state;
+    	oldState = Robot.shiftLow.state;
     }
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	Robot.shift.shiftLow();
+    	Robot.shiftLow.shiftLow();
     }
 
     // Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {
-        return oldState != Robot.shift.state;
+        return oldState != Robot.shiftLow.state;
     }
 
     // Called once after isFinished returns true
