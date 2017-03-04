@@ -5,26 +5,37 @@ import org.usfirst.frc.team5811.robot.RobotMap;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
-public class ShifterPneumaticsHigh extends Subsystem{
+public class Shifter extends Subsystem{
 	DoubleSolenoid shifterCylinder = RobotMap.shifterCylinder;
 	
 	public enum shiftState{
-		
+		lowGear,
 		highGear
 	}
-	public shiftState stateHigh = shiftState.highGear;
+	public shiftState state = shiftState.lowGear;
 	
 	public void initDefaultCommand() {}
-
+	
+	public void shiftLow(){
+		if(state != shiftState.lowGear){
+			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
+			state = shiftState.lowGear;
+		}
+	}
+	public boolean isLow(){
+		return state == shiftState.lowGear;
+	}
+	
 	public void shiftHigh(){
-		if(stateHigh != shiftState.highGear){
+		if(state != shiftState.highGear){
 			shifterCylinder.set(DoubleSolenoid.Value.kForward);
-			stateHigh = shiftState.highGear;
+			state = shiftState.highGear;
 		}
 	}
 	public boolean isHigh(){
-		return stateHigh == shiftState.highGear;
+		return state == shiftState.highGear;
 	}
+	
 	
 	
 	

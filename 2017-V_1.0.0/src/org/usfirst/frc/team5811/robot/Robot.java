@@ -26,10 +26,9 @@ public class Robot extends IterativeRobot {
 	public static Elevator elevator;
 	public static Shooter shooter;
 	public static Intake intake;
-	public static Pneumatics wings;
+	public static Wings wings;
 	public static DriveTrain train;
-	public static ShifterPneumaticsLow shiftLow;
-	public static ShifterPneumaticsHigh shiftHigh;
+	public static Shifter shifter;
 	
 	//stuff
 	Command autonomousCommand;
@@ -61,10 +60,9 @@ public class Robot extends IterativeRobot {
     	elevator = new Elevator();
     	shooter = new Shooter();
     	intake = new Intake();
-    	wings = new Pneumatics();
+    	wings = new Wings();
     	train = new DriveTrain();
-    	shiftLow = new ShifterPneumaticsLow();
-    	shiftHigh = new ShifterPneumaticsHigh();
+    	shifter = new Shifter();
 
 		chooser = new SendableChooser();
 		// chooser.addDefault("Default Auto", new ExampleCommand());

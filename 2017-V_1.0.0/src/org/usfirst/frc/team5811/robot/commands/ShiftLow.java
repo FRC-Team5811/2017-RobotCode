@@ -1,32 +1,28 @@
 package org.usfirst.frc.team5811.robot.commands;
 
 import org.usfirst.frc.team5811.robot.Robot;
-import org.usfirst.frc.team5811.robot.subsystems.ShifterPneumaticsHigh;
+import org.usfirst.frc.team5811.robot.subsystems.Shifter;
 
 import edu.wpi.first.wpilibj.command.Command;
 
-public class ToggleShifterHigh extends Command {
-	
-	ShifterPneumaticsHigh.shiftState oldState;
+public class ShiftLow extends Command {
 
-    public ToggleShifterHigh() {
+    public ShiftLow() {
         // Use requires() here to declare subsystem dependencies
-        requires(Robot.shiftHigh);
+        requires(Robot.shifter);
     }
 
     // Called just before this Command runs the first time
-    protected void initialize() {
-    	oldState = Robot.shiftHigh.stateHigh;
-    }
+    protected void initialize() {}
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	Robot.shiftHigh.shiftHigh();
+    	Robot.shifter.shiftLow();
     }
 
     // Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {
-        return oldState != Robot.shiftHigh.stateHigh;
+        return Robot.shifter.isLow();
     }
 
     // Called once after isFinished returns true

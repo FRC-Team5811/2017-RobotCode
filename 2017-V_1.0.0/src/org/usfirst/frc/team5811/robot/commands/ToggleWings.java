@@ -1,18 +1,15 @@
 package org.usfirst.frc.team5811.robot.commands;
 
 import org.usfirst.frc.team5811.robot.Robot;
-import org.usfirst.frc.team5811.robot.subsystems.Pneumatics;
+import org.usfirst.frc.team5811.robot.subsystems.Wings;
 
 import edu.wpi.first.wpilibj.command.Command;
 
-/**
- *
- */
-public class TogglePneumatics extends Command {
+public class ToggleWings extends Command {
 	
-	Pneumatics.WingsState oldState;
+	Wings.WingsState oldState;
 
-    public TogglePneumatics() {
+    public ToggleWings() {
         // Use requires() here to declare subsystem dependencies
         requires(Robot.wings);
     }

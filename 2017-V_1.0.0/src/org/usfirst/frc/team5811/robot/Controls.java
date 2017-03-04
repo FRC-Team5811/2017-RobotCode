@@ -77,8 +77,8 @@ public class Controls {
 		driverLeftTrigger = new JoystickButton(driverJoystick,7);
 		
 		
-		driverRightBumper.whenPressed(new ToggleShifterLow());
-		driverLeftBumper.whenPressed(new ToggleShifterHigh());
+		driverRightBumper.whenPressed(new ShiftLow());
+		driverLeftBumper.whenPressed(new ShiftHigh());
 		
 		/*manipulatorY = new JoystickButton(manipulatorJoystick, 4);
 		manipulatorA = new JoystickButton(manipulatorJoystick, 2);
