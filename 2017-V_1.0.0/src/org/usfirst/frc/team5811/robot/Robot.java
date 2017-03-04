@@ -28,6 +28,7 @@ public class Robot extends IterativeRobot {
 	public static Intake intake;
 	public static Pneumatics wings;
 	public static DriveTrain train;
+	public static ShifterPneumatics shift;
 	
 	//stuff
 	Command autonomousCommand;
@@ -61,6 +62,7 @@ public class Robot extends IterativeRobot {
     	intake = new Intake();
     	wings = new Pneumatics();
     	train = new DriveTrain();
+    	shift = new ShifterPneumatics();
 
 		chooser = new SendableChooser();
 		// chooser.addDefault("Default Auto", new ExampleCommand());
