@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
 public class Shifter extends Subsystem{
+	
 	DoubleSolenoid shifterCylinder = RobotMap.shifterCylinder;
 	
 	public enum shiftState{
@@ -32,6 +33,7 @@ public class Shifter extends Subsystem{
 			state = shiftState.highGear;
 		}
 	}
+	
 	public boolean isHigh(){
 		return state == shiftState.highGear;
 	}

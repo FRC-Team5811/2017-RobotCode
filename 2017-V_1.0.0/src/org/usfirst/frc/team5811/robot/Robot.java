@@ -136,7 +136,7 @@ public class Robot extends IterativeRobot {
 			System.out.println(RobotMap.driveEncoder.getDistance());
 			//System.out.println(RobotMap.driveEncoder.get());
 			//System.out.println(RobotMap.driveEncoder.getRate());
-			log("Angle: "+ train.navx.getAngle());
+			log("Angle: "+ RobotMap.navx.getAngle());
 			log("************");
 			
 			//log("Elevator Current: "+power.elevator());
@@ -156,9 +156,9 @@ public class Robot extends IterativeRobot {
 	}
 
 	private void dashboardDisplay() {
-		SmartDashboard.putNumber("IMU_TotalYaw", train.navx.getAngle());
-		SmartDashboard.putNumber("IMU_Byte_Count", train.navx.getByteCount());
-		SmartDashboard.putNumber("IMU_Update_Count", train.navx.getUpdateCount());
+		SmartDashboard.putNumber("IMU_TotalYaw", RobotMap.navx.getAngle());
+		SmartDashboard.putNumber("IMU_Byte_Count", RobotMap.navx.getByteCount());
+		SmartDashboard.putNumber("IMU_Update_Count", RobotMap.navx.getUpdateCount());
 	}
 	
 	public static void log(String str){

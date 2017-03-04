@@ -43,6 +43,8 @@ public class RobotMap {
 	public static Victor leftClimberMotor;
 	public static Victor rightClimberMotor;
 	
+	public static AHRS navx;
+	
 	
 	
 	
@@ -101,5 +103,8 @@ public class RobotMap {
 		shooterEncoder.setDistancePerPulse(36);
 		shooterEncoder.setMinRate(10);
 		shooterEncoder.setSamplesToAverage(32);
+		
+		// NavX instantiation
+		navx = new AHRS(SerialPort.Port.kUSB);
 	}
 }

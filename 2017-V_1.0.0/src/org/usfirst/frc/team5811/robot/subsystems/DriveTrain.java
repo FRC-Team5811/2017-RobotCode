@@ -23,16 +23,13 @@ public class DriveTrain extends Subsystem {
 	double distance;
 	
 	//this should be in RobotMap - however it seemed to be failing when using static reference
-	public AHRS navx;
+	AHRS navx = RobotMap.navx;
 	RobotDrive drive = RobotMap.driveTrain;
 	DoubleSolenoid shifter = RobotMap.shifterCylinder;
 	Encoder encoder = RobotMap.driveEncoder;
 	
 
-	public DriveTrain() {
-		// NavX instantiation
-		navx = new AHRS(SerialPort.Port.kUSB);
-	}
+	public DriveTrain() {}
 
 	@Override
 	protected void initDefaultCommand() {
