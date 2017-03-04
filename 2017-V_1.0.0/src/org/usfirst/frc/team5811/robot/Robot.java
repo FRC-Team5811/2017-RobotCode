@@ -66,6 +66,7 @@ public class Robot extends IterativeRobot {
 		// chooser.addDefault("Default Auto", new ExampleCommand());
 		// chooser.addObject("My Auto", new MyAutoCommand());
 		chooser.addObject("My Auto", "My Auto");
+		
 		SmartDashboard.putData("Auto mode", chooser);
 		
 		System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
@@ -101,7 +102,7 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 	    autonomousCommand = (Command) chooser.getSelected();
 	    
-		botPosition = SmartDashboard.getString("DB/String 0", "Is Bot at loading, middle, or boiler?");
+		/*botPosition = SmartDashboard.getString("DB/String 0", "Is Bot at loading, middle, or boiler?");
 		allianceColor = SmartDashboard.getString("DB/String 1", "Alliance Color red or blue?");
 		chooseBoilerOrLoading = SmartDashboard.getString("DB/String 2", "Going boiler or loading side or nil?");
 		baselineCross = SmartDashboard.getString("DB/String 3", "Only Cross Baseline? yes or no");
@@ -109,7 +110,7 @@ public class Robot extends IterativeRobot {
 		shoot = SmartDashboard.getString("DB/String 5", "Shoot Before Hopper Pickup? yes or no");
 		shootAfterHopper = SmartDashboard.getString("DB/String 6", "Shoot After Hopper Pickup? yes or no");
 		hopperPickup = SmartDashboard.getString("DB/String 7", "Pickup balls from hopper? yes or no");
-		
+		*/
 		
 		RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		RobotMap.reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
@@ -118,7 +119,7 @@ public class Robot extends IterativeRobot {
 	
 	public void autonomousPeriodic() {
 		Scheduler.getInstance().run();
-		 
+		
 	}
 
 	public void teleopInit() {
@@ -127,24 +128,25 @@ public class Robot extends IterativeRobot {
 
 	public void teleopPeriodic() {
 		Scheduler.getInstance().run();
+		cycleCounter++;
 		
-		log("************");
-		System.out.println(RobotMap.driveEncoder.getDistance());
-		System.out.println(RobotMap.driveEncoder.get());
-		System.out.println(RobotMap.driveEncoder.getRate());
-		log("************");
-		log("Angle: "+ RobotMap.ahrs.getAngle());
-		log("Elevator Current: "+power.elevator());
-		log("Intake Current: "+power.intake());
-		log("Front Right Drive Current: "+ power.frontRightDrive());
-		log("Back Right Drive Current: "+ power.backLeftDrive());
-		log("Front Left Drive Current: "+ power.frontLeftDrive());
-		log("Back Left Drive Current: "+ power.backLeftDrive());
-		log("Climber 1 Current: "+ power.climber1());
-		log("Climber 2 Current: "+ power.climber2());
-		
-		//operatorControl();
-
+		if(cycleCounter % 100 == 0){
+			log("************");
+			System.out.println(RobotMap.driveEncoder.getDistance());
+			//System.out.println(RobotMap.driveEncoder.get());
+			//System.out.println(RobotMap.driveEncoder.getRate());
+			log("Angle: "+ train.navx.getAngle());
+			log("************");
+			
+			//log("Elevator Current: "+power.elevator());
+			//log("Intake Current: "+power.intake());
+			//log("Front Right Drive Current: "+ power.frontRightDrive());
+			//log("Back Right Drive Current: "+ power.backLeftDrive());
+			//log("Front Left Drive Current: "+ power.frontLeftDrive());
+			//log("Back Left Drive Current: "+ power.backLeftDrive());
+			//log("Climber 1 Current: "+ power.climber1());
+			//log("Climber 2 Current: "+ power.climber2());
+		}
 	}
 
 	public void testPeriodic() {
@@ -153,9 +155,9 @@ public class Robot extends IterativeRobot {
 	}
 
 	private void dashboardDisplay() {
-		SmartDashboard.putNumber("IMU_TotalYaw", RobotMap.ahrs.getAngle());
-		SmartDashboard.putNumber("IMU_Byte_Count", RobotMap.ahrs.getByteCount());
-		SmartDashboard.putNumber("IMU_Update_Count", RobotMap.ahrs.getUpdateCount());
+		SmartDashboard.putNumber("IMU_TotalYaw", train.navx.getAngle());
+		SmartDashboard.putNumber("IMU_Byte_Count", train.navx.getByteCount());
+		SmartDashboard.putNumber("IMU_Update_Count", train.navx.getUpdateCount());
 	}
 	
 	public static void log(String str){
