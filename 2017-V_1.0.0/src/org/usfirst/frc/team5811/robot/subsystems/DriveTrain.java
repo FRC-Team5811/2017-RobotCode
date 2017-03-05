@@ -8,28 +8,38 @@ import org.usfirst.frc.team5811.robot.commands.RunDrive;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.PIDOutput;
 import edu.wpi.first.wpilibj.RobotDrive;
-import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Subsystem;
 
-public class DriveTrain extends Subsystem {
+public class DriveTrain extends Subsystem implements PIDOutput {
 	
-
+	public enum DriveMode {
+		normal,
+		holdStraight
+	}
+	
+	private DriveMode mode = DriveMode.normal;
+	
     //used in "correction" mode
 	float rotationPos;
 	double distance;
 	
-	//this should be in RobotMap - however it seemed to be failing when using static reference
+	//angle to set on next loop (set by pid stuff)
+	double rotateToAngleRate = 0;
+	double setAngle = 0;
+	
+	//Things the drivetrain cares about/controls
 	AHRS navx = RobotMap.navx;
 	RobotDrive drive = RobotMap.driveTrain;
 	DoubleSolenoid shifter = RobotMap.shifterCylinder;
 	Encoder encoder = RobotMap.driveEncoder;
 	
-
-	public DriveTrain() {}
+	
+	public DriveTrain() {
+	}
 
 	@Override
 	protected void initDefaultCommand() {
@@ -39,50 +49,50 @@ public class DriveTrain extends Subsystem {
 	
 	public void runDrive(){
 		
-		double left = -Controls.driverJoystick.getRawAxis(1);
-		double right = -Controls.driverJoystick.getRawAxis(2);
+		double direction = -Controls.driverJoystick.getRawAxis(1);
+		double rotation = -Controls.driverJoystick.getRawAxis(2);
 		
-		move(left,right);
+		switch(mode){
+		case normal:
+			move(direction,rotation);
+		case holdStraight:
+			move(direction,rotateToAngleRate);
+		}
 		
 		distance = encoder.getDistance();
 	}
 	
-	public void shifterDelay(){
+	//this is a method (instead of making 'mode' public) because we might need to do something
+	//when switching drive modes - a class that just wants us to transition shouldn't know about
+	//that stuff though
+	public void transitionToMode(DriveMode toMode){
+		switch(toMode){
+		case normal:
+			Robot.turnController.disable();
+			break;
+		case holdStraight:
+			setAngle = navx.getAngle();
+			Robot.turnController.enable();
+			break;
+		}
+		mode = toMode;
+	}
+	
+	public DriveMode getCurrentMode(){
+		return mode;
+	}
+	
+	private void shifterDelay(){
 		int cycleCounterTele = 0;
 		while(cycleCounterTele < 20){
-			//driveMotors(.3,-.3);
-			move(.3,-.3);
+			move(.3,0);
 			cycleCounterTele++;
 		}
 	}
 	
-	private void move(double forwards, double rotation){
-		drive.arcadeDrive(forwards, rotation);
+	private void move(double direction, double rotation){
+		drive.arcadeDrive(direction, rotation);
 	}
-	
-	/*
-	private void toggleShifter() {
-
-		if (logitechRightStickPress.get()) {
-			if (!wasPressedRightStick) {
-				
-				shouldBeRunningShifter = !shouldBeRunningShifter;
-				shifterDelay();
-			}
-			wasPressedRightStick = true;
-		} else {
-			wasPressedRightStick = false;
-		}
-
-		if (shouldBeRunningShifter) {
-			shifterCylinder.set(DoubleSolenoid.Value.kForward);
-			
-		} else {
-			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
-			
-		}
-	} 
-	*/
 	
 	private void checkShift(){
 		if(Controls.driverRightBumper.get()){
@@ -155,6 +165,12 @@ public class DriveTrain extends Subsystem {
 	private void slowMove(double reduction){
 		RobotMap.shifterCylinder.set(DoubleSolenoid.Value.kForward);
 		//arcadeDrive((-Controls.driverJoystick.getRawAxis(1)*reduction), (Controls.driverJoystick.getRawAxis(2)*reduction));
+	}
+
+	//The NaxRotationController calls this most likely
+	@Override
+	public void pidWrite(double output) {
+		rotateToAngleRate = output;
 	}
 	
 	/*

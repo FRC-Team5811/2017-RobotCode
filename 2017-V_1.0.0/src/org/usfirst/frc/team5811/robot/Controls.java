@@ -79,6 +79,8 @@ public class Controls {
 		
 		driverRightBumper.whenPressed(new ShiftLow());
 		driverLeftBumper.whenPressed(new ShiftHigh());
+		driverStart.whenPressed(new DriveStraight());
+		driverBack.whenPressed(new DriveNormal());
 		
 		/*manipulatorY = new JoystickButton(manipulatorJoystick, 4);
 		manipulatorA = new JoystickButton(manipulatorJoystick, 2);

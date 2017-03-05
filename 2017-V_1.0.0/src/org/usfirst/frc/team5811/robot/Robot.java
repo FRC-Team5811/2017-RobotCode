@@ -1,6 +1,7 @@
 package org.usfirst.frc.team5811.robot;
 
 import org.usfirst.frc.team5811.robot.subsystems.*;
+import org.usfirst.frc.team5811.robot.subsystems.DriveTrain.DriveMode;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.CameraServer;
@@ -33,6 +34,9 @@ public class Robot extends IterativeRobot {
 	//stuff
 	Command autonomousCommand;
 	SendableChooser chooser = new SendableChooser();
+	
+	//PIDControlled
+	public static NavXRotationalController turnController;
 	
 	//UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
 
@@ -78,6 +82,8 @@ public class Robot extends IterativeRobot {
 		//this should go last after all the subsystems have be initialized
 		oi = new Controls();
 		
+		turnController = new NavXRotationalController(RobotMap.navx,train);
+		
 		/*
 		SmartDashboard.putString("DB/String 0", "left, right, middle");
 		SmartDashboard.putString("DB/String 1", "red, blue");
@@ -88,6 +94,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putString("DB/String 6", "Shoot after hopper?");
 		SmartDashboard.putString("DB/String 7", "Pickup at Hopper?");
 		*/
+		LiveWindow.addActuator("DriveSystem", "RotateController", turnController);
 		
 	}
 
@@ -124,7 +131,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void teleopInit() {
-
+		train.transitionToMode(DriveMode.normal);
 	}
 
 	public void teleopPeriodic() {
@@ -137,6 +144,7 @@ public class Robot extends IterativeRobot {
 			//System.out.println(RobotMap.driveEncoder.get());
 			//System.out.println(RobotMap.driveEncoder.getRate());
 			log("Angle: "+ RobotMap.navx.getAngle());
+			log("Mode: "+ train.getCurrentMode());
 			log("************");
 			
 			//log("Elevator Current: "+power.elevator());

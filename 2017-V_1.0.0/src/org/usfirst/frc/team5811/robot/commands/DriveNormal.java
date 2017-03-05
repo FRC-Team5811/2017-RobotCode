@@ -1,14 +1,16 @@
 package org.usfirst.frc.team5811.robot.commands;
 
 import org.usfirst.frc.team5811.robot.Robot;
+import org.usfirst.frc.team5811.robot.subsystems.DriveTrain.DriveMode;
 
 import edu.wpi.first.wpilibj.command.Command;
 
+/**
+ *
+ */
+public class DriveNormal extends Command {
 
-public class RunDrive extends Command {
-
-    public RunDrive() {
-        // Use requires() here to declare subsystem dependencies
+    public DriveNormal() {
     	requires(Robot.train);
     }
 
@@ -18,12 +20,12 @@ public class RunDrive extends Command {
 
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
-    	Robot.train.runDrive();
+    	Robot.train.transitionToMode(DriveMode.normal);
     }
 
     // Make this return true when this Command no longer needs to run execute()
     protected boolean isFinished() {
-        return false;
+    	return Robot.train.getCurrentMode() == DriveMode.normal;
     }
 
     // Called once after isFinished returns true

@@ -72,6 +72,9 @@ public class RobotMap {
 		backRightDriveMotor = new Victor(3);
 		
 		driveTrain = new RobotDrive(frontLeftDriveMotor, backLeftDriveMotor, frontRightDriveMotor, backRightDriveMotor);
+		//safety mode whines for some reason
+		//driveTrain.setExpiration(0.1);
+		driveTrain.setSafetyEnabled(false);
 		
 		intakeMotor = new Victor(2);
 		
