@@ -8,11 +8,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.*;
-//import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import com.kauailabs.navx.frc.AHRS;
-
-import java.math.*;
 
 public class Robot extends IterativeRobot {
 
@@ -30,8 +27,6 @@ public class Robot extends IterativeRobot {
 
 	// Buttons
 	JoystickButton logitechY;
-	
-	//random addition
 	JoystickButton logitechA;
 	JoystickButton logitechX;
 	JoystickButton logitechB;
@@ -87,17 +82,13 @@ public class Robot extends IterativeRobot {
 	boolean spinUpComplete;
 	
 	boolean driveState;
-	
-	DigitalInput limitSwitch;
-	
-	
+
 	int stateSeq;
 	int rotationCountForDrive;
 	double rotationRateForDrive;
 	double distance;
 	
 	double autoSelecter;
-	
 	//Autonomous
 	int cycleCounter;
 	/*
@@ -226,8 +217,8 @@ public class Robot extends IterativeRobot {
 	String hopperPickup;
 	*/
 	// Boolean state changes
-	boolean shouldBeRunningSwitch;
-	boolean wasPressedLeftStick;
+	//boolean shouldBeRunningSwitch;
+	//boolean wasPressedLeftStick;
 	boolean shouldBeRunningShooter;
 	boolean wasPressedRightBumper;
 	boolean shouldBeRunningIntake;
@@ -289,7 +280,6 @@ public class Robot extends IterativeRobot {
 		shifterCylinder.set(DoubleSolenoid.Value.kForward);
 		arcadeDrive((-joyStickLeft.getRawAxis(1)*reduction), (joyStickLeft.getRawAxis(2)*reduction));
 	}
-	
 	public void intakeOnOff(double speed){
 		intake.set(speed);
 	}
@@ -320,9 +310,7 @@ public class Robot extends IterativeRobot {
 	}
 	
 	private void toggleShooterMotor() {
-		
 		// SHOOTER
-
 		if (logitechRightBumper2.get()) {
 			if (!wasPressedRightBumper) {
 				shouldBeRunningShooter = !shouldBeRunningShooter;
@@ -331,13 +319,11 @@ public class Robot extends IterativeRobot {
 		} else {
 			wasPressedRightBumper = false;
 		}
-
 		if(rotationRate >= 19000){
 			spinUpComplete = true;
 		} else {
 			spinUpComplete = false;
 		}
-		
 		if(shouldBeRunningShooter && !spinUpComplete){
 			shooterRight.set(.67);
 			shooterLeft.set(-.67);
@@ -383,10 +369,7 @@ public class Robot extends IterativeRobot {
 			elevator.set(0);
 			SmartDashboard.putNumber("ELEVATOR OFF", 101);
 		}
-
-		
 	}
-	
 	private void toggleResExpansion(){
 		if (logitechY2.get()) {
 			if (!wasPressedLogitechB) {
@@ -469,7 +452,6 @@ public class Robot extends IterativeRobot {
     		drive.reset();
     		return true;
     	}
-    	
     }
 	// CORRECTION METHOD. WE USE THE VALUE getAngleFOR ROTATIONAL
 	// POSTITIONING
@@ -492,14 +474,17 @@ public class Robot extends IterativeRobot {
 			driveMotors(.3, .3);
 			
 			float nowRot = (float) ahrs.getAngle();
+			float error = rotationPos-nowRot;
 			System.out.println(rotationPos);
 			System.out.println(nowRot);
+			
 			if (nowRot >= rotationPos + 5) {
 				driveMotors(-.3,.3);
 			}
 			if (nowRot <= rotationPos - 5) {
 				driveMotors(.3,-.3);
 			}
+			//driveMotors(.16+error/100,.16-error/100);
 			return false;
 		}
     	else{
@@ -556,8 +541,7 @@ public class Robot extends IterativeRobot {
 		climberLeft = new Victor(1);
 		climberRight = new Victor(7);
 		elevator = new Victor(6);
-		
-		
+	
 		agitator = new DigitalOutput(4);
 
 		// Encoder inits and instantiations
@@ -588,7 +572,7 @@ public class Robot extends IterativeRobot {
 		joyStickLeft = new Joystick(0);
 		joyStickRight = new Joystick(1);
 		
-		//camera = CameraServer.getInstance().startAutomaticCapture();
+		camera = CameraServer.getInstance().startAutomaticCapture();
 
 		// BUTTON MAPPING. REASON ITS HERE IS BECAUSE IT WAS WRONG AND THESE ARE
 		// THE CORRECT VALUES
@@ -630,9 +614,6 @@ public class Robot extends IterativeRobot {
 		logitechBack2 = new JoystickButton(joyStickRight, 9);
 		logitechRightTrigger2 = new JoystickButton(joyStickRight, 8);
 		logitechLeftTrigger2 = new JoystickButton(joyStickRight,7);
-		// rightTrim = SmartDashboard.getNumber("DB/Slider 3", 1.0);
-		// if(rightTrim == 0){ SmartDashboard.putNumber("DB/Slider 3", 1);
-		// rightTrim = 1;}
 
 		shifterCylinder = new DoubleSolenoid(2, 3);
 		reservoirCylinder = new DoubleSolenoid(6, 7);
@@ -642,14 +623,10 @@ public class Robot extends IterativeRobot {
 		// compressor port init
 		compressor = new Compressor(0);
 		compressor.setClosedLoopControl(false);
-
-		// limit switch init
-		// imitSwitch = new DigitalInput(1);
-
-
-		// Boolean Toggle Switch
-		shouldBeRunningSwitch = false;
-		wasPressedLeftStick = false;
+		
+		// Boolean Toggle Switches
+		//shouldBeRunningSwitch = false;
+		//wasPressedLeftStick = false;
 		shouldBeRunningShooter = false;
 		wasPressedRightBumper = false;
 		shouldBeRunningIntake = false;
@@ -735,98 +712,84 @@ public class Robot extends IterativeRobot {
 		    cycleCounter++;
 		    
 		    if(autoSelecter == 0.0){   //GEAR MIDDLE
-		    	if(stateSeq == 0){
+			    switch(stateSeq){
+			    case 0:
 			    	if(encoderMacro(30000)){
 			    		resetAutoEncNavX();
 			    	}
-		    	}
-			    if(stateSeq == 1){
+			    case 1:
 			    	driveMotors(0,0);
 			    }
 		    }
-		    else if(autoSelecter == 1.0){  //RED LEFT SIDE
-		    	if(stateSeq == 1){
-		    		if(turnMacro(60)){
-		    			System.out.println("incrementing");
-		    			resetAutoEncNavX();
-		    		}
-		    	}
-		    	if(stateSeq == 0){
+		    else if(autoSelecter == 1.0){ //RED LEFT SIDE
+		    	switch(stateSeq){
+		    	case 0:
 		    		if(encoderMacro(20000)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 2){
+		    	case 1:
+		    		if(turnMacro(60)){
+		    			resetAutoEncNavX();
+		    		}
+		    	case 2:
 		    		if(encoderMacro(10000)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 3){
+		    	case 3:
 		    		driveMotors(0,0);
 		    	}
-		    	System.out.println("stateSeq: "+stateSeq);
 		    }
-		    else if(autoSelecter == 2.0){      //RED RIGHT SIDE
-		    	if(stateSeq == 0){
+		    else if(autoSelecter == 2.0){//RED RIGHT SIDE
+		    	switch(stateSeq){
+		    	case 0:
 		    		if(encoderMacro(20000)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 1){
+		    	case 1:
 		    		if(turnMacro(300)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 2){
+		    	case 2:
 		    		if(encoderMacro(10000)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 3){
+		    	case 3:
 		    		driveMotors(0,0);
 		    	}
 		    }
 		    else if(autoSelecter == 3.0){  //BLUE LEFT SIDE
-		    	if(stateSeq == 1){
-		    		if(turnMacro(60)){
-		    			System.out.println("incrementing");
-		    			resetAutoEncNavX();
-		    		}
-		    	}
-		    	if(stateSeq == 0){
+		    	switch(stateSeq){
+		    	case 0:
 		    		if(encoderMacro(20000)){
 		    			resetAutoEncNavX();
 		    		}
-		    	
-		    	}
-		    	if(stateSeq == 2){
+		    	case 1:
+		    		if(turnMacro(60)){
+		    			resetAutoEncNavX();
+		    		}
+		    	case 2:
 		    		if(encoderMacro(10000)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 3){
+		    	case 3:
 		    		driveMotors(0,0);
 		    	}
 		    }
 		    else if(autoSelecter == 4.0){      //BLUE RIGHT SIDE
-		    	if(stateSeq == 0){
+		      	switch(stateSeq){
+		    	case 0:
 		    		if(encoderMacro(20000)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 1){
-		    		
+		    	case 1:
 		    		if(turnMacro(300)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 2){
-		    		
+		    	case 2:
 		    		if(encoderMacro(10000)){
 		    			resetAutoEncNavX();
 		    		}
-		    	}
-		    	if(stateSeq == 3){
+		    	case 3:
 		    		driveMotors(0,0);
 		    	}
 		    }
@@ -840,8 +803,6 @@ public class Robot extends IterativeRobot {
 			System.out.println("Auto Mode: "+autoSelecter);
 			System.out.println("stage: "+stateSeq);
 			System.out.println("***************");
-		
-		
 	}
 
 	public void teleopInit() {
@@ -897,8 +858,6 @@ public class Robot extends IterativeRobot {
 			intakeOnOff(0);
 			shouldBeRunningIntake = false;
 		}
-		
-		
 		if(logitechX.get()){
 			driveState = true;
 		}
@@ -931,7 +890,6 @@ public class Robot extends IterativeRobot {
 					
 				}
 			}
-	
 			if(currentElevator >= 28){
 				elevator.set(0);
 				Timer.delay(0.25);
