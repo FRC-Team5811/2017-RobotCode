@@ -526,13 +526,13 @@ public class Robot extends IterativeRobot {
     	double outputPower;
     	System.out.println("current position: "+nowRot);
     	System.out.println("set degrees: "+degrees);
-    	if(degrees+5 < nowRot || degrees-5 > nowRot){
+    	if(Math.abs(degrees)+5 < nowRot || Math.abs(degrees)-5 > nowRot){
     		if(nowRot > degrees){
     			outputDirection = -1;
     		}else{
     			outputDirection = 1;
     		}
-    		outputPower = (outputDirection*-.16)+outputDirection*(((nowRot-degrees)/500));
+    		outputPower = (outputDirection*-.16)+outputDirection*(((nowRot-Math.abs(degrees))/500));
     		//outputPower = outputDirection*.3;
     		driveMotors(outputPower,-outputPower);
     		System.out.println("moving");
@@ -612,6 +612,16 @@ public class Robot extends IterativeRobot {
     	rotationCountForDrive = (int) drive.getDistance();
     	if(Math.abs(rotationCountForDrive) < encValue){
 			driveMotors(.3, .3);
+			rotationPos = 0;
+			float nowRot = (float) ahrs.getAngle();
+			System.out.println(rotationPos);
+			System.out.println(nowRot);
+			if (nowRot >= rotationPos + 5) {
+				driveMotors(-.3,.3);
+			}
+			if (nowRot <= rotationPos - 5) {
+				driveMotors(.3,-.3);
+			}
 			return false;
 			//System.out.println(encValue);
 		//	System.out.println(Math.abs(rotationCountForDrive));
@@ -966,9 +976,12 @@ public class Robot extends IterativeRobot {
 	public void autonomousInit() {
 	    autonomousCommand = (Command) chooser.getSelected();
 	    autoSelecter = SmartDashboard.getNumber("DB/Slider 0", 0.0);
-	    /*
-
-		*/
+	    String autoDEF1 = SmartDashboard.getString("DB/String 0", "0 is GEAR MIDDLE");
+	    String autoDEF2 = SmartDashboard.getString("DB/String 1", "1 is GEAR LEFT RED");
+	    String autoDEF3 = SmartDashboard.getString("DB/String 2", "2 is GEAR RIGHT RED");
+1	    String autoDEF4 = SmartDashboard.getString("DB/String 3", "3 is GEAR LEFT BLUE");
+	    String autoDEF5 = SmartDashboard.getString("DB/String 4", "4 is GEAR RIGHT BLUE");
+	    
 		
 		shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
@@ -999,17 +1012,85 @@ public class Robot extends IterativeRobot {
 		 
 		    cycleCounter++;
 		    
-		    if(autoSelecter == 0.0){   //DRIVE FORWARD
-		    	switch(stateSeq){
-				case 0:
-					System.out.println("stage 0");
-					encoderMacro(3000);
-					break;
+		    if(autoSelecter == 0.0){   //GEAR MIDDLE
+		    	if(stateSeq == 0){
+			    	System.out.println("stage 0");
+			    	if(encoderMacro(30000)){
+			    		drive.reset();
+			    		ahrs.reset();
+			    		stateSeq++;
+			    	}
+		    	}
+			    if(stateSeq == 1){
+			    	System.out.println("stage 1");
+			    	driveMotors(0,0);
+			    }
+		    }
+		    else if(autoSelecter == 1.0){  //RED LEFT SIDE
+		    	if(stateSeq == 1){
+		    		System.out.println("stage 0");
+		    		if(turnMacro(60)){
+		    			System.out.println("incrementing");
+		    			drive.reset();
+		    			ahrs.reset();
+		    			stateSeq++;
+		    		}
+		    	}
+		    	if(stateSeq == 0){
+		    		
+		    		System.out.println("stage 1");
+		    		if(encoderMacro(20000)){
+		    			ahrs.reset();
+		        		drive.reset();
+		        		stateSeq++;
+		    		}
+		    	
+		    	}
+		    	if(stateSeq == 2){
+		    		System.out.println("stage 2");
+		    		if(encoderMacro(10000)){
+		    			ahrs.reset();
+		    			drive.reset();
+		    			stateSeq++;
+		    		}
+		    	}
+		    	if(stateSeq == 3){
+		    		driveMotors(0,0);
+		    	}
+		    	System.out.println("stateSeq: "+stateSeq);
+		    }
+		    else if(autoSelecter == 2.0){      //RED RIGHT SIDE
+		    	if(stateSeq == 0){
+		    		System.out.println("stage 0");
+		    		if(encoderMacro(20000)){
+		    			ahrs.reset();
+		    			drive.reset();
+		    			stateSeq++;
+		    		}
+		    	if(stateSeq == 1){
+		    		System.out.println("stage 1");
+		    		if(turnMacro(300)){
+		    			ahrs.reset();
+		    			drive.reset();
+		    			stateSeq++;
+		    		}
+		    	}
+		    	if(stateSeq == 2){
+		    		System.out.println("stage 2");
+		    		if(encoderMacro(10000)){
+		    			ahrs.reset();
+		    			drive.reset();
+		    			stateSeq++;
+		    		}
+		    	}
+		    	if(stateSeq == 3){
+		    		System.out.println("stage 3");
+		    		driveMotors(0,0);
+		    	}
 		    	}
 		    }
-		    else if(autoSelecter == 1.0){  //TURN
-		    	if(stateSeq ==0){
-		    		
+		    else if(autoSelecter == 3.0){  //BLUE LEFT SIDE
+		    	if(stateSeq == 1){
 		    		System.out.println("stage 0");
 		    		if(turnMacro(60)){
 		    			System.out.println("incrementing");
@@ -1017,17 +1098,58 @@ public class Robot extends IterativeRobot {
 		    			stateSeq++;
 		    		}
 		    	}
-		    	if(stateSeq == 1){
+		    	if(stateSeq == 0){
 		    		
 		    		System.out.println("stage 1");
-		    		if(encoderMacro(10000)){
+		    		if(encoderMacro(20000)){
 		    			ahrs.reset();
 		        		drive.reset();
 		        		stateSeq++;
 		    		}
 		    	
 		    	}
+		    	if(stateSeq == 2){
+		    		System.out.println("stage 2");
+		    		if(encoderMacro(10000)){
+		    			ahrs.reset();
+		    			drive.reset();
+		    			stateSeq++;
+		    		}
+		    	}
+		    	if(stateSeq == 3){
+		    		driveMotors(0,0);
+		    	}
 		    	System.out.println("stateSeq: "+stateSeq);
+		    }
+		    else if(autoSelecter == 4.0){      //BLUE RIGHT SIDE
+		    	if(stateSeq == 0){
+		    		System.out.println("stage 0");
+		    		if(encoderMacro(20000)){
+		    			ahrs.reset();
+		    			drive.reset();
+		    			stateSeq++;
+		    		}
+		    	if(stateSeq == 1){
+		    		System.out.println("stage 1");
+		    		if(turnMacro(300)){
+		    			ahrs.reset();
+		    			drive.reset();
+		    			stateSeq++;
+		    		}
+		    	}
+		    	if(stateSeq == 2){
+		    		System.out.println("stage 2");
+		    		if(encoderMacro(10000)){
+		    			ahrs.reset();
+		    			drive.reset();
+		    			stateSeq++;
+		    		}
+		    	}
+		    	if(stateSeq == 3){
+		    		System.out.println("stage 3");
+		    		driveMotors(0,0);
+		    	}
+		    	}
 		    }
 		 
 		 
