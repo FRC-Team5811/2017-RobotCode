@@ -215,14 +215,6 @@ public class Robot extends IterativeRobot {
 		
 		test,
 	}
-	*/
-	//RobotStates autoMode; 
-	
-	/*
-	public Robot(RobotStates autoMode){
-		this.autoMode = autoMode;
-	}
-    */
 	/*
 	String botPosition;
 	String allianceColor;
@@ -301,30 +293,12 @@ public class Robot extends IterativeRobot {
 	public void intakeOnOff(double speed){
 		intake.set(speed);
 	}
-	/*
-	private void switchDriveModes(){
-		// SWITCHING BETWEEN DRIVE MODES
-		if (logitechX.get()) {
-			if (!wasPressedLeftStick) {
-				shouldBeRunningSwitch = !shouldBeRunningSwitch;
-			}
-			wasPressedLeftStick = true;
-			System.out.println("yah boi be on");
-		} else {
-			wasPressedLeftStick = false;
-		}
-
-		if (shouldBeRunningSwitch) {
-			slowMove(0.5);
-			//joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-			//joyStickLeft.setRumble(RumbleType.kRightRumble, 1);
-		} else {
-			dualStick();
-			//joyStickLeft.setRumble(RumbleType.kLeftRumble, 1);
-			//joyStickLeft.setRumble(RumbleType.kRightRumble, 0);
-		}
+	public void resetAutoEncNavX(){
+		ahrs.reset();
+		drive.reset();
+		rotationPos = 0;
+		stateSeq++;
 	}
-	*/
 	private void testForCorrectionMode() {
 		// CORRECTION MODE
 		if (logitechBack.get()) {
@@ -347,7 +321,7 @@ public class Robot extends IterativeRobot {
 	
 	private void toggleShooterMotor() {
 		
-		// SHOOTER + BLOCK PNEUMATIC
+		// SHOOTER
 
 		if (logitechRightBumper2.get()) {
 			if (!wasPressedRightBumper) {
@@ -382,32 +356,7 @@ public class Robot extends IterativeRobot {
 		}
 		
 	}
-	/*
-	private void toggleIntake() {
-		
-		// INTAKE MY DUDES
-
-		if (logitechLeftBumper2.get()) {
-			if (!wasPressedLeftBumper) {
-				shouldBeRunningIntake = !shouldBeRunningIntake;
-			}
-			wasPressedLeftBumper = true;
-			// System.out.println("yah boi be on");
-		} else {
-			wasPressedLeftBumper = false;
-		}
-
-		if (shouldBeRunningIntake) {
-			intake.set(-.4);
-			// SmartDashboard.putNumber("INTAKE ON", 101);
-		} else {
-			intake.set(0);
-			// SmartDashboard.putNumber("INTAKE OFF", 101);
-		}
-
-
-	}
-	*/
+	
 	private void checkClimberState(){
 		//CLIMBER LOGIC
 		climberRight.set(joyStickRight.getY());
@@ -461,30 +410,7 @@ public class Robot extends IterativeRobot {
 			cycleCounterTele++;
 		}
 	}
-	/*
-	private void toggleShifter() {
 
-		if (logitechRightStickPress.get()) {
-			if (!wasPressedRightStick) {
-				
-				shouldBeRunningShifter = !shouldBeRunningShifter;
-				shifterDelay();
-			}
-			wasPressedRightStick = true;
-		} else {
-			wasPressedRightStick = false;
-		}
-
-		if (shouldBeRunningShifter) {
-			shifterCylinder.set(DoubleSolenoid.Value.kForward);
-			
-		} else {
-			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
-			
-		}
-		
-	} 
-	*/
 	private void checkShift(){
 		if(logitechRightBumper.get()){
 			shifterDelay();
@@ -517,8 +443,6 @@ public class Robot extends IterativeRobot {
 		driveMotors((throttle + turn), (throttle - turn));
 	}
 	
-	
-	
     private boolean turnMacro(float degrees){
     	//ahrs.reset();
     	float nowRot = (float) ahrs.getAngle();
@@ -533,10 +457,8 @@ public class Robot extends IterativeRobot {
     			outputDirection = 1;
     		}
     		outputPower = (outputDirection*-.16)+outputDirection*(((nowRot-Math.abs(degrees))/500));
-    		//outputPower = outputDirection*.3;
     		driveMotors(outputPower,-outputPower);
     		System.out.println("moving");
-    		System.out.println(outputPower);
     		return false;
     	}
     	else{
@@ -549,51 +471,7 @@ public class Robot extends IterativeRobot {
     	}
     	
     }
-    
-    private void driveStraightFeet(float feet){
-    	//ahrs.reset();
-    	float nowRot = (float) ahrs.getAngle();
-    	double outputDirection;
-    	double outputPower;
-    	//double currentLocation;
-    	if(distance < feet){
-    		//driveMotors(.5, -.5);
-    		while(5.0 > nowRot && nowRot > -5.0){
-        		if(nowRot > 0){
-        			outputDirection = 1;
-        		}else{
-        			outputDirection = -1;
-        		}
-        		
-        		outputPower = outputDirection*(((0-nowRot)/200)+.1);
-        		driveMotors(outputPower + 0.8 ,outputPower + -0.8);
-        		nowRot = (float) ahrs.getAngle();
-        	}
-    	}
-    	else{
-    		driveMotors(0,0);
-    	}
-    }
-    /*
-    private void rotationMacro(){
-    	if(logitechStart.get()){
-			if(!wasPressedStart){
-				macroPos = (float) ahrs.getAngle();
-				shouldBeRunningAutoTurn = !shouldBeRunningAutoTurn;
-			}
-			wasPressedStart = true;
-			System.out.println("yah boi be on");
-		}else{
-			wasPressedStart = false;
-		}
-    	if(shouldBeRunningSwitch){
-    		turnMacro(30);
-    	}else{
-    		
-    	}
-    }
-	*/
-	// CORRECTION METHOD. WE USE THE VALUE QUARTERNION Z FOR ROTATIONAL
+	// CORRECTION METHOD. WE USE THE VALUE getAngleFOR ROTATIONAL
 	// POSTITIONING
     //Spectre says HI 
 	private void correct() {
@@ -612,7 +490,7 @@ public class Robot extends IterativeRobot {
     	rotationCountForDrive = (int) drive.getDistance();
     	if(Math.abs(rotationCountForDrive) < encValue){
 			driveMotors(.3, .3);
-			rotationPos = 0;
+			
 			float nowRot = (float) ahrs.getAngle();
 			System.out.println(rotationPos);
 			System.out.println(nowRot);
@@ -623,24 +501,12 @@ public class Robot extends IterativeRobot {
 				driveMotors(.3,-.3);
 			}
 			return false;
-			//System.out.println(encValue);
-		//	System.out.println(Math.abs(rotationCountForDrive));
 		}
     	else{
     		driveMotors(0,0);
     		return true;
     	}
     }
-    
-    public void encoderCreep(float encValue){
-    	while(rotationCount >= 0.9 * encValue && rotationCount < encValue){
-			driveMotors(0.3, 0.3);
-		}
-    	driveMotors(.5,.5);
-    }
-
-
-
     public void shootAutonomous(double shootTime){
     	if(rotationRate >= 19000){
 			spinUpComplete = true;
@@ -811,13 +677,6 @@ public class Robot extends IterativeRobot {
 		
 		stateSeq = 0;
 		
-		//currentCycle = 0;
-		
-		//limitSwitch = new DigitalInput(1);
-		
-		//logicError = SmartDashboard.getString("DB/String 6", "No error");
-		//endgameAutonomous = SmartDashboard.getString("DB/String 8", "Hah....BASIC");
-		
 		// NavX instantiation
 		try {
 			ahrs = new AHRS(SerialPort.Port.kUSB);
@@ -835,130 +694,6 @@ public class Robot extends IterativeRobot {
 		if (isOperatorControl() && isEnabled()) {
 
 			Timer.delay(0.020); /* wait for one motor update time period (50Hz) */
-
-			/*
-			 * boolean zero_yaw_pressed = stick.getTrigger(); if (
-			 * zero_yaw_pressed ) { ahrs.zeroYaw(); }
-			 */
-
-			/* Display 6-axis Processed Angle Data */
-			/*
-			SmartDashboard.putBoolean("IMU_Connected", ahrs.isConnected());
-			SmartDashboard.putBoolean("IMU_IsCalibrating", ahrs.isCalibrating());
-			SmartDashboard.putNumber("IMU_Yaw", ahrs.getYaw());
-			SmartDashboard.putNumber("IMU_Pitch", ahrs.getPitch());
-			SmartDashboard.putNumber("IMU_Roll", ahrs.getRoll());
-
-			/* Display tilt-corrected, Magnetometer-based heading (requires */
-			/* magnetometer calibration to be useful) */
-
-			//SmartDashboard.putNumber("IMU_CompassHeading", ahrs.getCompassHeading());
-
-			/*
-			 * Display 9-axis Heading (requires magnetometer calibration to be
-			 * useful)
-			 */
-		//	SmartDashboard.putNumber("IMU_FusedHeading", ahrs.getFusedHeading());
-
-			/*
-			 * These functions are compatible w/the WPI Gyro Class, providing a
-			 * simple
-			 */
-			/* path for upgrading from the Kit-of-Parts gyro to the navx MXP */
-
-			SmartDashboard.putNumber("IMU_TotalYaw", ahrs.getAngle());
-			//SmartDashboard.putNumber("IMU_YawRateDPS", ahrs.getRate());
-
-			/*
-			 * Display Processed Acceleration Data (Linear Acceleration, Motion
-			 * Detect)
-			 */
-/*
-			SmartDashboard.putNumber("IMU_Accel_X", ahrs.getWorldLinearAccelX());
-			SmartDashboard.putNumber("IMU_Accel_Y", ahrs.getWorldLinearAccelY());
-			SmartDashboard.putBoolean("IMU_IsMoving", ahrs.isMoving());
-			SmartDashboard.putBoolean("IMU_IsRotating", ahrs.isRotating());
-*/
-			/*
-			 * Display estimates of velocity/displacement. Note that these
-			 * values are
-			 */
-			/*
-			 * not expected to be accurate enough for estimating robot position
-			 * on a
-			 */
-			/*
-			 * FIRST FRC Robotics Field, due to accelerometer noise and the
-			 * compounding
-			 */
-			/*
-			 * of these errors due to single (velocity) integration and
-			 * especially
-			 */
-			/* double (displacement) integration. */
-/*
-			SmartDashboard.putNumber("Velocity_X", ahrs.getVelocityX());
-			SmartDashboard.putNumber("Velocity_Y", ahrs.getVelocityY());
-			SmartDashboard.putNumber("Displacement_X", ahrs.getDisplacementX());
-			SmartDashboard.putNumber("Displacement_Y", ahrs.getDisplacementY());
-*/
-			/* Display Raw Gyro/Accelerometer/Magnetometer Values */
-			/*
-			 * NOTE: These values are not normally necessary, but are made
-			 * available
-			 */
-			/*
-			 * for advanced users. Before using this data, please consider
-			 * whether
-			 */
-			/* the processed data (see above) will suit your needs. */
-/*
-			SmartDashboard.putNumber("RawGyro_X", ahrs.getRawGyroX());
-			SmartDashboard.putNumber("RawGyro_Y", ahrs.getRawGyroY());
-			SmartDashboard.putNumber("RawGyro_Z", ahrs.getRawGyroZ());
-			SmartDashboard.putNumber("RawAccel_X", ahrs.getRawAccelX());
-			SmartDashboard.putNumber("RawAccel_Y", ahrs.getRawAccelY());
-			SmartDashboard.putNumber("RawAccel_Z", ahrs.getRawAccelZ());
-			SmartDashboard.putNumber("RawMag_X", ahrs.getRawMagX());
-			SmartDashboard.putNumber("RawMag_Y", ahrs.getRawMagY());
-			SmartDashboard.putNumber("RawMag_Z", ahrs.getRawMagZ());
-			SmartDashboard.putNumber("IMU_Temp_C", ahrs.getTempC());
-			SmartDashboard.putNumber("IMU_Timestamp", ahrs.getLastSensorTimestamp());
-*/
-			/* Omnimount Yaw Axis Information */
-			/*
-			 * For more info, see
-			 * http://navx-mxp.kauailabs.com/installation/omnimount
-			 */
-		//	AHRS.BoardYawAxis yaw_axis = ahrs.getBoardYawAxis();
-			/*
-			SmartDashboard.putString("YawAxisDirection", yaw_axis.up ? "Up" : "Down");
-			SmartDashboard.putNumber("YawAxis", yaw_axis.board_axis.getValue());
-
-			/* Sensor Board Information */
-			//SmartDashboard.putString("FirmwareVersion", ahrs.getFirmwareVersion());
-			/* Quaternion Data */
-			/*
-			 * Quaternions are fascinating, and are the most compact
-			 * representation of
-			 */
-			/*
-			 * orientation data. All of the Yaw, Pitch and Roll Values can be
-			 * derived
-			 */
-			/*
-			 * from the Quaternions. If interested in motion processing,
-			 * knowledge of
-			 */
-			
-			/* Quaternions is highly recommended. */
-			/*
-			SmartDashboard.putNumber("QuaternionW", ahrs.getQuaternionW());
-			SmartDashboard.putNumber("QuaternionX", ahrs.getQuaternionX());
-			SmartDashboard.putNumber("QuaternionY", ahrs.getQuaternionY());
-			SmartDashboard.putNumber("QuaternionZ", ahrs.getQuaternionZ());
-
-			/* Connectivity Debugging Support */
 			SmartDashboard.putNumber("IMU_Byte_Count", ahrs.getByteCount());
 			SmartDashboard.putNumber("IMU_Update_Count", ahrs.getUpdateCount());
 		}
@@ -979,79 +714,51 @@ public class Robot extends IterativeRobot {
 	    String autoDEF1 = SmartDashboard.getString("DB/String 0", "0 is GEAR MIDDLE");
 	    String autoDEF2 = SmartDashboard.getString("DB/String 1", "1 is GEAR LEFT RED");
 	    String autoDEF3 = SmartDashboard.getString("DB/String 2", "2 is GEAR RIGHT RED");
-1	    String autoDEF4 = SmartDashboard.getString("DB/String 3", "3 is GEAR LEFT BLUE");
+	    String autoDEF4 = SmartDashboard.getString("DB/String 3", "3 is GEAR LEFT BLUE");
 	    String autoDEF5 = SmartDashboard.getString("DB/String 4", "4 is GEAR RIGHT BLUE");
 	    
 		
 		shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
-		//rotationCountForDrive = 0;
 		drive.reset();
 		ahrs.reset();
 		cycleCounter = 0;
 		stateSeq = 0;
 		driveMotors(0, 0);
-	   //autoSelecter = SmartDashboard.getNumber("DB/Slider 0", 0.0);
-	   
-	  
-	    
-	 
-		//**************DEFAULT CODE IN CASE OF AN L**************
 
 	}
 
 	
 	public void autonomousPeriodic() {
-		/*NOTE: the notions of the method driveMotors are to be paired with encoder data.
-		 * Make sure to pair!!!!!!!
-		 * 
-		 *NOTE: The hopper only methods for boiler side and loading side return from the hopper. If a "hopperStay" auton sequence is needed,
-		 *contact Sam Sidhu ASAP 
-		 *
-		 */Scheduler.getInstance().run();
+			Scheduler.getInstance().run();
 		 
 		    cycleCounter++;
 		    
 		    if(autoSelecter == 0.0){   //GEAR MIDDLE
 		    	if(stateSeq == 0){
-			    	System.out.println("stage 0");
 			    	if(encoderMacro(30000)){
-			    		drive.reset();
-			    		ahrs.reset();
-			    		stateSeq++;
+			    		resetAutoEncNavX();
 			    	}
 		    	}
 			    if(stateSeq == 1){
-			    	System.out.println("stage 1");
 			    	driveMotors(0,0);
 			    }
 		    }
 		    else if(autoSelecter == 1.0){  //RED LEFT SIDE
 		    	if(stateSeq == 1){
-		    		System.out.println("stage 0");
 		    		if(turnMacro(60)){
 		    			System.out.println("incrementing");
-		    			drive.reset();
-		    			ahrs.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	}
 		    	if(stateSeq == 0){
-		    		
-		    		System.out.println("stage 1");
 		    		if(encoderMacro(20000)){
-		    			ahrs.reset();
-		        		drive.reset();
-		        		stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
-		    	
 		    	}
 		    	if(stateSeq == 2){
-		    		System.out.println("stage 2");
 		    		if(encoderMacro(10000)){
-		    			ahrs.reset();
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	}
 		    	if(stateSeq == 3){
@@ -1061,109 +768,78 @@ public class Robot extends IterativeRobot {
 		    }
 		    else if(autoSelecter == 2.0){      //RED RIGHT SIDE
 		    	if(stateSeq == 0){
-		    		System.out.println("stage 0");
 		    		if(encoderMacro(20000)){
-		    			ahrs.reset();
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
+		    	}
 		    	if(stateSeq == 1){
-		    		System.out.println("stage 1");
 		    		if(turnMacro(300)){
-		    			ahrs.reset();
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	}
 		    	if(stateSeq == 2){
-		    		System.out.println("stage 2");
 		    		if(encoderMacro(10000)){
-		    			ahrs.reset();
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	}
 		    	if(stateSeq == 3){
-		    		System.out.println("stage 3");
 		    		driveMotors(0,0);
-		    	}
 		    	}
 		    }
 		    else if(autoSelecter == 3.0){  //BLUE LEFT SIDE
 		    	if(stateSeq == 1){
-		    		System.out.println("stage 0");
 		    		if(turnMacro(60)){
 		    			System.out.println("incrementing");
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	}
 		    	if(stateSeq == 0){
-		    		
-		    		System.out.println("stage 1");
 		    		if(encoderMacro(20000)){
-		    			ahrs.reset();
-		        		drive.reset();
-		        		stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	
 		    	}
 		    	if(stateSeq == 2){
-		    		System.out.println("stage 2");
 		    		if(encoderMacro(10000)){
-		    			ahrs.reset();
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	}
 		    	if(stateSeq == 3){
 		    		driveMotors(0,0);
 		    	}
-		    	System.out.println("stateSeq: "+stateSeq);
 		    }
 		    else if(autoSelecter == 4.0){      //BLUE RIGHT SIDE
 		    	if(stateSeq == 0){
-		    		System.out.println("stage 0");
 		    		if(encoderMacro(20000)){
-		    			ahrs.reset();
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
+		    	}
 		    	if(stateSeq == 1){
-		    		System.out.println("stage 1");
+		    		
 		    		if(turnMacro(300)){
-		    			ahrs.reset();
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	}
 		    	if(stateSeq == 2){
-		    		System.out.println("stage 2");
+		    		
 		    		if(encoderMacro(10000)){
-		    			ahrs.reset();
-		    			drive.reset();
-		    			stateSeq++;
+		    			resetAutoEncNavX();
 		    		}
 		    	}
 		    	if(stateSeq == 3){
-		    		System.out.println("stage 3");
 		    		driveMotors(0,0);
-		    	}
 		    	}
 		    }
 		 
 		 
 			distance = drive.getDistance();
 		
-			
-			System.out.println(Math.abs(rotationCountForDrive));
-			//System.out.println(encValue);
-			//System.out.println(Math.abs(drive.getDistance()));
+			System.out.println("***************");
+			System.out.println("Encoder pulse count: "+Math.abs(rotationCountForDrive));
 			System.out.println("Raw Angle: "+ahrs.getAngle());
-			rotationRateForDrive = drive.getRate();
-			
-			System.out.println(autoSelecter);
-	
+			System.out.println("Auto Mode: "+autoSelecter);
+			System.out.println("stage: "+stateSeq);
+			System.out.println("***************");
 		
 		
 	}
@@ -1209,7 +885,7 @@ public class Robot extends IterativeRobot {
 		System.out.println("Back Left Drive Current: "+currentBackLeftDrive);
 		System.out.println("Climber 1 Current: "+currentClimber1);
 		System.out.println("Climber 2 Current: "+currentClimber2);
-		
+		System.out.println("**************");
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println(shooterEncoder.get());
 		
@@ -1265,16 +941,11 @@ public class Robot extends IterativeRobot {
 					elevator.set(-0.3);
 					
 				}
-			}
-	
-		
-		//switchDriveModes();  
+			} 
 
 		testForCorrectionMode();
 
 		toggleShooterMotor();
-
-		//toggleIntake();
 		
 		checkClimberState();
 		
@@ -1285,10 +956,6 @@ public class Robot extends IterativeRobot {
 		checkShift();
 		
 		agitator.set(false);
-		
-		//toggleShifter();
-		
-		//operatorControl();
 
 	}
 
