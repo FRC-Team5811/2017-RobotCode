@@ -64,7 +64,7 @@ public class Robot extends IterativeRobot {
 	Victor climberRight;
 	Victor elevator;
 	
-	DigitalOutput agitator;
+	//DigitalOutput agitator;
 	
 	UsbCamera camera;
 
@@ -93,8 +93,6 @@ public class Robot extends IterativeRobot {
 	int cycleCounter;
 	/*
 	enum RobotStates{ 
-		 
-		
 		//**************BASE FUNCTIONS**************
 		
 		//Baseline Only
@@ -287,6 +285,7 @@ public class Robot extends IterativeRobot {
 		ahrs.reset();
 		drive.reset();
 		rotationPos = 0;
+		Timer.delay(.5);
 		stateSeq++;
 	}
 	private void testForCorrectionMode() {
@@ -345,8 +344,8 @@ public class Robot extends IterativeRobot {
 	
 	private void checkClimberState(){
 		//CLIMBER LOGIC
-		climberRight.set(joyStickRight.getY());
-		climberLeft.set(joyStickRight.getY());
+		climberRight.set(Math.abs(joyStickRight.getY()));
+		climberLeft.set(Math.abs(joyStickRight.getY()));
 				
 	} 
 	
@@ -427,29 +426,28 @@ public class Robot extends IterativeRobot {
 	}
 	
     private boolean turnMacro(float degrees){
-    	//ahrs.reset();
     	float nowRot = (float) ahrs.getAngle();
     	double outputDirection;
     	double outputPower;
     	System.out.println("current position: "+nowRot);
     	System.out.println("set degrees: "+degrees);
-    	if(Math.abs(degrees)+5 < nowRot || Math.abs(degrees)-5 > nowRot){
+    	if(Math.abs(degrees)+1 < nowRot || Math.abs(degrees)-1 > nowRot){
     		if(nowRot > degrees){
     			outputDirection = -1;
     		}else{
     			outputDirection = 1;
     		}
-    		outputPower = (outputDirection*-.16)+outputDirection*(((nowRot-Math.abs(degrees))/500));
-    		driveMotors(outputPower,-outputPower);
+    		outputPower = (outputDirection*-.3)+outputDirection*(((nowRot-Math.abs(degrees))/500));
+    		driveMotors(-outputPower,outputPower);
     		System.out.println("moving");
     		return false;
     	}
     	else{
     		driveMotors(0,0);
     		System.out.println("not moving");
-    		ahrs.reset();
+    		//ahrs.reset();
     		degrees = nowRot;
-    		drive.reset();
+    		//drive.reset();
     		return true;
     	}
     }
@@ -471,20 +469,11 @@ public class Robot extends IterativeRobot {
     public boolean encoderMacro(float encValue){
     	rotationCountForDrive = (int) drive.getDistance();
     	if(Math.abs(rotationCountForDrive) < encValue){
-			driveMotors(.3, .3);
-			
 			float nowRot = (float) ahrs.getAngle();
 			float error = rotationPos-nowRot;
 			System.out.println(rotationPos);
 			System.out.println(nowRot);
-			
-			if (nowRot >= rotationPos + 5) {
-				driveMotors(-.3,.3);
-			}
-			if (nowRot <= rotationPos - 5) {
-				driveMotors(.3,-.3);
-			}
-			//driveMotors(.16+error/100,.16-error/100);
+			driveMotors(.30+error/10,.30-error/10);
 			return false;
 		}
     	else{
@@ -492,32 +481,29 @@ public class Robot extends IterativeRobot {
     		return true;
     	}
     }
-    public void shootAutonomous(double shootTime){
-    	if(rotationRate >= 19000){
-			spinUpComplete = true;
-		} else {
-			spinUpComplete = false;
-		}
-		
+    public void shootAutonomous(){
+	    	if(rotationRate >= 19000){
+				spinUpComplete = true;
+			} else {
+				spinUpComplete = false;
+			}
 		if(!spinUpComplete){
 			shooterRight.set(.62);
 			shooterLeft.set(-.62);
+			elevator.set(-.5);
 		} else if (shouldBeRunningShooter && spinUpComplete) {
 			rotationRate = shooterRightEnc.getRate();
 			shooterSpeedCorrection = (19200-rotationRate)/5000;   //.62 is 19200, .65 is 20000, .61 is 19000
 			shooterRight.set(.65+shooterSpeedCorrection);
 			shooterLeft.set(-.65+shooterSpeedCorrection);
+			elevator.set(-.5);
 			System.out.println("Rotation Rate: " + rotationRate);
 			System.out.println("Power Correction: " + shooterSpeedCorrection);
-			
 		} else {
 			shooterRight.set(0);
-		    shooterLeft.set(0);
-			
+		    shooterLeft.set(0);	
 		}
     }
-
-
     public void robotInit() {
 
 		oi = new OI();
@@ -542,7 +528,7 @@ public class Robot extends IterativeRobot {
 		climberRight = new Victor(7);
 		elevator = new Victor(6);
 	
-		agitator = new DigitalOutput(4);
+	//	agitator = new DigitalOutput(4);
 
 		// Encoder inits and instantiations
 		shooterRightEnc = new Encoder(0, 1, true, Encoder.EncodingType.k1X);
@@ -694,18 +680,18 @@ public class Robot extends IterativeRobot {
 	    String autoDEF4 = SmartDashboard.getString("DB/String 3", "3 is GEAR LEFT BLUE");
 	    String autoDEF5 = SmartDashboard.getString("DB/String 4", "4 is GEAR RIGHT BLUE");
 	    
-		
+	    driveMotors(0, 0);
 		shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		reservoirCylinder.set(DoubleSolenoid.Value.kReverse);
+		rotationPos =0;
 		drive.reset();
 		ahrs.reset();
 		cycleCounter = 0;
+		
 		stateSeq = 0;
-		driveMotors(0, 0);
-
+		Timer.delay(.5);
 	}
 
-	
 	public void autonomousPeriodic() {
 			Scheduler.getInstance().run();
 		 
@@ -714,83 +700,101 @@ public class Robot extends IterativeRobot {
 		    if(autoSelecter == 0.0){   //GEAR MIDDLE
 			    switch(stateSeq){
 			    case 0:
-			    	if(encoderMacro(30000)){
+			    	if(encoderMacro(132500)){
 			    		resetAutoEncNavX();
 			    	}
+			    	break;
 			    case 1:
 			    	driveMotors(0,0);
+			    	break;
 			    }
 		    }
-		    else if(autoSelecter == 1.0){ //RED LEFT SIDE
+		    else if(autoSelecter == 1.0){ //HOPPER LEFT SIDE
 		    	switch(stateSeq){
 		    	case 0:
-		    		if(encoderMacro(20000)){
+		    		if(encoderMacro(135000)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 1:
 		    		if(turnMacro(60)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 2:
-		    		if(encoderMacro(10000)){
+		    		if(encoderMacro(43000)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 3:
 		    		driveMotors(0,0);
+		    		break;
 		    	}
 		    }
-		    else if(autoSelecter == 2.0){//RED RIGHT SIDE
+		    else if(autoSelecter == 2.0){//BOILER RIGHT SIDE
 		    	switch(stateSeq){
 		    	case 0:
-		    		if(encoderMacro(20000)){
+		    		if(encoderMacro(135000)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 1:
 		    		if(turnMacro(300)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 2:
-		    		if(encoderMacro(10000)){
+		    		if(encoderMacro(53700)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 3:
 		    		driveMotors(0,0);
+		    		break;
 		    	}
 		    }
-		    else if(autoSelecter == 3.0){  //BLUE LEFT SIDE
+		    else if(autoSelecter == 3.0){  //BOILER LEFT SIDE
 		    	switch(stateSeq){
 		    	case 0:
-		    		if(encoderMacro(20000)){
+		    		if(encoderMacro(135000)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 1:
 		    		if(turnMacro(60)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 2:
-		    		if(encoderMacro(10000)){
+		    		if(encoderMacro(53700)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 3:
 		    		driveMotors(0,0);
+		    		break;
 		    	}
 		    }
-		    else if(autoSelecter == 4.0){      //BLUE RIGHT SIDE
+		    else if(autoSelecter == 4.0){      //HOPPER RIGHT SIDE
 		      	switch(stateSeq){
 		    	case 0:
-		    		if(encoderMacro(20000)){
+		    		if(encoderMacro(135000)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 1:
 		    		if(turnMacro(300)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 2:
-		    		if(encoderMacro(10000)){
+		    		if(encoderMacro(43000)){
 		    			resetAutoEncNavX();
 		    		}
+		    		break;
 		    	case 3:
 		    		driveMotors(0,0);
+		    		break;
 		    	}
 		    }
 		 
@@ -833,22 +837,22 @@ public class Robot extends IterativeRobot {
 		rotationRateForDrive = drive.getRate();
 		
 		System.out.println("************");
-		System.out.println(distance);
-		System.out.println(rotationCountForDrive);
-		System.out.println(rotationRateForDrive);
+		//System.out.println(distance);
+		System.out.println("Encoder: "+rotationCountForDrive);
+		//System.out.println(rotationRateForDrive);
 		System.out.println("************");
-		System.out.println("Angle: "+ahrs.getAngle());
-		System.out.println("Elevator Current: "+currentElevator);
-		System.out.println("Intake Current: "+currentIntake);
+		//System.out.println("Angle: "+ahrs.getAngle());
+		//System.out.println("Elevator Current: "+currentElevator);
+		//System.out.println("Intake Current: "+currentIntake);
 		System.out.println("Front Right Drive Current: "+currentFrontRightDrive);
 		System.out.println("Back Right Drive Current: "+currentBackRightDrive);
 		System.out.println("Front Left Drive Current: "+currentFrontLeftDrive);
 		System.out.println("Back Left Drive Current: "+currentBackLeftDrive);
-		System.out.println("Climber 1 Current: "+currentClimber1);
-		System.out.println("Climber 2 Current: "+currentClimber2);
+		//System.out.println("Climber 1 Current: "+currentClimber1);
+		//System.out.println("Climber 2 Current: "+currentClimber2);
 		System.out.println("**************");
 		//System.out.println(shooterEncoder.getDistance());
-		//System.out.println(shooterEncoder.get());
+		//System.out.println("Shooter Count: "+shooterRightEnc.get());
 		
 		if(logitechA2.get()){
 			intakeOnOff(.5);         //INTAKE CODE 
@@ -913,7 +917,7 @@ public class Robot extends IterativeRobot {
 		
 		checkShift();
 		
-		agitator.set(false);
+		//agitator.set(false);
 
 	}
 
