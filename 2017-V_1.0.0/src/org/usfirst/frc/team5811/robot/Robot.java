@@ -8,8 +8,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.DigitalOutput;
 
 public class Robot extends IterativeRobot {
 
@@ -24,6 +26,14 @@ public class Robot extends IterativeRobot {
 
 	// NavX
 	AHRS ahrs;
+	
+	//Outputs to Arduino
+	DigitalOutput red = new DigitalOutput(0);
+	DigitalOutput green = new DigitalOutput(1);
+	DigitalOutput blue = new DigitalOutput(2);
+	
+	//Serial i2c
+	I2C arduino;
 
 	// Buttons
 	JoystickButton logitechY;
@@ -520,7 +530,11 @@ public class Robot extends IterativeRobot {
 		chooser.addObject("My Auto", "My Auto");
 		SmartDashboard.putData("Auto mode", chooser);
 		System.out.println(SmartDashboard.getBoolean("DB/Button 0", false));
-
+		
+		arduino = new I2C(I2C.Port.kMXP, 58);
+		//Outputs to Arduino
+	
+		
 		// Motor port instantiating
 		frontLeftDriveMotor = new Victor(9);
 		frontRightDriveMotor = new Victor(4);
@@ -538,6 +552,7 @@ public class Robot extends IterativeRobot {
 	//	agitator = new DigitalOutput(4);
 
 		// Encoder inits and instantiations
+		/*
 		shooterRightEnc = new Encoder(0, 1, true, Encoder.EncodingType.k1X);
 		shooterRightEnc.setMaxPeriod(1);
 		shooterRightEnc.setDistancePerPulse(36);
@@ -549,7 +564,7 @@ public class Robot extends IterativeRobot {
 		drive.setDistancePerPulse(36);
 		drive.setMinRate(10);
 		drive.setSamplesToAverage(32);
-		
+		*/
 		
 		
 		//shooterEncoder = new Counter(0);
@@ -825,14 +840,23 @@ public class Robot extends IterativeRobot {
 		
 		//currentCycle = 0;
 		dualStickEXP();
+		
 		//dualStick();
 	}
-
+	byte[] toSend = new byte[1];
 	public void teleopPeriodic() {
-
+		
+		//arduino.transaction(dataToSend, sendSize, dataReceived, receiveSize)
+		
+		
+		
+		if(arduino.writeBulk(toSend)){
+			System.out.println("didnt send");
+		}
+		
 		Scheduler.getInstance().run(); 
 		compressor.setClosedLoopControl(true);
-		
+		/*
 		rotationCount = shooterRightEnc.get();
 		rotationRate = shooterRightEnc.getRate();
 		//double distance = shooterRightEnc.getDistance();
@@ -844,7 +868,7 @@ public class Robot extends IterativeRobot {
 		
 		rotationCountForDrive = drive.get();
 		rotationRateForDrive = drive.getRate();
-		
+		*/
 		System.out.println("************");
 		//System.out.println(distance);
 		System.out.println("Encoder: "+rotationCountForDrive);
@@ -876,11 +900,19 @@ public class Robot extends IterativeRobot {
 			shouldBeRunningIntake = false;
 		}
 		if(logitechX.get()){
-			driveState = true;
+			driveState = true;	
 		}
 		if(logitechY.get()){
-			driveState = false;           //STATE CHANGE CODE
+			driveState = false;         //STATE CHANGE CODE
 		}
+		if(logitechA.get()){
+			toSend[0] = 1;
+		}
+		else
+		{
+			toSend[0] = 2;
+		}
+		
 		if(driveState){
 			dualStickEXP();
 			//dualStick();
@@ -939,8 +971,7 @@ public class Robot extends IterativeRobot {
 		if(shifterCylinder.get() == DoubleSolenoid.Value.kForward){
 			System.out.println("HIGH GEAR");
 		}
-		//agitator.set(false);
-
+	
 	}
 
 	public void testPeriodic() {
