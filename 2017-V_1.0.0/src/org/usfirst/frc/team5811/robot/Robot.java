@@ -844,6 +844,7 @@ public class Robot extends IterativeRobot {
 		//dualStick();
 	}
 	byte[] toSend = new byte[1];
+	//lol
 	public void teleopPeriodic() {
 		
 		//arduino.transaction(dataToSend, sendSize, dataReceived, receiveSize)
