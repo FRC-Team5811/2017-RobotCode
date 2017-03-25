@@ -968,6 +968,7 @@ public class Robot extends IterativeRobot {
 		toggleResExpansion();
 		
 		checkShift();
+		//lols
 		if(shifterCylinder.get() == DoubleSolenoid.Value.kReverse){
 			System.out.println("LOW GEAR");
 		}
