@@ -288,7 +288,7 @@ public class Robot extends IterativeRobot {
 		arcadeDrive(-joyStickLeft.getRawAxis(1)*Math.abs(joyStickLeft.getRawAxis(1)),joyStickLeft.getRawAxis(2)*Math.abs(joyStickLeft.getRawAxis(2)));
 	}
 	private void slowMove(double reduction){
-		//shifterCylinder.set(DoubleSolenoid.Value.kReverse);
+		shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 		arcadeDrive((-joyStickLeft.getRawAxis(1)*reduction), (joyStickLeft.getRawAxis(2)*reduction));
 	}
 	public void intakeOnOff(double speed){
@@ -361,6 +361,9 @@ public class Robot extends IterativeRobot {
 		//CLIMBER LOGIC
 		climberRight.set(Math.abs(joyStickRight.getY()));
 		climberLeft.set(Math.abs(joyStickRight.getY()));
+		if(Math.abs(joyStickRight.getY())> .5 && Math.abs(joyStickRight.getY()) > 0.5){
+			toSend[0] = 4;
+		}
 				
 	} 
 	
@@ -411,14 +414,22 @@ public class Robot extends IterativeRobot {
 	private void checkShift(){
 		if(logitechRightBumper.get()){
 			//shifterDelay();
+			toSend[0] = 1;
 			shifterCylinder.set(DoubleSolenoid.Value.kForward);
 			System.out.println("HIGH GEAR");
 		}
-		if(logitechLeftBumper.get()){
+		else if(logitechLeftBumper.get()){
 			//shifterDelay();
+			toSend[0] = 2;
 			shifterCylinder.set(DoubleSolenoid.Value.kReverse);
 			System.out.println("LOW GEAR");
 		}
+		else if(logitechY.get()){
+			slowMove(.25);
+			toSend[0] = 3;
+			System.out.println("SLOWMODE");
+		}
+		
 	}
 	/*
 	private void singleStickArcade() {
@@ -690,7 +701,7 @@ public class Robot extends IterativeRobot {
 
 	public void disabledPeriodic() {
 		Scheduler.getInstance().run();
-		
+		//toSend[0] = 5;
 	}
 
 	public void autonomousInit() {
@@ -842,7 +853,7 @@ public class Robot extends IterativeRobot {
 		
 		//currentCycle = 0;
 		dualStickEXP();
-		
+		toSend[0] = 6;
 		//dualStick();
 	}
 	byte[] toSend = new byte[1];
@@ -889,7 +900,7 @@ public class Robot extends IterativeRobot {
 		//System.out.println("**************");
 		//System.out.println(shooterEncoder.getDistance());
 		//System.out.println("Shooter Count: "+shooterRightEnc.get());
-		
+		/*
 		if(logitechA2.get()){
 			intakeOnOff(.5);         //INTAKE CODE 
 			shouldBeRunningIntake = true;
@@ -902,30 +913,7 @@ public class Robot extends IterativeRobot {
 			intakeOnOff(0);
 			shouldBeRunningIntake = false;
 		}
-		if(logitechX.get()){
-			driveState = true;	
-		}
-		if(logitechY.get()){
-			driveState = false;         //STATE CHANGE CODE
-		}
-		if(logitechA.get()){
-			toSend[0] = 1;
-		}
-		else
-		{
-			toSend[0] = 2;
-		}
-		
-		if(driveState){
-			dualStickEXP();
-			//dualStick();
-			System.out.println("NORMAL DRIVE");
-		}
-		else{
-			dualStick();
-			//slowMove(.4);
-			System.out.println("IN SLOW MODE");
-		}
+		*/
 		
 		currentElevator = power.getCurrent(3);
 		currentIntake = power.getCurrent(13);
@@ -956,7 +944,7 @@ public class Robot extends IterativeRobot {
 					
 				}
 			} 
-
+		
 		//testForCorrectionMode();
 
 		toggleShooterMotor();
