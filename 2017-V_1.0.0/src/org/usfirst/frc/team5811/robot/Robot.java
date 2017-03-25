@@ -558,13 +558,13 @@ public class Robot extends IterativeRobot {
 		shooterRightEnc.setDistancePerPulse(36);
 		shooterRightEnc.setMinRate(10);
 		shooterRightEnc.setSamplesToAverage(32);
-		
-		drive = new Encoder(2,3, true, Encoder.EncodingType.k4X);
+		*/
+		drive = new Encoder(11,12, true, Encoder.EncodingType.k4X);
 		drive.setMaxPeriod(1);
 		drive.setDistancePerPulse(36);
 		drive.setMinRate(10);
 		drive.setSamplesToAverage(32);
-		*/
+		
 		
 		
 		//shooterEncoder = new Counter(0);
@@ -829,6 +829,8 @@ public class Robot extends IterativeRobot {
 			System.out.println("Auto Mode: "+autoSelecter);
 			System.out.println("stage: "+stateSeq);
 			System.out.println("***************");
+			
+			rotationCountForDrive = (int) drive.getDistance();
 	}
 
 	public void teleopInit() {
@@ -849,14 +851,13 @@ public class Robot extends IterativeRobot {
 		
 		//arduino.transaction(dataToSend, sendSize, dataReceived, receiveSize)
 		
-		
-		
 		if(arduino.writeBulk(toSend)){
 			System.out.println("didnt send");
 		}
 		
 		Scheduler.getInstance().run(); 
 		compressor.setClosedLoopControl(true);
+	
 		/*
 		rotationCount = shooterRightEnc.get();
 		rotationRate = shooterRightEnc.getRate();
@@ -864,12 +865,13 @@ public class Robot extends IterativeRobot {
 		boolean direction = shooterRightEnc.getDirection();
 		boolean stopped = shooterRightEnc.getStopped();
 		rotationPeriod = shooterRightEnc.getRaw();
-		
+		*/
 		distance = drive.getDistance();
 		
 		rotationCountForDrive = drive.get();
 		rotationRateForDrive = drive.getRate();
-		*/
+		
+		
 		System.out.println("************");
 		//System.out.println(distance);
 		System.out.println("Encoder: "+rotationCountForDrive);
