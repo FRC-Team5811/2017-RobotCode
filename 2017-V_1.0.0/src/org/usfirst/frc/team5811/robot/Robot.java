@@ -26,6 +26,7 @@ public class Robot extends IterativeRobot {
 
 	// NavX
 	AHRS ahrs;
+	AHRS sample;
 	
 	//Outputs to Arduino
 	DigitalOutput red = new DigitalOutput(0);
