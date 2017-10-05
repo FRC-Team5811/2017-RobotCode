@@ -24,6 +24,7 @@ public class Robot extends IterativeRobot {
 
 	// NavX
 	AHRS ahrs;
+	AHRS sample;
 
 	// Buttons
 	JoystickButton logitechY;
