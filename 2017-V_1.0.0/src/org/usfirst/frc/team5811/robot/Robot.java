@@ -34,6 +34,7 @@ public class Robot extends IterativeRobot {
 	
 	//Serial i2c
 	I2C arduino;
+	I2C sample;
 
 	// Buttons
 	JoystickButton logitechY;
@@ -469,8 +470,7 @@ public class Robot extends IterativeRobot {
     		driveMotors(-outputPower,outputPower);
     		System.out.println("moving");
     		return false;
-    	}
-    	else{
+    	}else{
     		driveMotors(0,0);
     		System.out.println("not moving");
     		//ahrs.reset();
@@ -853,7 +853,7 @@ public class Robot extends IterativeRobot {
 		
 		//currentCycle = 0;
 		dualStickEXP();
-		toSend[0] = 6;
+		toSend[0] = 7;
 		//dualStick();
 	}
 	byte[] toSend = new byte[1];
